@@ -121,14 +121,95 @@ owned by the separate session family under parent `session-03996ede`, whose chil
 was reading and staging exactly those paths at the same time. No new directory appeared in the
 repository's `.agent-teams/`.
 
-## What this validation does not cover
+## Round 2 — role tools and model routing (2026-09-17, later)
+
+Two capabilities the skill previously had to fake were moved into the harness.
+
+**Role-scoped delegation tools.** New user preset at `~/.dsh/.agent-presets/team/`
+(`preset.yml` + `agent.cordis.yml`, copied from the shipped `standard` preset and extended in the
+`delegation` group): `subagent_scout`, `subagent_prober`, `subagent_critic`, each with a
+`persona` string that shadows the deployment persona section and a `toolFilter.deny` list.
+
+| Role tool | Denied tools | Effect |
+| --- | --- | --- |
+| `subagent_scout` | `write`, `edit` | cannot edit files through the file tools |
+| `subagent_prober` | `write`, `edit` | same, and it keeps `pwsh` so it can run acceptance commands |
+| `subagent_critic` | `write`, `edit`, `pwsh` | cannot change a byte by any mounted tool |
+
+Mechanism, read from the code rather than assumed: `applyChildComposition`
+(`dsh-subagent/lib/types/child-agent.js`) calls `childCtx.tools.restrict(composition.toolFilter)`
+for the filter and registers the persona as the `deployment:persona-prefix` section.
+`dsh-subagent-spawn-in-process` advertises `toolFilter` and `persona`, so the mount is accepted.
+
+**A bug caught by reading the code**: `maxDepth` is the child's *absolute* depth ceiling, not the
+child's own budget — `resolveChildDepth` computes `childDepth = parentDepth + 1` and throws
+`SubagentDepthError` when it exceeds `maxDepth`. A first draft used `maxDepth: 0` on the role
+tools, which would have refused every single call. Corrected to `1` (a role child may exist at
+depth 1 and may not go further), and the checker now fails on `0` and warns above `1`.
+
+**Model routing.** `~/.dsh/settings.yaml` gained the `subagent-model-selection` section
+(namespace and schema read from `dsh-tool-subagent/lib/model-selection-settings.js`):
+`enabled: true` with three allowed routes (`deepseek-flash`, `deepseek-v4-flash`,
+`deepseek-v4-pro`). The setting is sampled when a **fresh top-level session** is composed, so
+this session — and every session already running — keeps its recorded policy of "off".
+
+**New checker** `scripts/check-team-preset.mjs`, run as
+`node scripts/check-team-preset.mjs --modules <checkout>/node_modules --shipped <standard preset dir>`:
+
+```
+PASS  C:\Users\owner\.dsh\.agent-presets\team — 0 error(s), 0 warning(s)
+  - preset metadata: 團隊模式（Agents Team）
+  - composition: 34 rows
+  - model selection owner: delegation/tool-subagent
+  - role tools: 3 (delegation/tool-subagent-scout, delegation/tool-subagent-prober, delegation/tool-subagent-critic)
+  - added row: tool-subagent-scout / -prober / -critic
+  - model selection enabled with 3 route(s)
+```
+
+It resolves every plugin name against the installed modules, asserts a single model-selection
+owner per scope (a harness rule: `list_subagent_models` is a global name), checks role personas,
+filters and `maxDepth` semantics, and validates the settings section. Negative control: rewriting
+the preset with `maxDepth: 0` produces three errors and exit code 1.
+
+### Not verified in this round
+
+- **The preset has never been composed.** Children join their parent's composition, so a session
+  already running on `standard` cannot test the `team` preset; only a new top-level session can,
+  and that is the human's action. Static checks pass; runtime behaviour is unproven until then.
+- **Model selection has never been exercised.** It is off in this session by construction. The
+  section validates against the plugin's own rules (enabled ⇒ at least one route, routes unique)
+  and every listed route is in the adapter's catalog, but no call has carried `provider`/`model`.
+- **`toolFilter` covers named tools only.** `pwsh` remains in the prober and scout, so "read-only"
+  there means "cannot use the file tools", not "cannot write". Only the critic is non-mutating by
+  construction. A shell-denied role is the honest name for the hard guarantee; the docs say so.
+- **`persona` shadows the deployment persona prefix.** The role charter replaces the
+  "You are a coding agent powered by ..." line for that child; whether that reads well for a
+  teammate has not been observed in a live run.
+
+## What round 1 does not cover
 
 - The team rung was exercised once, on a 4-file sandbox job. Nothing here tests a multi-day run,
   a context loss and resume, `interrupt_agent` on a live teammate, or a human-gate breach.
 - Failure paths were exercised by the prober (tamper copies) but not by the skill's own
   playbook: no deliberate "teammate goes silent", "two writers collide", or "attempt 2 reached"
   drill has been run.
-- Role separation is instruction-level. The harness does not sandbox a teammate into read-only;
-  nothing here proves a prober *cannot* write, only that it did not.
-- Per-teammate model routing was never available in this profile (the `subagent` schema exposes
-  no `provider`/`model`), so the `model: "inherited"` field is untested against a real override.
+- Role separation in round 1 was instruction-level (the team preset did not exist yet); nothing
+  there proves a prober *cannot* write, only that it did not.
+- Per-teammate model routing was not available while round 1 ran, so that round's
+  `model: "inherited"` field is untested against a real override. Round 2 provisioned the
+  capability; the test is still owed.
+
+## Owed acceptance test (human, in a new session)
+
+1. New session → preset picker → **團隊模式（Agents Team）**.
+2. Ask for the delegation tools by name; expect `subagent`, `subagent_fork`, `subagent_scout`,
+   `subagent_prober`, `subagent_critic`, plus `list_subagent_models` and `provider`/`model`/
+   `reasoning_effort` on the generic `subagent` schema.
+3. Spawn `subagent_scout` and `subagent_prober`, each asked to list its own file-editing tools;
+   expect both to report none. Spawn `subagent_critic` and ask the same; expect it to have no
+   shell either.
+4. Spawn two teammates with different `model` values from the allowed routes; confirm both calls
+   succeed and that the lead records the routes in `team.json`.
+5. If step 2 shows no role tools, the preset did not compose — the picker lists a broken preset
+   with its reason; report that reason rather than editing the preset blindly.
+

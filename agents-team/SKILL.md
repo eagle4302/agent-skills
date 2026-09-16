@@ -43,9 +43,12 @@ Each step ends when its completion criterion holds.
    *Done when:* validation passes and every task has an owner or is deliberately `backlog`.
 
 3. **Staff** — spawn independent teammates **in one message** so they run in parallel, each with
-   a self-contained brief from `staffing.md`. Delegate what a teammate can finish without you
-   and hand back as evidence; keep the judgement calls, the integration and anything smaller
-   than the brief it would take. Record the returned child id as that member's `agentId`.
+   a self-contained brief from `staffing.md`. On the *team preset* choose the tool by role
+   (`subagent_scout`, `subagent_prober`, `subagent_critic` carry the persona and drop the tools
+   that role may not use); on any other preset carry the charter in the brief and say so in the
+   human report. Delegate what a teammate can finish without you and hand back as evidence; keep
+   the judgement calls, the integration and anything smaller than the brief it would take.
+   Record the returned child id as that member's `agentId`.
    *Done when:* every live member has an `agentId`, and `board.md` shows who owns what.
 
 4. **Run** — you are a working lead: you hold the smallest tasks, the integration, and every

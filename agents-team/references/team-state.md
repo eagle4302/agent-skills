@@ -23,6 +23,10 @@ its `init` copies live in `assets/`. Run it as
 `node "<skill base dir>/scripts/team.mjs" <command>`. The script is a convenience, not a
 dependency: if it is missing, hand-edit the JSON and keep going.
 
+`scripts/check-team-preset.mjs` re-checks the role-tool preset after a DSH upgrade (row ids,
+plugin resolution, one model-selection owner, role personas and filters, `maxDepth` semantics);
+run it with `--modules <checkout>/node_modules`.
+
 ## `team.json` schema v1
 
 | Block | Fields |
@@ -46,6 +50,8 @@ Field notes:
 
 - `agentId` is the durable id the `subagent` tool returned (`started subagent <id>`). It is
   the only way back to a teammate after a context loss. Leave it empty for the lead.
+- `model` records the route the member actually ran on: `inherited`, or `provider/model` when the
+  delegation named one. Write it when you staff, not at the end.
 - `territory` (on a member) and `inScope` (on a task) are path globs. Two teammates writing
   the same glob is a lead bug, not a teammate bug.
 - `verify` holds commands that a prober can paste and run unchanged. If you cannot write one,

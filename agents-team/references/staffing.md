@@ -30,6 +30,33 @@ Team shapes:
 Cap concurrent members at 3–4. Every teammate is a full context; a team costs real money
 and real wall-clock, and the human pays for both.
 
+## Role tools versus role briefs
+
+A role is always a brief. On the **團隊模式（Agents Team）** preset three roles are also *tool
+level*: the tool instance carries the persona and removes the tools the role may not use, so the
+restriction is enforced by the harness rather than promised by the model.
+
+| Role | Tool on the team preset | Enforced by the harness | Still not enforced |
+| --- | --- | --- | --- |
+| scout | `subagent_scout` | `write` and `edit` are absent from the child's catalog; persona fixed | `pwsh` can still write — send it to a scratch copy |
+| prober | `subagent_prober` | `write` and `edit` absent; persona fixed | same; the lead's diff check stays the backstop |
+| critic | `subagent_critic` | `write`, `edit` **and** `pwsh` absent — it cannot change a byte | it also cannot run anything, so a dynamic claim it makes is unverified by construction |
+| builder, scribe | `subagent` / `subagent_fork` | nothing beyond the brief and the task's territory | the lead's scope check |
+
+On the **standard** preset none of the role tools exist. Pass the charter in the brief instead,
+and say in the human report that role separation was instruction-level — never let the reader
+believe a verifier was sandboxed when it was only asked nicely.
+
+## Model routing
+
+- Per-call selection (when the session exposes `provider` / `model` / `reasoning_effort` on the
+  delegation tool): put routine, mechanical or parallel work on a fast model, and judgement,
+  review and hard diagnosis on the strongest route available.
+- Role tools inherit the session's route. A role can only pin its own model in the preset
+  (`agentOptions`), because only one tool in a scope may own model selection.
+- Record the route actually used in `team.json` (`members[].model`). A report that cannot say
+  which model produced a claim cannot be audited later.
+
 ## What to delegate, what to keep
 
 The lead is a working lead. It is not a dispatcher, and it is not a spectator.
