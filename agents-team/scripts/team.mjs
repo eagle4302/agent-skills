@@ -223,7 +223,7 @@ function cmdValidate(args) {
         if (!existsSync(p)) err(at(`evidence file does not exist: ${t.evidence}`));
       }
     }
-    if (t.attempt >= 2 && !['done', 'canceled'].includes(t.status)) {
+    if (t.attempt >= 2 && !['done', 'canceled'].includes(t.status) && doc.phase !== 'closed') {
       warn(at(`attempt ${t.attempt} reached the escalation trigger — reassign or ask the human`));
     }
   }
@@ -252,9 +252,11 @@ function cmdValidate(args) {
   }
 
   const open = tasks.filter((t) => !['done', 'canceled'].includes(t.status));
-  for (const m of members) {
-    if (['running', 'idle'].includes(m.status) && !open.some((t) => t.assignee === m.name)) {
-      warn(`member "${m.name}" is ${m.status} but owns no open task`);
+  if (doc.phase !== 'closed') {
+    for (const m of members) {
+      if (['running', 'idle'].includes(m.status) && !open.some((t) => t.assignee === m.name)) {
+        warn(`member "${m.name}" is ${m.status} but owns no open task`);
+      }
     }
   }
 

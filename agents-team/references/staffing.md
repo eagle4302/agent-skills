@@ -30,6 +30,41 @@ Team shapes:
 Cap concurrent members at 3–4. Every teammate is a full context; a team costs real money
 and real wall-clock, and the human pays for both.
 
+## What to delegate, what to keep
+
+The lead is a working lead. It is not a dispatcher, and it is not a spectator.
+
+| Keep with the lead | Hand to a teammate |
+| --- | --- |
+| The sizing decision, the board, and every call the evidence does not settle | A workstream with a written acceptance and a paste-ready verify command |
+| Integration across territories and the final end-to-end check | One territory with exactly one writer |
+| Anything smaller than the brief it would take | Anything whose discovery would flood the lead's context |
+| Talking to the human, the gates, and the closing report | Recon, implementation, verification, review, docs |
+| Resolving two conflicting claims | Independently re-running acceptance on a frozen artifact |
+
+- A task is ready to delegate when you can write its acceptance lines **and** a verify command.
+  If you cannot, you have not finished thinking — that is not a reason to staff more.
+- Delegation is granular: a one-line question, a single file, and a multi-day workstream are all
+  legitimate tasks. Match the brief to the errand; never send a paragraph of instructions where
+  a sentence would do, and never send a one-liner for work that needs context to be safe.
+- The lead's own tasks live in `team.json` like everyone else's, so the board tells the truth
+  about who is doing what.
+- The lead's territory is normally the board, `notes/` and the integrated result. It claims
+  product files only when it is their single writer — and then no builder is there too.
+
+## Re-sizing mid-run
+
+Size is a decision you revisit, not a decision you make once.
+
+- **Take a task back** when the brief outgrew the work, when the teammate is stuck after two
+  attempts, or when its territory turns out to overlap someone else's. Finish it inline.
+- **Retire a member** with `interrupt_agent` while it runs, `status: "retired"` in `team.json`,
+  and one `inbox.log` line saying why. A teammate left running with nothing to do is pure cost.
+- **Merge** two small tasks into one brief; **split** a task whose acceptance has two independent
+  halves and two owners.
+- **Grow only for a stateable reason**: a newly discovered independent workstream, a verification
+  that must be independent, or terrain nobody has mapped. "It felt safer" is not a reason.
+
 ## Spawning
 
 Start every independent teammate **in the same assistant message** so they actually run in

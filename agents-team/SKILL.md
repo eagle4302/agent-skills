@@ -14,18 +14,28 @@ not see this conversation, they cannot message each other, and they cannot messa
 
 ## Run the loop
 
-Each step ends when its completion criterion holds. Do not skip a step to look fast.
+Each step ends when its completion criterion holds.
 
-1. **Gate** — choose the shape before spawning anything.
+1. **Size the job** — judge how much team this deserves before spawning anything. Most jobs
+   are smaller than they feel; some are larger than they look.
 
-   | Situation | Shape |
-   | --- | --- |
-   | One bounded errand | no team: one background `subagent` call |
-   | Small work that still needs a second pair of eyes | light: 1 builder + 1 prober |
-   | 2–3 independent workstreams sharing an artifact | full: builders + prober, plus scout/critic/scribe only as needed |
-   | One stage, many homogeneous items | run that stage through the `workflow` tool (`workflow-stage.md`) |
+   | Scale | Reach for it when | Shape |
+   | --- | --- | --- |
+   | **Solo** | one workstream, one pass, nothing that must be reproduced by a second pair of eyes | you do it yourself, inline — and create **no team state at all** |
+   | **One helper** | one bounded errand whose reading, fetching or building would flood your context | one background `subagent` call |
+   | **Light team** | one deliverable that owes independent verification, work that splits into two disjoint territories, or work that will outlive a compaction | 1–2 builders + 1 prober |
+   | **Full team** | 2–3 independent workstreams sharing an artifact, unknown terrain, a high-risk or contract-touching change, or the human asked for a team | scout + builders + prober, plus critic/scribe as needed |
+   | **Stage fan-out** | one stage is many homogeneous items | that stage runs through the `workflow` tool (`workflow-stage.md`) |
 
-   *Done when:* the shape and the reason are written into `team.json`.
+   Push **up** a rung when: the human asked for a team; two workers could run at once without
+   waiting on each other; the result must be independently reproducible; the job will not
+   survive one context; a mistake is expensive or slow to undo.
+   Push **down** when: one file, one command, one question; you already hold every fact a
+   teammate would have to go and discover; briefing takes longer than doing.
+
+   *Done when:* the scale and its one-line reason exist — in your reply for solo or one-helper,
+   in `team.json` for a light or full team. Solo work writes no `.agent-teams/` directory;
+   ceremony on a one-file change is a defect, not diligence.
 
 2. **Charter** — `node "<this skill's base dir>/scripts/team.mjs" init <slug>`, then fill in the
    tasks. Every task carries acceptance lines, a paste-ready `verify` command where one exists,
@@ -33,13 +43,18 @@ Each step ends when its completion criterion holds. Do not skip a step to look f
    *Done when:* validation passes and every task has an owner or is deliberately `backlog`.
 
 3. **Staff** — spawn independent teammates **in one message** so they run in parallel, each with
-   a self-contained brief from `staffing.md`. Record the returned child id as that member's
-   `agentId`.
+   a self-contained brief from `staffing.md`. Delegate what a teammate can finish without you
+   and hand back as evidence; keep the judgement calls, the integration and anything smaller
+   than the brief it would take. Record the returned child id as that member's `agentId`.
    *Done when:* every live member has an `agentId`, and `board.md` shows who owns what.
 
-4. **Run** — do your own tasks, never idle on the team. Read settlement notices, `list_agents`
+4. **Run** — you are a working lead: you hold the smallest tasks, the integration, and every
+   decision, and you never idle while the team works. Re-size whenever the evidence changes —
+   merge two small tasks, split an oversized one, re-assign, interrupt a teammate whose errand
+   turned out trivial, retire a member with nothing left. Read settlement notices, `list_agents`
    when status is unclear, `send_message` to steer, `interrupt_agent` to stop a teammate that is
-   looping or outside its territory. Append every exchange to `inbox.log`.
+   looping, drifting, or outside its territory — then decide explicitly whether to re-brief it or
+   finish the work yourself. Append every exchange to `inbox.log`.
    *Done when:* every task is `in_progress`, `in_review`, `blocked`, or `done` — and the board
    plus `inbox.log` say so.
 
@@ -69,13 +84,20 @@ Each step ends when its completion criterion holds. Do not skip a step to look f
    operations, format changes: ask, then record.
 6. **The lead is the only voice to the human.** Teammates message you; you decide what reaches
    the human, and you never relay an unverified claim as fact.
+7. **Scale down as fast as you scale up.** A teammate whose task shrinks, or whose results you
+   no longer need, is stopped and retired — not kept busy to justify the team. Say in the human
+   report that the team was resized, and why.
 
 ## Red flags — stop and correct
 
 - Reporting progress to the human by quoting a teammate's summary.
 - A verification task assigned to whoever wrote the code, or to a re-briefed same child.
 - Two builders whose territories touch, or a teammate that "also cleaned up" a nearby file.
-- Skipping the board because the job "looks small" — then losing the thread after a compaction.
+- Skipping the board on a team run because the job "looks small" — then losing the thread after a
+  compaction.
+- Building team state, briefs or a helper for work you could have finished in the time the
+  briefing took.
+- The lead idle while teammates work, or quietly redoing a teammate's task in parallel with them.
 - Staffing five teammates for two territories, or a teammate spawning its own helpers unasked.
 - A teammate asking the human directly, or taking a gated action.
 - Attempt 2 reached and the run continuing without a reassignment or a human question.
