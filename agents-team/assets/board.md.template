@@ -1,0 +1,17 @@
+# {{SLUG}} — {{OBJECTIVE}}
+
+phase: chartering · updated: {{ISO}} · team: .agent-teams/{{SLUG}}/team.json
+
+## Board
+
+| id | task | owner | status | deps | evidence |
+| --- | --- | --- | --- | --- | --- |
+| t1 | REPLACE: task subject | lead | todo | — | — |
+
+## Human gates for this run
+
+commit · push · deploy/restart · destructive operations · format changes — ask first, always.
+
+## Open questions for the human
+
+- REPLACE: anything the lead needs a decision on, or delete this section.

@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "name": "{{SLUG}}",
+  "objective": "{{OBJECTIVE}}",
+  "createdAt": "{{ISO}}",
+  "phase": "chartering",
+  "humanGates": [
+    "commit",
+    "push",
+    "deploy or restart any service",
+    "destructive filesystem or database operations",
+    "configuration or data-format changes"
+  ],
+  "members": [
+    {
+      "name": "lead",
+      "role": "lead",
+      "agentId": "",
+      "status": "running",
+      "territory": [
+        ".agent-teams/{{SLUG}}/",
+        "board.md"
+      ],
+      "model": "inherited"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "t1",
+      "kind": "recon",
+      "subject": "REPLACE: write the terrain facts before anyone edits",
+      "status": "todo",
+      "assignee": "lead",
+      "dependencies": [],
+      "attempt": 0,
+      "objective": "REPLACE: one paragraph stating what this task produces.",
+      "acceptance": [
+        "REPLACE: every fact carries a file:line citation"
+      ],
+      "verify": [
+        "REPLACE: a command a prober can paste unchanged, or drop this field for recon tasks"
+      ],
+      "inScope": [
+        "REPLACE: path globs this task may write"
+      ],
+      "outOfScope": [
+        "REPLACE: path globs this task must not touch"
+      ],
+      "evidence": "",
+      "reviewedTaskId": null,
+      "verdict": null
+    }
+  ],
+  "taskSeq": 1
+}
