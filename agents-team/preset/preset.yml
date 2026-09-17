@@ -1,0 +1,3 @@
+name: 團隊模式（Agents Team）
+description: 標準模式再加上角色分工的委派工具：subagent_scout（只讀偵查）、subagent_prober（獨立驗收，沒有 write／edit）、subagent_critic（只讀審查，連 pwsh 都拿掉）。搭配 agents-team skill 當隊長用。
+order: 10

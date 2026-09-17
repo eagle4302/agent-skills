@@ -114,6 +114,7 @@ Each step ends when its completion criterion holds.
 | `references/team-state.md` | Creating or reading `team.json`, `board.md`, reports; resuming after a context loss |
 | `references/failure-playbook.md` | Something went wrong: silence, wrong output, conflicts, runaway teammates |
 | `references/workflow-stage.md` | A whole stage is a fan-out over many homogeneous items |
+| `preset/README.md` | Installing the preset that gives the roles their own tools and their own limits |
 
 Related skills: `dispatching-parallel-agents` (ad-hoc 2+ delegations), `subagent-driven-development`
 (written plan, fresh agent per task), `verification-before-completion` (the completion claim),
