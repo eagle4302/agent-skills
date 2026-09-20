@@ -241,20 +241,28 @@ cmd_doctor() {
 # The joined argv is evaluated by the remote login shell: quote as you would there.
 cmd_run() {
   local name="${1:-}"
-  [ -n "$name" ] || die "usage: cap.sh run <name> [--timeout SEC] [--cd DIR] -- <command...>"
+  [ -n "$name" ] || die "usage: cap.sh run <name> [--timeout SEC] [--cd DIR] [--file LOCAL.sh] [-- <command...>]"
   shift
-  local to=120 wd=""
+  local to=120 wd="" file=""
   while [ $# -gt 0 ]; do
     case "$1" in
       --timeout) to="$2"; shift 2;;
       --cd) wd="$2"; shift 2;;
+      --file) file="$2"; shift 2;;
       --) shift; break;;
       *) break;;
     esac
   done
-  [ $# -gt 0 ] || die "no command given"
+  local cmd
+  if [ -n "$file" ]; then
+    [ -f "$file" ] || die "no such local file: $file"
+    [ $# -eq 0 ] || die "--file and an inline command are mutually exclusive"
+    cmd=$(cap_ship_run "$file")
+  else
+    [ $# -gt 0 ] || die "no command given"
+    cmd="$*"
+  fi
   load_host "$name"; ssh_args
-  local cmd="$*"
   [ -n "$wd" ] && cmd="cd $wd && { $cmd; }"
   cap_timeout "$to" ssh "${SSH_ARGS[@]}" -o BatchMode=yes -T "$H_TARGET" "bash -lc $(printf %q "$cmd")"
   local rc=$?
@@ -312,16 +320,29 @@ cmd_pull() {
 # Long work (builds, test suites) must outlive one SSH round trip.
 cmd_bg() {
   local name="${1:-}" tag="${2:-}"
-  [ -n "$name" ] && [ -n "$tag" ] || die "usage: cap.sh bg <name> <tag> [--cd DIR] -- <command...>"
+  [ -n "$name" ] && [ -n "$tag" ] || die "usage: cap.sh bg <name> <tag> [--cd DIR] [--file LOCAL.sh] [-- <command...>]"
   shift 2
   case "$tag" in *[!A-Za-z0-9._-]*) die "tag must be [A-Za-z0-9._-]";; esac
-  local wd=""
+  local wd="" file=""
   while [ $# -gt 0 ]; do
-    case "$1" in --cd) wd="$2"; shift 2;; --) shift; break;; *) break;; esac
+    case "$1" in
+      --cd) wd="$2"; shift 2;;
+      --file) file="$2"; shift 2;;
+      --) shift; break;;
+      *) break;;
+    esac
   done
-  [ $# -gt 0 ] || die "no command given"
+  local body
+  if [ -n "$file" ]; then
+    [ -f "$file" ] || die "no such local file: $file"
+    [ $# -eq 0 ] || die "--file and an inline command are mutually exclusive"
+    body="$(cat "$file")"
+  else
+    [ $# -gt 0 ] || die "no command given"
+    body="$*"
+  fi
   load_host "$name"; ssh_args
-  local body="$*" script enc pid
+  local script enc pid
   [ -n "$wd" ] && body="cd $wd || exit 1
 $body"
   # The trap records the exit code even when the body calls exit itself.
@@ -467,6 +488,69 @@ cmd_install_key() {
   cmd_doctor "$name"
 }
 
+# ---- shipping a local script ----------------------------------------------
+# The command string these build contains only base64 plus fixed text: none of the
+# caller's quotes, backslashes or `;` ever reach a shell. That matters because the
+# layers between the agent and the teammate (agent harness, PowerShell, Git Bash,
+# ssh, the remote login shell) strip quotes and can truncate a quoted body —
+# silently, with exit 0. See references/troubleshooting.md.
+cap_ship_run() {
+  local enc; enc=$(cap_b64 < "$1")
+  printf 'd=$(mktemp -d "${TMPDIR:-/tmp}/cap-file.XXXXXX") || exit 1; '
+  printf 'printf %%s %s > "$d/b64"; ' "'$enc'"
+  printf '{ base64 -d "$d/b64" > "$d/run.sh" 2>/dev/null || base64 -D -i "$d/b64" -o "$d/run.sh"; } || exit 1; '
+  printf 'rm -f "$d/b64"; bash "$d/run.sh"; rc=$?; rm -rf "$d"; exit $rc'
+}
+
+# cmd_script <name> <local.sh> [--cd DIR] [--out LOCAL] [--tag TAG] [--quiet] [--timeout SEC]
+# Ship a local script, run it, and bring its output back to the captain as a file.
+# This is the shape to reach for when output must not be lost: the script is what runs,
+# and its stdout+stderr land in a file we then pull. The remote copy stays at
+# /tmp/cap-script-<tag>.out so it can be re-read.
+cmd_script() {
+  local name="${1:-}" src="${2:-}"
+  [ -n "$name" ] && [ -n "$src" ] || die "usage: cap.sh script <name> <local.sh> [--cd DIR] [--out LOCAL] [--tag TAG] [--quiet] [--timeout SEC]"
+  shift 2
+  [ -f "$src" ] || die "no such local file: $src"
+  local wd="" out="" tag="" quiet=0 to=600
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --cd) wd="$2"; shift 2;;
+      --out) out="$2"; shift 2;;
+      --tag) tag="$2"; shift 2;;
+      --timeout) to="$2"; shift 2;;
+      --quiet) quiet=1; shift;;
+      *) die "unknown flag: $1";;
+    esac
+  done
+  [ -n "$tag" ] || { tag=$(basename "$src"); tag="${tag%.*}"; }
+  case "$tag" in ''|*[!A-Za-z0-9._-]*) die "tag must be [A-Za-z0-9._-] — pass --tag (file name gave '$tag')";; esac
+  [ -n "$out" ] || out="./$tag.out"
+  load_host "$name"; ssh_args
+  local enc; enc=$(cap_b64 < "$src")
+  local rout="/tmp/cap-script-$tag.out"
+  local body
+  body="d=\$(mktemp -d \"\${TMPDIR:-/tmp}/cap-script.XXXXXX\") || exit 1"
+  body="$body; printf %s '$enc' > \"\$d/b64\""
+  body="$body; { base64 -d \"\$d/b64\" > \"\$d/run.sh\" 2>/dev/null || base64 -D -i \"\$d/b64\" -o \"\$d/run.sh\"; } || exit 1"
+  body="$body; bash \"\$d/run.sh\" > '$rout' 2>&1; rc=\$?"
+  body="$body; rm -rf \"\$d\"; exit \$rc"
+  [ -n "$wd" ] && body="cd $wd || exit 1
+$body"
+  note "cap: running $src on $name — output goes to $rout"
+  cap_timeout "$to" ssh "${SSH_ARGS[@]}" -o BatchMode=yes -T "$H_TARGET" "bash -lc $(printf %q "$body")"
+  local rc=$?
+  [ $rc -eq 124 ] && note "cap: TIMEOUT after ${to}s on $name — the work died with the SSH connection"
+  if cmd_pull "$name" "$rout" "$out" >/dev/null 2>&1; then
+    printf 'exit %s · output saved to %s (remote copy: %s)\n' "$rc" "$out" "$rout"
+    [ "$quiet" = 1 ] || { printf -- '--- %s ---\n' "$out"; cat "$out"; }
+  else
+    note "cap: could not bring $rout back — it is still on $name"
+    printf 'exit %s\n' "$rc"
+  fi
+  return $rc
+}
+
 # ---- dispatch -------------------------------------------------------------
 usage() {
   cat <<'USAGE'
@@ -477,17 +561,22 @@ ssh-captain — one captain machine, many remote dev boxes.
   cap.sh rm <name>
   cap.sh dossier <name>                           per-host guardrails — READ BEFORE WORKING
   cap.sh doctor [name|all]                        reachable? key auth? toolchain?
-  cap.sh run <name> [--timeout SEC] [--cd DIR] -- <cmd...>
+  cap.sh run <name> [--timeout SEC] [--cd DIR] [--file LOCAL.sh] -- <cmd...>
   cap.sh fleet [--timeout SEC] -- <cmd...>        the same command on every teammate
   cap.sh push <name> <local> <remote>             scp up, then sha256 on both sides
   cap.sh pull <name> <remote> <local>             scp down
-  cap.sh bg <name> <tag> [--cd DIR] -- <cmd...>   long job, outlives the SSH round trip
+  cap.sh bg <name> <tag> [--cd DIR] [--file LOCAL.sh] -- <cmd...>
+                                                  long job, outlives the SSH round trip
   cap.sh log <name> <tag> [lines]                 tail that job's log
   cap.sh jobs <name>                              which jobs run / finished / failed
+  cap.sh script <name> <local.sh> [--cd DIR] [--out LOCAL] [--tag TAG] [--quiet] [--timeout SEC]
+                                                  ship a script, run it, pull its output back
   cap.sh keygen <name> [--comment TEXT]           ASK THE USER FIRST
   cap.sh install-key <name>                       ASK FIRST; the user types the password
 
-Remote command strings are evaluated by the remote login shell.
+Remote command strings are evaluated by the remote login shell. Anything that needs
+quoting does not belong inline: write it to a .sh and pass --file (run/bg), or use
+`script`. A quoted body can be silently truncated before it ever gets there.
 State lives in $CAP_HOME (default ~/.claude/ssh-captain).
 USAGE
 }
@@ -508,6 +597,7 @@ main() {
     bg)          cmd_bg "$@";;
     log)         cmd_log "$@";;
     jobs)        cmd_jobs "$@";;
+    script)      cmd_script "$@";;
     keygen)      cmd_keygen "$@";;
     install-key) cmd_install_key "$@";;
     ''|-h|--help|help) usage;;

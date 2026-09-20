@@ -81,6 +81,14 @@ bash $CAP install-key <name>                        # 要先問；密碼由使�
 - **不殺不是自己起的程序。** 遠端常有使用者自己的 VS Code / Cursor Remote-SSH、
   自己開的 tmux。要殺之前先 `ps` 看清楚並問過。
 - **超過 ~2 分鐘的工作一律 `bg`**，不要用大 `--timeout` 硬撐：連線一斷工作就沒了。
+- **複雜指令不要內嵌。** `run`／`bg` 的 `--` 後面是**用空白接成一條字串**再交給遠端，
+  所以引號、`;`、`|`、`>`、`&&`、多行都要連續過好幾層 shell（harness → PowerShell →
+  Git Bash → ssh → 遠端 `bash -lc`）。失敗的樣子是**靜默的成功**：`bg` 回 `done-ok`
+  而 log 是空的。含特殊字元的東西一律**寫成檔案再交給 `--file`**：
+  `cap.sh run <name> --file ./x.sh`、`cap.sh bg <name> <tag> --file ./x.sh`，
+  要連輸出一起帶回來就用 `cap.sh script <name> ./x.sh`。
+  配方與量到的症狀見 [references/remote-dev.md](references/remote-dev.md) 與
+  [references/troubleshooting.md](references/troubleshooting.md)。
 - **裝套件前要問。** `apt install`、`npm -g`、`pip install` 都會改到別人的機器。
 - 有新的長期事實（clone 路徑、慣例、禁區、工具鏈），**寫回 dossier**：
   `~/.claude/ssh-captain/hosts/<name>.md`。下一個 session 才讀得到。
@@ -108,7 +116,7 @@ portability 區塊已經做了雙軌：找不到 `timeout` 就用純 bash 的 wa
 
 - [references/keys.md](references/keys.md) — 金鑰產生、安裝、`~/.ssh/config`、Windows 遠端、agent。
 - [references/remote-dev.md](references/remote-dev.md) — 遠端 git／worktree／build／測試併發鎖／檔案往返的做法。
-- [references/troubleshooting.md](references/troubleshooting.md) — 連不上、金鑰不認、指令被引號吃掉、背景工作不見了。
+- [references/troubleshooting.md](references/troubleshooting.md) — 連不上、金鑰不認、指令被引號吃掉、**背景工作回 `done-ok` 但 log 是空的**、背景工作不見了。
 
 狀態檔都在 `~/.claude/ssh-captain/`：`hosts.tsv`（名冊）、`hosts/<name>.md`（守則）、
 `jobs/<name>.tsv`（開過的背景工作）。遠端那側只在 `~/.ssh-captain/jobs/` 放背景工作的
