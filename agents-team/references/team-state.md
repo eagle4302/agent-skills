@@ -88,6 +88,13 @@ worse than no board, because it is believed.
 
 ## Resuming after a context loss
 
+**First decide which kind it is — the two have different first moves:**
+
+| Situation | `list_agents` | What to do |
+| --- | --- | --- |
+| The context was compacted inside the same session | `running` / `idle` teammates still resolve | Steps 1–4 below: re-attach |
+| **The human opened a new conversation** | **empty** | **Do not spend a turn on `send_message`** — old agent ids are unreachable from a new session. Read the team directory and spawn fresh teammates from `reports/` |
+
 1. Read `team.json`, `board.md`, `inbox.log`, then the `reports/` files the open tasks point at.
 2. Run `list_agents` with `descendants` and match ids against `members[].agentId`.
 3. Re-attach with `send_message` to whoever is still `running` or `idle`; re-spawn anyone
@@ -95,3 +102,25 @@ worse than no board, because it is believed.
    brief rebuilt from the reports.
 4. Continue from the first task that is not `done`, and say plainly in the human report which
    part of the run predates the context loss.
+
+### When the human is about to change conversations: write `HANDOFF.md`
+
+The moment the human says anything like "give me a prompt to continue in a new conversation",
+"we'll pick this up in a new chat", or "write the handoff", the lead writes
+`<team dir>/HANDOFF.md`. It is the **first thing the next session reads**, and it is written
+for an agent that has none of this conversation.
+
+It must contain:
+
+- **The objective in one sentence, and what is actually blocking it right now.**
+- **The real state of the tree**: `git log -1`, `git status`, which ticket each uncommitted
+  file belongs to, and their hashes — verified in this run, not remembered.
+- **"No agent id is reachable from a new session."** Without that line, the next agent burns
+  a turn on `send_message` before discovering it.
+- Decisions already made that must not be re-litigated.
+- The remaining steps **in order**, each with how to measure its acceptance.
+- The lessons and landmines from this run (the ones that cost real time).
+- External channels: remote hosts, how to reach them, and their gotchas.
+
+Keep it current: update it when the state changes, not only at the end. A stale handoff is
+worse than none, because it is believed.
