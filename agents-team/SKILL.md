@@ -9,14 +9,33 @@ A team is three things and nothing else: **disjoint territories**, **one indepen
 per deliverable**, and **one voice to the human** — you, the lead. Everything below serves
 those three.
 
-Teammates are `pi-subagents` children: each has a run id, runs in the background by default,
-and notifies you natively when it settles. A `fresh` child does not see this conversation and
-does not read `AGENTS.md`; they cannot address each other, and they cannot reach the human —
-they raise things to you with `contact_supervisor`.
+A teammate is a subagent: it gets a self-contained brief, it runs on its own, and it hands back
+a result. It does not see this conversation unless you ask for that, it does not read
+`CLAUDE.md` or `AGENTS.md` on its way in, it cannot address the other teammates, and it cannot
+reach the human. Everything it needs is in the brief, and everything it says comes back through
+you.
+
+**The tool names are not in this skill.** They live in `adapters/`, one file per harness, and
+step 0 is reading yours.
 
 ## Run the loop
 
 Each step ends when its completion criterion holds.
+
+0. **Identify the harness** — look at the delegation tools this session actually has and read
+   the matching file in `adapters/` (`adapters/README.md` picks it; it is one table). Never
+   guess from the machine or the repo — one machine can have several harnesses installed, and
+   this skill has already been shipped to a harness whose tools it did not have.
+
+   The adapter tells you which of eleven capabilities you hold. Two of them change the plan:
+   without `gate` **you are the verifier of record** and run every `verify` yourself at step 5;
+   without `parallel-spawn` teammates cannot overlap and the sizing ladder drops a rung.
+   `protocol.md` has the full degradation table — read the rows for whatever you are missing,
+   at step 0, not when you hit them.
+
+   *Done when:* one `note` line in `inbox.log` names the harness, whether you have a `gate`,
+   and who is therefore the verifier of record. If no adapter matches, write one from the
+   harness's own tool reference before staffing, or stay Solo.
 
 1. **Size the job** — judge how much team this deserves before spawning anything. Most jobs
    are smaller than they feel; some are larger than they look.
@@ -24,16 +43,17 @@ Each step ends when its completion criterion holds.
    | Scale | Reach for it when | Shape |
    | --- | --- | --- |
    | **Solo** | one workstream, one pass, nothing that must be reproduced by a second pair of eyes | you do it yourself, inline — and create **no team state at all** |
-   | **One helper** | one bounded errand whose reading, fetching or building would flood your context | one background `subagent` call |
+   | **One helper** | one bounded errand whose reading, fetching or building would flood your context | one background teammate |
    | **Light team** | one deliverable that owes independent verification, work that splits into two disjoint territories, or work that will outlive a compaction | 1–2 builders + 1 prober |
    | **Full team** | 2–3 independent workstreams sharing an artifact, unknown terrain, a high-risk or contract-touching change, or the human asked for a team | scout + builders + prober, plus critic/scribe as needed |
-   | **Stage fan-out** | one stage is many homogeneous items | that stage runs as parallel lanes or a packaged `/parallel-*` prompt (`workflow-stage.md`) |
+   | **Stage fan-out** | one stage is many homogeneous items | that stage runs as parallel lanes, or as a packaged prompt where the harness ships one (`workflow-stage.md`) |
 
    Push **up** a rung when: the human asked for a team; two workers could run at once without
    waiting on each other; the result must be independently reproducible; the job will not
    survive one context; a mistake is expensive or slow to undo.
    Push **down** when: one file, one command, one question; you already hold every fact a
-   teammate would have to go and discover; briefing takes longer than doing.
+   teammate would have to go and discover; briefing takes longer than doing; or the harness has
+   no `parallel-spawn`, so a second teammate buys no wall-clock at all.
 
    *Done when:* the scale and its one-line reason exist — in your reply for solo or one-helper,
    in `team.json` for a light or full team. Solo work writes no `.agent-teams/` directory;
@@ -58,10 +78,11 @@ Each step ends when its completion criterion holds.
    task has an owner or is deliberately `backlog`.
 
 3. **Staff** — spawn independent teammates **in one message** so they run in parallel, each with
-   a self-contained brief from `staffing.md`. Pick the agent profile that matches the role
-   (`scout`, `worker`, `reviewer`, `oracle`, `evidence-auditor`, `delegate`) and put the task's
-   `verify` command in `gate` so the harness, not a model's word, decides whether the result is
-   accepted. Delegate what a teammate can finish without you and hand back as evidence; keep
+   a self-contained brief from `staffing.md`. Pick the agent profile that matches the role from
+   your adapter's dispatch table, set the context mode explicitly rather than inheriting a
+   default you have not checked, and put the task's `verify` command in the `gate` so the
+   harness, not a model's word, decides whether the result is accepted. Where there is no
+   `gate`, that check does not vanish — it becomes yours at step 5. Delegate what a teammate can finish without you and hand back as evidence; keep
    the judgement calls, the integration and anything smaller than the brief it would take.
    Record the returned child id as that member's `agentId`.
    *Done when:* every live member has an `agentId`, and `board.md` shows who owns what.
@@ -69,16 +90,19 @@ Each step ends when its completion criterion holds.
 4. **Run** — you are a working lead: you hold the smallest tasks, the integration, and every
    decision, and you never idle while the team works. Re-size whenever the evidence changes —
    merge two small tasks, split an oversized one, re-assign, interrupt a teammate whose errand
-   turned out trivial, retire a member with nothing left. Read the settlement notices,
-   `subagent({ action: "status" })` when it is unclear who is running, `action: "steer"` to
-   redirect, `action: "stop"` for a teammate that is looping, drifting, or outside its
-   territory — then decide explicitly whether to re-brief it or finish the work yourself.
+   turned out trivial, retire a member with nothing left. Read the settlement notices, ask for
+   `status` when it is unclear who is running, `steer` to redirect, and `stop` a teammate that
+   is looping, drifting, or outside its territory — then decide explicitly whether to re-brief
+   it or finish the work yourself. Where `steer` or `stop` is absent, `protocol.md` says what
+   replaces it.
    Append every exchange to `inbox.log`.
    *Done when:* every task is `in_progress`, `in_review`, `blocked`, or `done` — and the board
    plus `inbox.log` say so.
 
 5. **Verify, then land the batch** — dispatch a prober that did not write the code; it re-runs
    `verify` against the frozen artifact and returns per-criterion PASS/FAIL with raw output.
+   On a harness with no `gate`, run every `verify` command yourself before the batch lands —
+   the prober's report is the second opinion, your own output is the evidence of record.
    The moment every task in a `commitGroup` is settled and its verdict is `pass`, that batch
    lands: `team.mjs batch` prints the pathspecs, you show the human `git status --short` for
    those globs, commit **by pathspec only**, then write the sha into each task's `commitSha`
@@ -128,6 +152,10 @@ Each step ends when its completion criterion holds.
   briefing took.
 - The lead idle while teammates work, or quietly redoing a teammate's task in parallel with them.
 - Staffing five teammates for two territories, or a teammate spawning its own helpers unasked.
+- Dispatching a builder or a critic without setting the context mode, so it silently inherits
+  the whole conversation you were paying a teammate to stay out of.
+- Staffing before reading the adapter, then discovering at step 5 that nothing was ever
+  harness-enforced — or calling a tool this harness does not have.
 - A teammate asking the human directly, or taking a gated action.
 - Attempt 2 reached and the run continuing without a reassignment or a human question.
 - Reaching Close with every territory still uncommitted, so the run ends as one giant commit
@@ -144,12 +172,16 @@ Each step ends when its completion criterion holds.
 
 | File | Read it when |
 | --- | --- |
+| `adapters/README.md` | **First, every run.** Which harness you are on, and the eleven capabilities |
+| `adapters/<harness>.md` | The actual calls: dispatch, status, steer, stop, gate, fan-out |
 | `references/staffing.md` | Choosing roles, writing a brief, deciding team shape and size |
-| `references/protocol.md` | Messaging, steering, status, escalation, `inbox.log` format |
+| `references/protocol.md` | The capability contract, **what to do when one is missing**, escalation, `inbox.log` format |
 | `references/team-state.md` | Creating or reading `team.json`, `board.md`, reports; resuming after a context loss |
 | `references/failure-playbook.md` | Something went wrong: silence, wrong output, conflicts, runaway teammates |
 | `references/workflow-stage.md` | A whole stage is a fan-out over many homogeneous items |
 
 Related skill: `ssh-captain` (remote machines as a team role) — load it instead of reinventing
 an `ops` teammate. Everything else this skill needs is in the table above; do not go looking for
-a companion skill to do the sizing, the fan-out or the verification for you.
+a companion skill to do the sizing, the fan-out or the verification for you. A harness may ship
+its own subagent skill — read it for tool detail your adapter is missing, never for the team
+rules, which are here.
