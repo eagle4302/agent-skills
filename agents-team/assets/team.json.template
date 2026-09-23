@@ -1,16 +1,33 @@
 {
-  "schema": 1,
+  "schema": 2,
   "name": "{{SLUG}}",
   "objective": "{{OBJECTIVE}}",
   "createdAt": "{{ISO}}",
   "phase": "chartering",
   "humanGates": [
-    "commit",
     "push",
     "deploy or restart any service",
     "destructive filesystem or database operations",
     "configuration or data-format changes"
   ],
+  "baseline": {
+    "sha": "",
+    "branch": "",
+    "dirtyPaths": [],
+    "verifiedClean": "unknown",
+    "knownFailures": [],
+    "capturedAt": ""
+  },
+  "houseRules": [
+    "REPLACE: the build/test command with every flag it needs, or delete this line",
+    "REPLACE: line endings, formatting, anything the project insists on, or delete this line"
+  ],
+  "commitPolicy": {
+    "mode": "per-territory",
+    "authorized": false,
+    "authorizedAt": "",
+    "messagePrefix": ""
+  },
   "members": [
     {
       "name": "lead",
@@ -46,6 +63,8 @@
       "outOfScope": [
         "REPLACE: path globs this task must not touch"
       ],
+      "commitGroup": "",
+      "commitSha": "",
       "evidence": "",
       "reviewedTaskId": null,
       "verdict": null

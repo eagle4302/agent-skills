@@ -47,6 +47,17 @@ On the **standard** preset none of the role tools exist. Pass the charter in the
 and say in the human report that role separation was instruction-level — never let the reader
 believe a verifier was sandboxed when it was only asked nicely.
 
+The backstop is a real command, not a promise. `baseline.sha` is what makes it runnable —
+without it, "did anyone write outside their territory?" has no answer:
+
+```
+git status --short
+git diff --stat <baseline.sha> -- <that member's territory globs>
+```
+
+Anything changed that is neither in a territory nor in `baseline.dirtyPaths` is a scope breach.
+Run it before the first batch lands, not after the run.
+
 ## Model routing
 
 - Per-call selection (when the session exposes `provider` / `model` / `reasoning_effort` on the
@@ -65,6 +76,7 @@ The lead is a working lead. It is not a dispatcher, and it is not a spectator.
 | --- | --- |
 | The sizing decision, the board, and every call the evidence does not settle | A workstream with a written acceptance and a paste-ready verify command |
 | Integration across territories and the final end-to-end check | One territory with exactly one writer |
+| Every commit — one batch per territory, landed once its prober passes | Nothing: a teammate never runs `git commit` |
 | Anything smaller than the brief it would take | Anything whose discovery would flood the lead's context |
 | Talking to the human, the gates, and the closing report | Recon, implementation, verification, review, docs |
 | Resolving two conflicting claims | Independently re-running acceptance on a frozen artifact |
@@ -74,6 +86,10 @@ The lead is a working lead. It is not a dispatcher, and it is not a spectator.
 - Delegation is granular: a one-line question, a single file, and a multi-day workstream are all
   legitimate tasks. Match the brief to the errand; never send a paragraph of instructions where
   a sentence would do, and never send a one-liner for work that needs context to be safe.
+- A territory is also a **commit batch**: give every implementation task in it the same
+  `commitGroup`, normally the owning member's name, so that builder's work lands as one
+  reviewable commit the moment its prober passes. Two builders sharing a `commitGroup` means
+  the territories were not disjoint after all — fix the split, not the group.
 - The lead's own tasks live in `team.json` like everyone else's, so the board tells the truth
   about who is doing what.
 - The lead's territory is normally the board, `notes/` and the integrated result. It claims
@@ -101,7 +117,10 @@ child id in `team.json` (`members[].agentId`); that id is what makes the team re
 after a context loss.
 
 Give each teammate: a label (3–5 words), the brief, and nothing else. Spawn children do
-not see this conversation, so the brief must be self-contained.
+not see this conversation, so the brief must be self-contained. That includes the project's
+own rules: a teammate does not read `CLAUDE.md` or `AGENTS.md` on its way in, so whatever
+those say about build flags, line endings or formatting has to be in `houseRules` and pasted
+into every brief. A teammate that breaks a house rule you never told it is a lead bug.
 
 ## Brief skeleton (builder)
 
@@ -111,6 +130,12 @@ You are the <role> on a team. <One-line team objective.>
 TASK: <what to produce, in one paragraph>
 TERRITORY (the only paths you may write): <globs>
 MUST READ: <exact files, tickets, specs — with paths>
+HOUSE RULES (paste `houseRules` from team.json verbatim — you cannot see the project's
+  CLAUDE.md or AGENTS.md, and "it built on my machine" is not acceptance):
+  - <build/test command with every flag>
+  - <line endings, formatting, naming — whatever the project insists on>
+ALREADY BROKEN (do not try to fix, do not report as yours):
+  - <each baseline.knownFailures entry: command -> symptom>
 ACCEPTANCE (each line must end with evidence you can point at):
   1. ...
   2. ...
@@ -130,7 +155,11 @@ Adapt for the other roles:
 - `scout` — deliverables are facts and a recommendation; add "read-only, write no files".
 - `prober` — replaces ACCEPTANCE with the other teammate's acceptance list, adds "you did
   not write this code; reproduce every criterion from scratch; on failure report the exact
-  command and the mismatch, do not fix it", and requires a per-criterion verdict.
+  command and the mismatch, do not fix it", and requires a per-criterion verdict. Its
+  ALREADY BROKEN block is not optional: without it a prober re-discovers a failure that
+  predates the team, calls it a FAIL, and the lead burns two attempts on nothing. Say it
+  plainly — *"reproducing one of these is not a FAIL of this task; only a new failure is.
+  If one of them no longer reproduces, say so, that is also news."*
 - `critic` — adds the two axes (spec compliance, red lines), forbids re-opening decided
   questions, and requires findings in this shape:
 

@@ -199,6 +199,154 @@ the preset with `maxDepth: 0` produces three errors and exit code 1.
   `model: "inherited"` field is untested against a real override. Round 2 provisioned the
   capability; the test is still owed.
 
+## Round 3 — commit batching (2026-09-23)
+
+Triggered by a real defect, not a hypothetical: the skill had no git step anywhere. `commit`
+appeared in five places, all of them prohibitions. The seven-step loop never raised the gate,
+so every run ended as one uncommitted blob.
+
+Evidence from a real run on `MetalAutoUQDwpf`: team `ssc-batch1` (10 members, 37 tasks, 31 of
+them implementation, 4 builders on disjoint territories) landed as commit `1b524c1` — **206
+files, +27646 / −7967**. Its own objective says `lead integrates uncommitted on master`. The
+last non-team commit before it was 29 files.
+
+Changed: `schema` 2 with `baseline` (git sha, branch, already-dirty paths) and `commitPolicy`
+(`mode`, `authorized`, `authorizedAt`, `messagePrefix`); `commitGroup`/`commitSha` per task;
+`team.mjs baseline` and `team.mjs batch`; `commit` added to the `inbox.log` kinds; the
+authorization asked once at charter instead of never.
+
+Verified on this machine:
+
+| Check | Result |
+| --- | --- |
+| `node --check scripts/team.mjs` | passes |
+| 6 existing boards re-validated | no new error or warning from the schema-2 checks; schema 1 boards get one informational line and skip them |
+| `init` → `baseline` on a scratch git repo | recorded `master @ 2830890` and both already-dirty paths |
+| `status` / `batch` on a two-territory board | `builder-a ready`, `builder-b blocked t2:unverified` |
+| Landing the ready batch by pathspec | commit contained `src/a/a.cs` only; `untracked-by-human.txt` stayed loose in the tree |
+| Prose in `inScope` (`src/b/** (only the parser bits)`) | flagged `! not pathspecs` instead of emitting a wrong `git add` |
+| `commitSha` with `authorized: false` | ERROR, exit 1 |
+| `phase: closed` with a batch still open | WARN naming the count |
+
+Not verified: no full team run has used the new path end to end — the numbers above come from
+a synthetic board and a scratch repo, not from teammates actually working. `per-task`,
+`single` and `none` modes are validated but never exercised on a real run.
+
+## Round 4 — known failures, house rules, bookkeeping (2026-09-23)
+
+Four gaps found in the same review, fixed together.
+
+1. **A failure that predates the team was scored as the team's.** On this machine the repo's
+   own build always ends at `VerifyDecodeModels` (the models are hand-placed and untracked), so
+   a prober running the charter's `verify` command reports FAIL, the lead burns attempt 1 on a
+   re-brief and attempt 2 on an escalation, for nothing. Added `baseline.verifiedClean`
+   (`unknown` | `clean` | `known-failures`) and `baseline.knownFailures[]`
+   (`command`, `symptom`, `why`), an `ALREADY BROKEN` block in every brief, and a ladder row
+   saying such a failure never increments `attempt`.
+2. **Briefs carried no project conventions.** A spawn child never reads `CLAUDE.md` or
+   `AGENTS.md`, so build flags and line-ending rules reached nobody. Added `houseRules[]`, a
+   `HOUSE RULES` block in the brief skeleton, and a warning when the repo has one of those
+   files while `houseRules` is empty.
+3. **Three dangling skill references.** `dispatching-parallel-agents`,
+   `subagent-driven-development` and `verification-before-completion` exist nowhere on disk or
+   in the plugin marketplace cache. Removed; `ssh-captain` was verified present and kept.
+4. **`validate` never checked the log.** Added `inbox.log` accounting: a staffed member with no
+   `brief` line, a member with a done task and no `report` line, a landed sha with no `commit`
+   line. Gated to live boards so archived ones stay quiet.
+
+Verified on this machine:
+
+| Check | Result |
+| --- | --- |
+| `node --check` | passes |
+| 6 existing boards re-validated | error counts unchanged (35 / 4 / 0 / 0 / 43 / 0); the 3 boards at `phase: closed` gained no warnings |
+| `baseline` on a repo with `CLAUDE.md` + `AGENTS.md` | named both and listed what is still owed by hand |
+| `verifiedClean: "known-failures"` with an empty list | ERROR, exit 1 |
+| `knownFailures[1]` missing `symptom` | ERROR naming the index |
+| Re-running `baseline` after filling them in | `verifiedClean`, `knownFailures` and `houseRules` all survived |
+| Empty `houseRules` while the repo has convention files | WARN naming the files |
+| Staffed member with no `brief`/`report` line | 2 WARNs; both cleared after two `team.mjs log` calls |
+| Free-form log (4 of 9 lines parseable) | WARN says so first, so the rest are not read as missing entries |
+
+Not verified: same limit as round 3 — none of this has run inside an actual team.
+
+## Round 5 — the vocabulary was the bug (2026-09-22)
+
+Round 4's bookkeeping check reported that `loader-speed-ceiling-…` had a 155-line `inbox.log`
+that was "mostly prose", with five of six teammates missing a brief or report. **That reading
+was wrong, and so was the check.** 147 of those 155 lines are correctly shaped; the board just
+uses a richer `kind` vocabulary than the protocol had — 32 `note`, 24 `verified`, 23 `action`,
+8 `task`, 7 `decision`, 6 `verdict`, 6 `report`, 5 `steer`, 4 `finding`. The validator dropped
+every line whose kind was not one of its seven and then blamed the board.
+
+Fixed in the skill, not in the board:
+
+| Change | Why |
+| --- | --- |
+| `LOG_KINDS` gained `note`, `finding`, `verified`, `decision`, `action` | a log of only lead↔teammate traffic cannot explain one decision; real boards write mostly these |
+| `LOG_ALIASES` normalises `task`→`brief`, `question`/`問`→`human`, `ruling`→`decision`, `blocker-adjacent`→`block`, and 7 more | the vocabulary already in use is not wrong, only unlisted |
+| Kind token is split on `:`/`：` | real lines write `task：implement t3` |
+| A line must start with an ISO date to count | wrapped summaries were being parsed as log lines |
+| "never reported" now accepts `verdict`, `finding` or `block` | a prober's output *is* a verdict; demanding `report` was wrong |
+| Malformed-shape and unknown-kind are two separate warnings | conflating them blamed the board for a parser limit |
+
+Effect on that board: 10 warnings → 3 real gaps (`prober-backend` had no brief and no report,
+`critic-contract` had no brief). Those three were backfilled from evidence that exists on disk
+— `team.json` assignees and `agentId`s, and `reports/t5-prober-backend.md` (mtime
+2026-09-20T18:49Z) and `reports/t6-critic-contract.md` (18:48Z) — each line marked `[重建]`,
+timestamped when it was written, not backdated. Nothing about the *content* of those briefs was
+reconstructed, because nothing on disk records it.
+
+Also found on that board and **not** fixed (reported to the human instead, it is their call):
+`phase` still `staffing` while tasks are `done`; `t8` and `t12` point at evidence files that do
+not exist; `reports/` holds four files (`t9`, `t10`, `t13`, `t14`) for tasks absent from
+`team.json`.
+
+Regression after all of it: 6 boards, error counts unchanged (35 / 4 / 0 / 0 / 43 / 0).
+
+Lesson worth keeping: a validator that finds a vocabulary it does not know should say so in
+those words, not report the data as missing.
+
+## Round 6 — the CRLF bug, found by using the tool (2026-09-22)
+
+Reconciling that board turned up a defect in round 4's own code. The `inbox.log` reader did
+`.split('\n')`, which leaves a `\r` on every CRLF line, and the parse pattern ends `(.*)$` —
+and JavaScript's `.` does not match `\r`. So **every Windows-written line failed to parse** and
+was counted as unreadable. On a mixed-ending file it silently dropped 5 of the 12 lines under
+examination. Fixed to `.split(/\r?\n/)`. This is a Windows-first repo; the bug would have
+misreported every board written here.
+
+Reconciliation of `loader-speed-ceiling-…`, all of it evidence-led:
+
+| Source | Used for |
+| --- | --- |
+| `board.md` (2026-09-20T23:57, newer than `team.json`'s 19:05) | the 15-row task table: subjects, owners, deps, verdicts |
+| `reports/*.md` on disk | verdicts re-read from the files themselves, not from the board's prose |
+| `inbox.log` lines 59/80/91 and 116/122/123/134/135 | transcribing the two reports that were gone |
+
+- Added `t9`, `t10`, `t13`, `t14`, `t15`; `t8` and `t12` moved to `done`; `prober-backend` and
+  `critic-contract` retired; `critic-contract` given the territory it never had; `taskSeq` 13→15.
+- `phase` set to `integrating`, **not** `closed`: `t7`'s own subject includes `archive`, and the
+  directory is still in `.agent-teams/`, not `.agent-teams/archive/`. The board said "done"; the
+  filesystem said otherwise, and the filesystem wins.
+- `reports/t8-prober-hmi-round2.md` and `reports/t12-builder-hmi.md` were genuinely lost — absent
+  from the repo, every worktree, and unrecoverable because `.agent-teams/` is gitignored. They
+  were rebuilt from `inbox.log` following the convention this board already used for `t9`, `t10`
+  and `t14`: a header naming the transcription, the exact source lines, and a closing section
+  listing what the transcription does *not* contain.
+- 12 `inbox.log` lines had summary text sitting in the `kind` slot. Repaired by inserting the
+  kind or splitting it off the `to` field; verified by reconstructing each expected line —
+  12/12 as intended, the other 149 lines byte-identical.
+
+Result: that board went from `0 error(s), 14 warning(s)` to `0 error(s), 1 warning(s)` (the
+remaining one is the schema-1 notice). Regression across all 6 boards: error counts unchanged
+(35 / 4 / 0 / 0 / 43 / 0).
+
+Lesson worth keeping: the two tasks with no surviving evidence were the ones worth the most
+attention. Reconstructing them was only defensible because the board had already established
+how to mark a transcription — and because what could not be recovered was written down as
+missing rather than quietly filled in.
+
 ## Owed acceptance test (human, in a new session)
 
 1. New session → preset picker → **團隊模式（Agents Team）**.

@@ -7,6 +7,9 @@ not a diagnosis exercise.
 | --- | --- | --- |
 | Teammate returns nothing, or a one-line "done" with no evidence | `list_agents` to see `running`/`idle`/`ready` | `send_message` a narrow re-ask naming exactly the missing evidence; if it is `ready`, it stopped — re-brief or re-spawn |
 | Settlement notice says the run failed or was interrupted | Read the notice's stop reason and its diagnostic | Re-brief with the failing reason folded in, or take the task inline if it is small |
+| Prober reports a failure that is in `baseline.knownFailures` | Compare its raw output against the recorded symptom | Not the team's failure: leave `attempt` alone, note it in the verdict, and add the block to the next prober's brief |
+| Prober reports a failure and nobody knows whether it predates the team | Re-run that one command against `baseline.sha` in a scratch worktree | Pre-existing → add it to `knownFailures` and set `verifiedClean`; new → treat as a real FAIL |
+| Teammate broke a project convention nobody told it (build flags, line endings, formatting) | Lead bug, not a teammate bug — `houseRules` was empty or not pasted into the brief | Fix `houseRules`, re-brief with it, and fix the files before the batch lands |
 | Output exists but misses acceptance | Re-brief the same teammate with the exact failing criterion, its raw output, and the required fix | `attempt += 1`; at 2, reassign to a different teammate or shrink the task |
 | Two teammates touched the same file | Stop both, diff the file, pick one owner | The other teammate's brief changes to read-only; record the overlap as a lead error in `inbox.log` |
 | Teammate wrote outside its territory | `interrupt_agent` | Inspect the diff, keep or revert per the lead's judgement, re-brief narrower, tighten the territory glob |
@@ -14,6 +17,10 @@ not a diagnosis exercise.
 | `send_message` reports the message was not delivered (ghost id) | Confirm with `list_agents` | Re-spawn a fresh teammate from the last report, update `agentId` in `team.json` |
 | Teammate asks the human something directly, or takes a human-gated action | Stop it, undo nothing without the human's say, report the breach | Re-brief with the gate list spelled out; nothing ships until the human confirms |
 | Verification passes but the artifact does not match the request | Back to the charter: the acceptance criteria were wrong, not the code | Fix `team.json` acceptance, then re-verify; never patch acceptance to match what was built |
+| A batch is ready but one task in it never got a prober | Do not land it — `team.mjs batch` says `blocked`, believe it | Dispatch the prober, or move that task into its own group and land the rest |
+| A landed batch turns out wrong | `git revert <commitSha>`, never `reset --hard`: other batches are in the same branch | Clear `commitSha`, reopen the task, `attempt += 1`, log it as `commit` |
+| A batch swept in files nobody on the team touched | Compare against `baseline.dirtyPaths` — that was the human's own work | `git revert`, re-add by pathspec only, and say so in the report |
+| Teammate ran `git commit` itself | Stop it, `git log` the sha, report the breach — do not quietly keep it | Re-brief with "you never commit"; the lead decides whether to revert or adopt the commit |
 | Human interrupts, or the session restarts | Freeze the board, write `inbox.log` up to the interruption | Resume via `team-state.md` → "Resuming after a context loss" |
 
 ## Standing anti-patterns
@@ -28,5 +35,10 @@ not a diagnosis exercise.
   reads the file.
 - **Silent scope growth** — an implementation that "also cleaned up" a nearby file. Ask for
   the diff to stay inside `inScope`; anything else is a separate task.
-- **Self-authorized gates** — commit, push, deploy, restart, format change, destructive op.
-  None of these are ever a teammate's or the lead's decision.
+- **Self-authorized gates** — push, deploy, restart, format change, destructive op. None of
+  these are ever a teammate's or the lead's decision. Commits are the one gate answered in
+  advance, at charter, and only for verified batches by pathspec.
+- **The closing blob** — nothing committed all run, then one commit at Close with every
+  territory in it. Nobody can review it, revert one part of it, or bisect it.
+- **`git add -A`** — the tree was dirty before the team started; `baseline.dirtyPaths` says
+  exactly how. Adding everything makes the human's unrelated work part of the team's commit.

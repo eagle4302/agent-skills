@@ -4,13 +4,37 @@ phase: chartering · updated: {{ISO}} · team: .agent-teams/{{SLUG}}/team.json
 
 ## Board
 
-| id | task | owner | status | deps | evidence |
-| --- | --- | --- | --- | --- | --- |
-| t1 | REPLACE: task subject | lead | todo | — | — |
+| id | task | owner | status | deps | batch | evidence |
+| --- | --- | --- | --- | --- | --- | --- |
+| t1 | REPLACE: task subject | lead | todo | — | — | — |
+
+## Commit batches
+
+baseline: REPLACE branch@sha · REPLACE n path(s) already dirty before the team started
+mode: per-territory · authorized by the human: REPLACE yes/no, when
+
+| batch | tasks | state | sha |
+| --- | --- | --- | --- |
+| REPLACE | — | blocked | — |
+
+A batch lands only after its prober returns `pass`, and only by pathspec —
+never `git add -A`, because the paths above were dirty first.
+
+## Already broken before we started
+
+verified on the untouched tree: REPLACE unknown / clean / known-failures
+
+| command | symptom | why |
+| --- | --- | --- |
+| REPLACE, or delete this section | — | — |
+
+Reproducing one of these is not a FAIL, and never increments `attempt`.
 
 ## Human gates for this run
 
-commit · push · deploy/restart · destructive operations · format changes — ask first, always.
+push · deploy/restart · destructive operations · format changes — ask first, always.
+Commits are gated once, at charter, in `commitPolicy`; that answer covers verified
+batches by pathspec and nothing else.
 
 ## Open questions for the human
 
