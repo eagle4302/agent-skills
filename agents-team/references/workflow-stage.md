@@ -13,13 +13,17 @@ Reach for a fan-out when a **single stage** of the plan is many homogeneous item
 
 ## Three ways to run one, cheapest first
 
-1. **A packaged prompt.** `/parallel-review`, `/parallel-cleanup`, `/parallel-research`,
-   `/review-loop`. Same shape every time, nothing to write. Try this before building anything.
-2. **Parallel lanes in one `subagent` call.** `runs.all` for "every lane gets this task",
-   `runs.run` for per-lane tasks. Add `isolation: "worktree"` when the lanes write, so they
-   cannot collide; `none` when they only read.
-3. **`workflowScript`.** Only when the stage genuinely needs sequencing and conditionals that
-   the first two cannot express.
+1. **A packaged prompt**, if your harness ships one for this shape. Same result every time,
+   nothing to write. Try this before building anything.
+2. **Parallel lanes in one call**, if your harness has `fan-out`: one task for every lane, or
+   a task per lane. Use `isolate` when the lanes write, so they cannot collide.
+3. **A workflow script**, only when the stage genuinely needs sequencing and conditionals the
+   first two cannot express — and only where the harness offers one and the human has agreed to
+   the cost.
+
+Your adapter names whichever of these exist. Where **none** does, the stage is not a fan-out:
+run the lanes as ordinary parallel teammates sharing one brief shape, and synthesise the result
+yourself. Do not build a workflow the harness does not have.
 
 Whichever you use, say **which stage** is fanning out and why before you call it. A whole team
 project does not go inside one fan-out: nothing in it can be re-briefed, corrected, or asked a
@@ -31,7 +35,7 @@ question.
 | --- | --- |
 | The composite settles as a unit | Never fan out a stage the lead needs to steer item by item |
 | A lane's intermediate messages do not reach the lead | Design each lane to fail loudly in its own result instead |
-| Children do not get the `subagent` tool by default | A lane cannot spawn its own help unless you chartered it, and `maxSubagentDepth` still binds |
+| Lanes usually cannot delegate further | A lane cannot spawn its own help unless you chartered it, and the harness's nesting-depth limit still binds |
 | Children do not receive this skill | The lane knows nothing about the board; the brief carries everything |
 | "Read-only" is an instruction, not a sandbox | Verify with a diff against `baseline.sha` afterwards |
 | Output is truncated by `maxOutput` when set | Return summaries and file paths, not transcripts; use `outputMode: "file-only"` for the big ones |

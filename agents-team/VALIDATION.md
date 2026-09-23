@@ -170,8 +170,9 @@ depth 1 and may not go further), and the checker now fails on `0` and warns abov
 `deepseek-v4-pro`). The setting is sampled when a **fresh top-level session** is composed, so
 this session — and every session already running — keeps its recorded policy of "off".
 
-**New checker** `scripts/check-team-preset.mjs`, run as
-`node scripts/check-team-preset.mjs --modules <checkout>/node_modules --shipped <standard preset dir>`:
+**New checker** `scripts/check-team-preset.mjs` (DSH only — **deleted in the pi port**, because
+the preset it checked does not exist here; the output below is the record of that round, not a
+command you can run in this copy):
 
 ```
 PASS  C:\Users\owner\.dsh\.agent-presets\team — 0 error(s), 0 warning(s)
@@ -364,17 +365,163 @@ attention. Reconstructing them was only defensible because the board had already
 how to mark a transcription — and because what could not be recovered was written down as
 missing rather than quietly filled in.
 
-## Owed acceptance test (human, in a new session)
+## Round 7 — what the validator was not checking (2026-09-23)
 
-1. New session → preset picker → **團隊模式（Agents Team）**.
-2. Ask for the delegation tools by name; expect `subagent`, `subagent_fork`, `subagent_scout`,
-   `subagent_prober`, `subagent_critic`, plus `list_subagent_models` and `provider`/`model`/
-   `reasoning_effort` on the generic `subagent` schema.
-3. Spawn `subagent_scout` and `subagent_prober`, each asked to list its own file-editing tools;
-   expect both to report none. Spawn `subagent_critic` and ask the same; expect it to have no
-   shell either.
-4. Spawn two teammates with different `model` values from the allowed routes; confirm both calls
-   succeed and that the lead records the routes in `team.json`.
-5. If step 2 shows no role tools, the preset did not compose — the picker lists a broken preset
-   with its reason; report that reason rather than editing the preset blindly.
+A second review pass, driven by running the script rather than reading it. Three defects, each
+reproduced on a scratch board before it was fixed.
+
+1. **A teammate could verify its own work and the board called it ready to commit.** A board
+   where `t2` (verification of `t1`) was assigned to `builder-a`, who wrote `t1`, validated
+   `0 error(s)` and `batch` printed `[ready] builder-a`. The skill's first hard rule was the
+   one rule with no check behind it. `validate` now errors on it, and `commitGroups` no longer
+   counts a self-authored `pass`, so that batch reports `[blocked] t1:unverified`.
+2. **The territory-overlap check missed any glob with a non-trailing wildcard.** `globOverlap`
+   trimmed a trailing `*` and compared prefixes, so two builders on `src/**/*.cs` and
+   `src/core/**/*.cs` were reported disjoint. Four of six realistic overlapping pairs were
+   missed. Replaced with segment-wise glob intersection (`**` spans any number of segments,
+   wildcard segments compared by regex, wildcard-free directory patterns read as git reads a
+   pathspec). Now 14/14 on a positive/negative suite; the sweep also covers every writing role
+   (`lead`, `builder`, `scribe`, `ops`) instead of `builder` alone.
+3. **An untouched `init` template passed validation.** The template marks each owed field with
+   `REPLACE:`; nothing looked for them, so `SKILL.md`'s "run validate until it exits 0" was
+   satisfiable by a board nobody had filled in. `validate` now errors, naming the fields.
+
+Also corrected, from the harness's own docs rather than a run: `failure-playbook.md` told the
+lead to cap a looping teammate with `toolBudget`, but `docs/tool-reference.md` says not to set
+one on implementation workers or reviewers with edit authority — its default block list is
+`read`/`grep`/`find`/`ls`, so capping a thrashing builder removes its ability to look things
+up and leaves its ability to write.
+
+Verified on this machine:
+
+| Check | Result |
+| --- | --- |
+| `node --check scripts/team.mjs` | passes; file stayed CRLF throughout (0 stray LF-only lines) |
+| Self-verifying board | was `0 error(s)`, now `FAIL` exit 1 with the error naming t2, builder-a and t1 |
+| Same board, `batch` | was `[ready]`, now `[blocked] builder-a (t1) — t1:unverified` |
+| Same board with an independent `prober-a` | `0 error(s)`, batch back to `[ready]` — no false positive |
+| Duplicate error when `reviewedTaskId` and `dependencies` both name the task | fired twice, deduped, now 1 |
+| `globOverlap` suite (8 overlapping, 6 disjoint) | 14/14 |
+| `station-status-lights` (the one real board on this machine) | byte-identical before and after: 0 error(s), 3 warning(s) |
+
+Not verified: still no full team run on pi. Everything above is a scratch board and a scratch
+git repo.
+
+Checked and found **correct**, so not changed: `protocol.md`'s spawn-budget claim
+(`maxSubagentSpawnsPerSession`, `maxSubagentSpawnsPerRun`, `globalConcurrencyLimit` all exist)
+and its `contact_supervisor` claim (the supervisor bridge defaults to `mode: "always"`, so the
+tool is auto-added to children).
+
+**Fourth defect, fixed in the same round: the documented `context` default was wrong.**
+`SKILL.md`, `staffing.md` and `protocol.md` all said a spawned child is `fresh` by default, and
+no dispatch example passed `context` at all. Read from the installed package: of the six
+profiles this skill uses, `worker` (builder) and `oracle` (critic) declare
+`defaultContext: fork`, and this machine sets no `defaultSubagentContext` to override them —
+`scout`, `reviewer`, `evidence-auditor` and `delegate` are unset and do fall back to `fresh`.
+So every builder and every critic was forking the lead's whole conversation: real tokens per
+teammate, and on a critic it hands over the framing it was staffed to challenge. The
+self-contained-brief and `houseRules` apparatus was built on a premise that held for four of
+the six profiles.
+
+Fixed by making `context` explicit rather than assumed: every dispatch example now carries
+`context: "fresh"`, the profile table names the two that default to `fork`, `protocol.md` gained
+an operating rule ("Say `context` out loud", rules renumbered 3–10), `staffing.md` gained a
+third "what the profile does not give you" bullet, `members[].model` now records a deliberate
+fork, and `SKILL.md` gained a red flag for an omitted `context`.
+
+| Check | Result |
+| --- | --- |
+| Profile defaults re-read from `node_modules/pi-subagents/agents/*.md` | 2 of 13 profiles set `defaultContext: fork` — `worker` and `oracle` |
+| `defaultSubagentContext` in this machine's pi settings | not set, so the agent defaults win |
+| `subagent(` dispatch examples in the skill without `context` | was 8, now 0 (a multiline sweep; a single-line grep misses the `gate` example and finds only 7) |
+| `protocol.md` operating rules after renumbering | 1–10, no gaps, no duplicates |
+| Cross-references to a renumbered rule | none in the skill |
+| Line endings on the four edited docs | CRLF preserved, 0 stray LF |
+
+## Round 8 — one skill, three harnesses (2026-09-23)
+
+Triggered by a fact, not a preference: **this skill exists in three drifted copies on this
+machine**, and two of them hand the agent tool names that harness does not have.
+
+| Copy | State when found |
+| --- | --- |
+| `.pi/agent/skills/agents-team` | the git repo; ported to pi-subagents, rounds 3–7 applied here |
+| `.claude/skills/agents-team` | still DSH-era — "Teammates are DSH subagents", 8 mentions of `subagent_scout` / `send_message` / `list_agents`, none of which exist in Claude Code |
+| `.dsh/skills/agents-team` | a third copy, already differing from the `.claude` one in 2 files |
+
+So "should this be more abstract?" had a concrete answer: the failure was already happening,
+and vague prose would not have fixed it — it would have deleted round 7's `context` fix, which
+is only useful *because* it names a specific profile's specific default.
+
+### What changed
+
+A capability layer instead of abstraction. Everything outside `adapters/` names capabilities;
+the tool names live in one file per harness.
+
+- **`adapters/`** — `README.md` (how to pick, the eleven capabilities, how to write a new one),
+  `pi.md`, `dsh.md`, `claude-code.md`. Each carries a capability table, a role-dispatch table,
+  the harness's edges, how its gate works, and an explicit verified/not-verified section.
+- **`protocol.md` rewritten** as the capability contract plus a **degradation table**: for each
+  of the eleven capabilities, what its absence costs and what the lead does instead. That table
+  is what makes portability honest rather than vague — no `gate` means the lead is the verifier
+  of record, no `parallel-spawn` means the sizing ladder drops a rung.
+- **`SKILL.md` gained step 0**, "Identify the harness", whose completion criterion is one
+  `inbox.log` note naming the harness, whether there is a gate, and who is therefore the
+  verifier of record. Steps 1–7 keep their numbers.
+- `staffing.md`, `workflow-stage.md`, `failure-playbook.md` and `team-state.md` had their tool
+  calls replaced by capability names, each with the no-capability branch stated inline.
+- `scripts/team.mjs`: **unchanged**. It was already plain Node touching no harness API, which is
+  why the board format survives a harness change at all.
+
+### Verified on this machine
+
+| Check | Result |
+| --- | --- |
+| Harness-specific token sweep outside `adapters/` and `VALIDATION.md` | 0 hits across all 6 neutral docs (`subagent(`, `subagent_*`, `contact_supervisor`, `children.list`, `workflowScript`, `runs.all`, `/parallel-*`, `toolBudget`, `defaultContext`, `send_message`, `list_agents`, `interrupt_agent`, `FleetView`) |
+| `node --check scripts/team.mjs` | passes |
+| `station-status-lights`, the one real board | 0 error(s), 3 warning(s) — unchanged through the whole restructure |
+| Round 7's self-verification error | still fires: `FAIL`, 1 error |
+| Round 7's template-placeholder error | still fires: `FAIL`, 1 error naming 9 fields |
+| Every file path referenced from a doc | all resolve |
+| Line endings on all 12 skill files | CRLF, 0 stray LF (the 4 new adapters were written LF and converted) |
+
+### Cost, stated honestly
+
+The restructure **does not save tokens**, contrary to what was predicted when it was proposed.
+`SKILL.md` went 155 → 187 lines because step 0 is new; the neutral docs went 817 → 968, and the
+four adapters add 325 more. A pi run now reads `SKILL.md` + `adapters/README.md` +
+`adapters/pi.md` where it used to read `SKILL.md` alone.
+
+What it buys: the skill stops being wrong on two of the three harnesses it is installed on, and
+a fourth harness needs one new file rather than a fork. Runtime behaviour on pi is unchanged —
+`adapters/pi.md` is round 7's content in a different location.
+
+### Not verified
+
+- **No team has been run on any harness since the restructure.** The neutral files and the pi
+  adapter are a re-arrangement of content that was itself never exercised end to end.
+- **`adapters/dsh.md` is a port, not a measurement.** Its tool names came from the DSH-era copy
+  of this skill and the round-2 record, not from a DSH session running today.
+- **`adapters/claude-code.md`** was read from live tool schemas in a Claude Code session, but no
+  agent was dispatched from it. One row is explicitly an assumption: whether a Claude Code
+  subagent inherits the project's `CLAUDE.md`.
+- The other two copies on this machine were **not** touched — the human is reconciling those.
+
+## Owed acceptance test (on pi, one real run)
+
+Everything below is still unmeasured on this harness. The old version of this section was a DSH
+preset drill (`subagent_scout` / `subagent_prober` / the 團隊模式 picker); none of that exists on
+pi, so following it would have wasted a session. What is actually owed:
+
+1. Charter a real two-territory team and run `baseline` on a dirty tree, then land one batch by
+   pathspec and confirm `baseline.dirtyPaths` stayed out of the commit.
+2. Dispatch one `worker` with a `gate` that fails, and confirm the host rejects the child's
+   result rather than a model reporting the failure.
+3. `steer` a running teammate and quote the steer receipt from `action: "status"`; then `stop`
+   one and confirm it is gone from the fleet.
+4. Record which `provider/id` each teammate actually ran on in `members[].model`, taken from
+   `action: "models"` rather than guessed.
+5. Confirm on a live run that `context: "fresh"` actually reaches the child — dispatch one
+   `worker` with it and ask the child whether it can see anything of the parent conversation.
+   The profile defaults were read from the installed package, never observed in a run.
 

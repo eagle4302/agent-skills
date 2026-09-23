@@ -1,6 +1,10 @@
 # Team state on disk
 
-Sessions end, contexts compact, and subagent ids evaporate. The board is the team's memory.
+Sessions end, contexts compact, and teammate ids evaporate. The board is the team's memory.
+Nothing in this file is harness-specific: the same `team.json`, `board.md` and `inbox.log`
+describe a run on any of them, and `scripts/team.mjs` is plain Node that touches no harness
+API. That is deliberate — a board written on one harness has to be readable by a session
+running on another.
 
 ## Layout
 
@@ -34,9 +38,9 @@ dependency: if it is missing, hand-edit the JSON and keep going.
 
 `init`, `baseline` and `log` write; the rest only read.
 
-Check what the harness currently offers with `subagent({ action: "list" })` for agent profiles
-and `subagent({ action: "doctor" })` for the spawn budget and health — do that before staffing a
-wide team, not after it fails.
+Check what the harness currently offers — the agent profiles it lists, and any spawn or
+concurrency budget it enforces — before staffing a wide team, not after it fails. Your adapter
+under `adapters/` names the calls.
 
 ## `team.json` schema v2
 
@@ -67,10 +71,13 @@ Enumerations — keep them exact, the script validates them:
 
 Field notes:
 
-- `agentId` is the durable id the `subagent` tool returned (`started subagent <id>`). It is
-  the only way back to a teammate after a context loss. Leave it empty for the lead.
+- `agentId` is the durable id the dispatch returned. It is the only way back to a teammate
+  after a context loss, and on a harness with no `identity` capability there is no way back at
+  all — see the degradation table in `protocol.md`. Leave it empty for the lead.
 - `model` records the route the member actually ran on: `inherited`, or `provider/model` when the
-  delegation named one. Write it when you staff, not at the end.
+  delegation named one. Write it when you staff, not at the end. Append `(inherited-context)`
+  when the teammate was deliberately given this conversation, so the closing report can say who
+  saw it and who did not.
 - `territory` (on a member) and `inScope` (on a task) are path globs. Two teammates writing
   the same glob is a lead bug, not a teammate bug.
 - `verify` holds commands that a prober can paste and run unchanged. If you cannot write one,
@@ -128,7 +135,9 @@ The cycle, once per batch:
 
 `validate` enforces the honest parts of that: a `commitSha` without `commitPolicy.authorized`
 is an error, a ready batch that has not landed is a warning, and closing with an uncommitted
-batch is a warning naming how many.
+batch is a warning naming how many. A batch only reaches `ready` when a verification task
+**someone else owns** returned `pass` — a task verified by its own author counts as unverified,
+and `validate` reports the self-verification as an error.
 
 If `inScope` holds prose rather than pathspecs (`Core/Config/* (recipe section only)`),
 `batch` flags it instead of emitting a wrong `git add` — fix the glob, or add that one by hand.
@@ -161,17 +170,17 @@ worse than no board, because it is believed.
 
 **First decide which kind it is — the two have different first moves:**
 
-| Situation | `subagent({ action: "status" })` | What to do |
+| Situation | What `status` returns | What to do |
 | --- | --- | --- |
 | The context was compacted inside the same session | running children still resolve | Steps 1–4 below: re-attach |
-| **The human opened a new conversation** | **empty** | **Do not spend a turn steering** — run ids from the old parent session are unreachable from a new one, and `children.list` is scoped to the current parent. Read the team directory and spawn fresh teammates from `reports/` |
+| **The human opened a new conversation** | **empty** | **Do not spend a turn steering** — ids from the old parent session are unreachable from a new one, and a finished-children listing is scoped to the current parent. Read the team directory and spawn fresh teammates from `reports/` |
 
 1. Read `team.json`, `board.md`, `inbox.log`, then the `reports/` files the open tasks point at.
-2. Run `subagent({ action: "status" })` and `subagent({ action: "children.list" })`, and match
-   run ids against `members[].agentId`.
-3. Re-attach with `action: "steer"` to whoever is still running; a settled child may be
-   resumable — `children.list` says so per row. Re-spawn anyone whose id no longer resolves, or
-   whose row is not resumable, with a brief rebuilt from the reports, and label it a fallback.
+2. Ask the harness for `status` and for its list of finished teammates, and match the ids
+   against `members[].agentId`.
+3. Re-attach with `steer` to whoever is still running; a settled teammate may be resumable
+   where the harness says so per row. Re-spawn anyone whose id no longer resolves, or who is not
+   resumable, with a brief rebuilt from the reports, and label it a fallback.
 4. Continue from the first task that is not `done`, and say plainly in the human report which
    part of the run predates the context loss.
 
@@ -187,8 +196,11 @@ It must contain:
 - **The objective in one sentence, and what is actually blocking it right now.**
 - **The real state of the tree**: `git log -1`, `git status`, which ticket each uncommitted
   file belongs to, and their hashes — verified in this run, not remembered.
-- **"No run id is reachable from a new session."** Without that line, the next agent burns a
-  turn on `action: "status"` and a steer before discovering it.
+- **"No teammate id is reachable from a new session."** Without that line, the next agent burns
+  a turn on `status` and a steer before discovering it.
+- **Which harness this run was on, and which capabilities it had.** The next session may not be
+  on the same one; a verdict recorded under a harness with a `gate` means something different
+  from one recorded without.
 - Decisions already made that must not be re-litigated.
 - The remaining steps **in order**, each with how to measure its acceptance.
 - The lessons and landmines from this run (the ones that cost real time).

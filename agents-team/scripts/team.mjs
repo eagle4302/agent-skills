@@ -53,6 +53,8 @@ const HOUSE_FILES = ['CLAUDE.md', 'AGENTS.md', 'CONTRIBUTING.md'];
 const NEEDS_ACCEPTANCE = ['implementation', 'verification', 'review'];
 const NEEDS_VERIFY = ['implementation', 'verification'];
 
+// Roles that write. scout, prober and critic are read-only, so they cannot collide.
+const WRITER_ROLES = ['lead', 'builder', 'scribe', 'ops'];
 const KEBAB = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 // A workflow fan-out owns a task but has no member row — see references/workflow-stage.md.
 const STAGE = /^stage:[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -162,12 +164,64 @@ function findCycle(tasks, byId) {
   return null;
 }
 
-/** Glob-ish overlap: equal, or one path is a prefix of the other once '*' is trimmed. */
+/**
+ * Does one member's territory overlap another's? Both sides are globs, so this asks whether
+ * any concrete path could satisfy both — segment by segment, with `**` spanning any number of
+ * segments. A prefix test is not enough: two territories that filter by extension deeper in
+ * the tree do collide, and the old trailing-`*` prefix test reported them as disjoint.
+ */
+function globSegments(pattern) {
+  const p = String(pattern).replace(/\\/g, '/').replace(/^\.\//, '').replace(/\/+$/, '');
+  const segs = p.split('/').filter(Boolean);
+  const last = segs[segs.length - 1] ?? '';
+  // Read a wildcard-free `src/core` the way git reads a pathspec: that directory and
+  // everything under it. `src/core.cs` names one file and stays one file.
+  if (segs.length && !/[*?]/.test(p) && !last.includes('.')) segs.push('**');
+  return segs;
+}
+
+/** One path segment as a regex; `*` and `?` never cross a `/`. */
+function segRegex(seg) {
+  const body = seg
+    .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+    .replace(/\*/g, '[^/]*')
+    .replace(/\?/g, '[^/]');
+  return new RegExp(`^${body}$`);
+}
+
+/** Could one string satisfy both segment patterns? */
+function segOverlap(a, b) {
+  if (a === b) return true;
+  const wa = /[*?]/.test(a);
+  const wb = /[*?]/.test(b);
+  if (!wa && !wb) return false;
+  if (!wa) return segRegex(b).test(a);
+  if (!wb) return segRegex(a).test(b);
+  // Both wildcarded: their literal heads and tails have to be compatible. `*.cs` and `*.ts`
+  // are not; `*.cs` and `Foo*` are, because `Foo.cs` satisfies both.
+  const head = (s) => s.slice(0, s.search(/[*?]/));
+  const tail = (s) => {
+    const i = s.search(/[*?](?=[^*?]*$)/);
+    return i < 0 ? '' : s.slice(i + 1);
+  };
+  const [ha, hb] = [head(a), head(b)];
+  if (!ha.startsWith(hb) && !hb.startsWith(ha)) return false;
+  const [ta, tb] = [tail(a), tail(b)];
+  return ta.endsWith(tb) || tb.endsWith(ta);
+}
+
+function segsOverlap(A, B) {
+  if (!A.length && !B.length) return true;
+  // One side ran out: the other can still collide only if what is left of it spans nothing.
+  if (!A.length) return B.every((s) => s === '**');
+  if (!B.length) return A.every((s) => s === '**');
+  if (A[0] === '**') return segsOverlap(A.slice(1), B) || segsOverlap(A, B.slice(1));
+  if (B[0] === '**') return segsOverlap(A, B.slice(1)) || segsOverlap(A.slice(1), B);
+  return segOverlap(A[0], B[0]) && segsOverlap(A.slice(1), B.slice(1));
+}
+
 function globOverlap(a, b) {
-  const norm = (s) => s.replace(/\\/g, '/').replace(/\*+$/, '').replace(/\/+$/, '');
-  const x = norm(a);
-  const y = norm(b);
-  return x === y || x.startsWith(`${y}/`) || y.startsWith(`${x}/`);
+  return segsOverlap(globSegments(a), globSegments(b));
 }
 
 /**
@@ -177,9 +231,12 @@ function globOverlap(a, b) {
  */
 function commitGroups(doc) {
   const tasks = Array.isArray(doc.tasks) ? doc.tasks : [];
+  // A pass only counts when someone other than the author produced it — otherwise a batch
+  // self-verified by its own builder would be reported ready to commit.
   const verifiedOk = (t) =>
     tasks.some((v) => v.kind === 'verification'
       && (v.reviewedTaskId === t.id || (v.dependencies ?? []).includes(t.id))
+      && v.assignee !== t.assignee
       && v.verdict === 'pass');
   const out = new Map();
   for (const t of tasks) {
@@ -232,6 +289,23 @@ function cmdValidate(args) {
   const teamDir = dirname(file);
   const err = (m) => errors.push(m);
   const warn = (m) => warnings.push(m);
+
+  // The template marks every field the lead owes with "REPLACE:". Passing validate with
+  // those still in place is how a board gets staffed with nobody having read it.
+  const stubs = [];
+  const walk = (node, path) => {
+    if (typeof node === 'string') {
+      if (node.trimStart().startsWith('REPLACE:')) stubs.push(path);
+    } else if (Array.isArray(node)) {
+      node.forEach((v, i) => walk(v, `${path}[${i}]`));
+    } else if (node && typeof node === 'object') {
+      for (const [k, v] of Object.entries(node)) walk(v, path ? `${path}.${k}` : k);
+    }
+  };
+  walk(doc, '');
+  if (stubs.length) {
+    err(`${stubs.length} field(s) still hold the init template's "REPLACE:" text — fill them in or delete the line: ${stubs.slice(0, 6).join(', ')}${stubs.length > 6 ? ', …' : ''}`);
+  }
 
   if (![1, 2].includes(doc.schema)) {
     err(`top-level "schema" must be 1 or 2, got ${JSON.stringify(doc.schema)}`);
@@ -309,6 +383,17 @@ function cmdValidate(args) {
     }
     if (t.kind === 'implementation' && (!Array.isArray(t.inScope) || t.inScope.length === 0)) {
       err(at('implementation task needs "inScope" path globs'));
+    }
+    // Hard rule: the prober is never the builder. This is the one invariant the board can
+    // actually check, and a self-verified task would otherwise be reported ready to land.
+    if (['verification', 'review'].includes(t.kind) && t.assignee) {
+      const judged = [...new Set([t.reviewedTaskId, ...(t.dependencies ?? [])])]
+        .filter(Boolean)
+        .map((rid) => byId.get(rid))
+        .filter((r) => r && r.kind === 'implementation' && r.assignee === t.assignee);
+      for (const r of judged) {
+        err(at(`${t.kind} of "${r.id}" is assigned to ${t.assignee}, who wrote it — a teammate never verifies its own work`));
+      }
     }
     if (t.kind === 'review') {
       if (!t.reviewedTaskId) err(at('review tasks must set "reviewedTaskId"'));
@@ -502,13 +587,15 @@ function cmdValidate(args) {
   const cycle = findCycle(tasks, byId);
   if (cycle) err(`dependency cycle: ${cycle.join(' -> ')}`);
 
-  const builders = members.filter((m) => m.role === 'builder' && ['running', 'idle'].includes(m.status));
-  for (let i = 0; i < builders.length; i += 1) {
-    for (let j = i + 1; j < builders.length; j += 1) {
-      for (const a of builders[i].territory ?? []) {
-        for (const b of builders[j].territory ?? []) {
+  // Every role that can write, not just the builders: a scribe or the lead sitting on a
+  // builder's path is the same defect with a different job title.
+  const writers = members.filter((m) => WRITER_ROLES.includes(m.role) && ['running', 'idle'].includes(m.status));
+  for (let i = 0; i < writers.length; i += 1) {
+    for (let j = i + 1; j < writers.length; j += 1) {
+      for (const a of writers[i].territory ?? []) {
+        for (const b of writers[j].territory ?? []) {
           if (globOverlap(a, b)) {
-            warn(`territory overlap: ${builders[i].name} (${a}) and ${builders[j].name} (${b})`);
+            warn(`territory overlap: ${writers[i].name} (${a}) and ${writers[j].name} (${b})`);
           }
         }
       }
@@ -517,8 +604,9 @@ function cmdValidate(args) {
 
   const doneImpl = tasks.filter((t) => t.kind === 'implementation' && t.status === 'done');
   for (const t of doneImpl) {
-    const verified = tasks.some((v) => v.kind === 'verification' && v.reviewedTaskId === t.id)
-      || tasks.some((v) => v.kind === 'verification' && (v.dependencies ?? []).includes(t.id));
+    const verified = tasks.some((v) => v.kind === 'verification'
+      && (v.reviewedTaskId === t.id || (v.dependencies ?? []).includes(t.id))
+      && v.assignee !== t.assignee);
     if (!verified) warn(`task "${t.id}" is done with no verification task pointing at it`);
   }
 

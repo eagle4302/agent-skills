@@ -1,9 +1,10 @@
 # Staffing: roles, charters, briefs
 
-A role is a **prompt-level contract** first. `pi-subagents` agent profiles carry a persona and
-a tool posture, which gets you most of the way, but a teammate is a builder or a prober because
-the brief says so and the lead checks the output against that contract. The one thing the
-harness really enforces is a `gate`. Never assume anything else is.
+A role is a **prompt-level contract** first. Most harnesses ship agent profiles that carry a
+persona and a tool posture, which gets you most of the way, but a teammate is a builder or a
+prober because the brief says so and the lead checks the output against that contract. The most
+a harness ever enforces is a `gate`, and not every harness has one. Never assume anything else
+is enforced.
 
 ## Roster
 
@@ -30,33 +31,31 @@ Team shapes:
 Cap concurrent members at 3–4. Every teammate is a full context; a team costs real money
 and real wall-clock, and the human pays for both.
 
-## Roles map onto pi's agent profiles
+## Roles map onto your harness's agent profiles
 
-A role is always a brief. `pi-subagents` also ships agent profiles that carry a persona and a
+A role is always a brief. Most harnesses also ship agent profiles that carry a persona and a
 tool posture, so pick the profile that matches the role instead of describing it from scratch.
-Read the current list with `subagent({ action: "list" })` — the table below is what ships, and
-your machine may have more.
+**Your adapter's "Role dispatch" table is that mapping** — read it at step 0, and check it
+against the profiles this session actually lists before you staff.
 
-| Role | Dispatch | What the profile already does | Still only the brief |
-| --- | --- | --- | --- |
-| scout | `subagent({ agent: "scout", task })` | fast local recon: files, entry points, data flow, risks | keeping it read-only is the brief's job — say "write no files" |
-| builder | `subagent({ agent: "worker", task })` | implementation; escalates unapproved decisions instead of guessing | its territory |
-| prober | `subagent({ agent: "reviewer", task, gate: "<verify cmd>" })` | review against the task, tests, edge cases; the `gate` is host-run | that it is not the author — **the lead must pick a different child** |
-| critic | `subagent({ agent: "oracle", task })` | second opinion, challenges assumptions, does not edit | the two axes and the verdict vocabulary |
-| prober (claims) | `subagent({ agent: "evidence-auditor", task })` | checks whether claims are supported by their sources | needs `pi-web-access` in the child |
-| scribe | `subagent({ agent: "delegate", task })` | behaves close to the parent session | doc conventions |
+Three things a profile does **not** give you, on any harness, and all three are the lead's job:
 
-Two things the profile does **not** give you, and both are the lead's job:
+- **Independence.** No profile stops you handing the prober's task to the teammate that wrote
+  the code. Spawn a separate one, and say in the human report that you did. This is also the
+  one rule `team.mjs validate` enforces: a verification task whose `assignee` wrote the task
+  it judges is an error, and its batch never reaches `ready`.
+- **Read-only.** A profile that cannot edit files usually still has a shell, and "read-only" in
+  a brief is an instruction, not a sandbox. Write it in the brief and check the diff afterwards.
+- **A known context.** Whether a teammate inherits this conversation is a per-profile default on
+  some harnesses and a per-call flag on others. Your adapter says which; pass it explicitly
+  where the harness accepts one.
 
-- **Independence.** No profile stops you handing the prober's task to the child that wrote the
-  code. Spawn a separate child, and say in the human report that you did.
-- **Read-only.** `oracle` does not edit, but `scout` and `reviewer` still have a shell. If a
-  role must not touch the tree, write it in the brief and check the diff afterwards.
-
-What *is* harness-enforced is the **gate** (see `protocol.md`): a host-run command whose failure
-rejects the child's result. Put every task's `verify` command there. A gate proves the command
-passed; it does not prove the command tested the right thing, so the prober's judgement still
-matters. Say in the human report which checks were gates and which were a model's word.
+What a harness *can* enforce is the **gate**: a host-run command whose failure rejects the
+teammate's result. Where you have one, put every task's `verify` command in it. A gate proves
+the command passed; it does not prove the command tested the right thing, so the prober's
+judgement still matters. Where you do not have one — see the degradation table in
+`protocol.md` — **the lead runs `verify` itself before the batch lands**. Either way, say in
+the human report which checks were harness-enforced and which were a model's word.
 
 The backstop is a real command, not a promise. `baseline.sha` is what makes it runnable —
 without it, "did anyone write outside their territory?" has no answer:
@@ -73,11 +72,13 @@ Run it before the first batch lands, not after the run.
 
 - Put routine, mechanical or parallel work on a fast model; put judgement, review and hard
   diagnosis on the strongest route available.
-- Pass `model` on the dispatch to route a single child. Call `subagent({ action: "models" })`
-  first and copy an exact `provider/id`; a bare id resolves only when unique, and an agent name
-  is not a model id. A `provider/id:high` suffix overrides that agent's thinking level.
+- Route a single teammate by naming a model on the dispatch, using whatever form your adapter
+  gives. Copy an exact identifier from the harness's own model listing rather than typing one
+  from memory; an agent name is not a model id.
 - Record the route actually used in `team.json` (`members[].model`). A report that cannot say
-  which model produced a claim cannot be audited later.
+  which model produced a claim cannot be audited later. Record a deliberate inherited context
+  there too (`provider/model (inherited-context)`), so the closing report can say which
+  teammates saw this conversation and which did not.
 
 ## What to delegate, what to keep
 
@@ -112,9 +113,10 @@ Size is a decision you revisit, not a decision you make once.
 
 - **Take a task back** when the brief outgrew the work, when the teammate is stuck after two
   attempts, or when its territory turns out to overlap someone else's. Finish it inline.
-- **Retire a member** with `subagent({ action: "stop", id })` while it runs, `status: "retired"`
-  in `team.json`, and one `inbox.log` line saying why. A teammate left running with nothing to
-  do is pure cost, and it holds part of the session's spawn budget.
+- **Retire a member** with `stop` while it runs, `status: "retired"` in `team.json`, and one
+  `inbox.log` line saying why. A teammate left running with nothing to do is pure cost, and it
+  holds part of the session's spawn budget. Where `stop` is absent, let it settle and discard
+  the result — then check the diff before anything lands.
 - **Merge** two small tasks into one brief; **split** a task whose acceptance has two independent
   halves and two owners.
 - **Grow only for a stateable reason**: a newly discovered independent workstream, a verification
@@ -123,10 +125,17 @@ Size is a decision you revisit, not a decision you make once.
 ## Spawning
 
 Start every independent teammate **in the same assistant message** so they actually run in
-parallel, and use `subagent` (spawn) unless the teammate genuinely needs this session's
-conversation — `context: "fork"` copies it and costs the extra context. Record the returned
-run id in `team.json` (`members[].agentId`); that id is what `status`, `steer` and `stop`
-take, and what makes the team resumable after a context loss.
+parallel. If your harness has no `parallel-spawn`, they run one after another and the sizing
+ladder drops a rung — two territories that cannot overlap in time are often one task for the
+lead.
+
+Pass a fresh context unless the teammate genuinely needs this session's conversation.
+Inheriting it copies the whole thing: real tokens per teammate and, on a critic, the framing it
+was staffed to challenge. Your adapter says whether fresh is the default here — on at least one
+harness it is not, for exactly the profiles a team uses most.
+
+Record the returned id in `team.json` (`members[].agentId`); that id is what `status`, `steer`
+and `stop` take, and what makes the team resumable after a context loss.
 
 Give each teammate: a label (3–5 words), the brief, and nothing else. Spawn children do
 not see this conversation, so the brief must be self-contained. That includes the project's
@@ -159,7 +168,8 @@ EVIDENCE FORMAT (mandatory):
   - WHAT YOU DID NOT VERIFY: <be specific; an empty list is a red flag>
 DO NOT: touch files outside your territory; commit; push; deploy; restart services;
   change configuration formats; ask the human anything directly.
-REPORT: your final message is the report. Raise a blocker mid-run with contact_supervisor.
+REPORT: your final message is the report. If the harness gives you a way to raise a blocker
+  mid-run, the lead will have named it in this brief; otherwise stop and report what blocked you.
 ```
 
 Adapt for the other roles:
