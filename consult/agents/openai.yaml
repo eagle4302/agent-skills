@@ -1,0 +1,3 @@
+interface:
+  display_name: "Consult"
+  short_description: "Ask a stronger read-only advisor at decision checkpoints"
