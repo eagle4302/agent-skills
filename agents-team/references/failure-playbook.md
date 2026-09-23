@@ -23,6 +23,12 @@ not a diagnosis exercise.
 | A batch swept in files nobody on the team touched | Compare against `baseline.dirtyPaths` — that was the human's own work | `git revert`, re-add by pathspec only, and say so in the report |
 | Teammate ran `git commit` itself | Stop it, `git log` the sha, report the breach — do not quietly keep it | Re-brief with "you never commit"; the lead decides whether to revert or adopt the commit |
 | Human interrupts, or the session restarts | Freeze the board, write `inbox.log` up to the interruption | Resume via `team-state.md` → "Resuming after a context loss" |
+| A brief or ticket cites a line number, count, or limit the lead did **not** measure this session, and it later turns out wrong | Stop and measure first | The artifact has to be rewritten **and re-delivered** (a mirror/dispatch per revision). Rule: measure → write → dispatch **once**. Every number in a ticket carries the command and output that produced it |
+| `HEAD` does not compile on its own, because a committed file depends on a change that is still uncommitted | `git worktree add --detach <dir> HEAD`, build there | The pending batch repairs it; before **every** commit, verify the commit point builds by itself — "the working tree builds" is not that check |
+| The same class of defect is caught by a prober in two consecutive revisions (tautological assertions, stale direction/limit prose) | Do not just fix it again | Turn it into a **pattern the next verifier is told to search for**, and add a line to the acceptance criteria |
+| A verifier returns "could not determine" for one item | Usually there is no pre-change snapshot to compare against | Before editing, save the pre-change output (a render snapshot) and hand it to the verifier with the brief |
+| One brief carries two deliverables where one depends on the other | Split it | Otherwise revising the upstream artifact forces the downstream one to be redone |
+| The lead is polling with sleeps while teammate runs are open | Do not wait as work | Settlement notices arrive on their own; do queued work, or end the turn |
 
 ## Standing anti-patterns
 
@@ -43,3 +49,21 @@ not a diagnosis exercise.
   territory in it. Nobody can review it, revert one part of it, or bisect it.
 - **`git add -A`** — the tree was dirty before the team started; `baseline.dirtyPaths` says
   exactly how. Adding everything makes the human's unrelated work part of the team's commit.
+- **Tautological acceptance** — an assertion whose expected value is computed by the same
+  expression it is testing: two helpers that are the same `floor(...)` differing by ±1, a
+  caller passing the very thing under test, `A ≡ B ± 1`. It reads green and proves nothing.
+  **It grows back**: one was deleted and an instance reappeared two lines below its
+  replacement. Verifiers must actively search this shape and list what they inspected —
+  "I scanned it" is not a finding.
+- **Unmeasured prose** — a direction, a limit, a multiplier, or "which value gets refused"
+  written into a message or a comment, with no test that measures it. Editing the words is
+  not editing the fact. Two of these in one run stated the exact opposite of the arithmetic
+  (`lowering X shrinks the ceiling` when it doubles it).
+- **Authoring from memory** — a brief or ticket citing numbers that were not measured in
+  this session. It costs two full dispatches when it turns out wrong. Measure → write →
+  dispatch, once.
+- **Waiting as work** — the lead sleeping on a poll while teammate runs are open and queued
+  work is sitting untouched. Settlement notices are delivered; use the gap, or end the turn.
+- **A stale frozen artifact** — the lead edits an artifact after freezing its hash, then the
+  verifier reports "artifact moved". Freeze, verify, and only then touch it; if you must
+  touch it, say so in `inbox.log` and re-freeze before the verifier starts.

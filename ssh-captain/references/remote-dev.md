@@ -18,6 +18,36 @@ bash $CAP run box --cd '~/proj' -- 'git status --short | head'
 bash $CAP run box -- 'echo $HOSTNAME; ls "$HOME/bin"'
 ```
 
+### 複雜指令：交給 `--file` 或 `script`（預設做法）
+
+`run`／`bg` 把 `--` 後面的參數**用空白接成一條字串**（`cmd="$*"`）。所以一趟指令裡只要
+出現引號、`;`、`|`、`>`、`&&` 或多行，就會連續經過好幾層解析：
+harness → PowerShell → Git Bash → ssh → 遠端的 `bash -lc`。
+**任何一層吃掉一個引號，結果就是「跑得完但做錯事」** —— `bg` 會回 `done-ok` 而 log 是空的，
+`run` 會安靜地少跑幾段。細節與診斷法見
+[troubleshooting.md](troubleshooting.md) 的「`bg` 回 `done-ok`，但 log 是空的」。
+
+**所以不要內嵌：把東西寫成檔案，交給 `--file`。** body 走 base64，指令列裡只剩一個檔名，
+哪一層都切不動它。
+
+```bash
+# 先在本機用檔案工具寫一個 LF 的 run.sh，然後：
+bash $CAP run box --file ./run.sh                  # 前景，輸出直接串回來
+bash $CAP run box --cd '~/proj' --file ./run.sh    # 也可以配 --cd
+bash $CAP bg  box t1 --file ./run.sh               # 長工作
+bash $CAP log box t1
+
+# 要連輸出一起帶回本機（怕輸出被吃掉、或想留檔）：
+bash $CAP script box ./run.sh --out ./run.out      # 在遠端跑，stdout+stderr 拉回來
+bash $CAP script box ./run.sh --tag t1 --quiet     # 只印 exit code 與存檔路徑
+```
+
+`script` 把遠端輸出留在 `/tmp/cap-script-<tag>.out`，本機預設存成 `./<tag>.out`
+（`--tag` 沒給就用檔名去掉副檔名）。它會回傳腳本的 exit code。
+
+**一句話的判準**：如果這條指令你會想用引號包起來，就把它寫成檔案 ——
+多寫一個檔的成本遠低於猜錯一輪。
+
 ## git
 
 ```bash

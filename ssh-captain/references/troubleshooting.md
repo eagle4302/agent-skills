@@ -41,7 +41,13 @@ bash $CAP run <name> -- 'ls -ld ~ ~/.ssh; ls -l ~/.ssh/authorized_keys'
 `run` 的字串是**遠端** shell 解析的。常見狀況：
 
 - 本機 Git Bash 在送出前就把 `$VAR` 展開了 → 用單引號包整條指令。
+- **外層 harness 會剝掉內層雙引號。** Windows 隊長尤其會遇到：`-- "a; b"` 到本機 bash 時
+  引號已經不見，`;` 在**本機**被切開。**不要用雙引號包整條指令** —— 用單引號，
+  或直接走下面的「推檔再跑」。
 - 路徑有空白 → 在遠端的引號裡再包一層：`-- 'ls "$HOME/My Docs"'`。
+- **`push`／`pull` 的遠端路徑一律用單引號。** 用雙引號的話 `~` 會被**本機**展開，
+  症狀是 `scp: /c/Users/...: No such file or directory`（看起來像遠端檔案不見了，
+  其實是本機路徑）。
 - 指令其實在 PATH 上但找不到 → `run` 走 `bash -lc`，login shell 應該有讀
   `.bashrc`／`.profile`；若該工具靠 `nvm` 或只在互動 shell 才載入，就寫絕對路徑。
 
@@ -50,6 +56,64 @@ bash $CAP run <name> -- 'ls -ld ~ ~/.ssh; ls -l ~/.ssh/authorized_keys'
 ```bash
 bash $CAP run <name> -- 'echo "$0 saw: $*"'
 ```
+
+## `bg` 回 `done-ok`，但 log 是空的
+
+**九成不是遠端的問題，是 body 被本機切掉了。** 這是這個技能最危險的失敗模式，
+因為**它看起來像成功**：遠端只收到殘缺的指令，跑完（或根本沒跑到東西）就以 0 結束，
+`jobs` 顯示 `done-ok`，沒有任何錯誤。
+
+Windows 隊長最常見。外層的 PowerShell／harness 會剝掉內層雙引號，於是
+
+```bash
+bash $CAP bg box t1 -- "id; pwd; ls /tmp"
+```
+
+到本機 bash 時引號已經不見，`;` 在**本機**被切開 —— `id` 成了 body，
+`pwd` 與 `ls /tmp` 在本機跑。遠端跑完 `id`，exit 0，log 只有一行 `uid=...`。
+
+**診斷：body 實際收到什麼，遠端有留檔。**
+
+```bash
+bash $CAP run box -- 'cat ~/.ssh-captain/jobs/<tag>.sh'
+```
+
+那會印出 `bg` 真正執行的那份腳本。body 不對，就是這裡。`run` 沒有留檔，
+但同樣的切法會讓它安靜地少跑幾段 —— 症狀是輸出比預期短，不是報錯。
+
+**修法：複雜的東西不要內嵌，交給 `--file`。**
+
+```bash
+# 先在本機用檔案工具寫一個 LF 的 run.sh，然後：
+bash $CAP run box --file ./run.sh      # 前景
+bash $CAP bg  box t1 --file ./run.sh   # 背景
+bash $CAP log box t1
+```
+
+body 走 base64 送過去，指令列裡只剩一個檔名 —— 沒有任何一層切得動它。
+**要連輸出一起帶回本機就用 `script`**（stdout+stderr 會在遠端落成檔案再拉回來）：
+
+```bash
+bash $CAP script box ./run.sh --out ./run.out
+```
+
+隊員身上有 `python3` 也不能免這一條：被切掉的是**指令字串**，不是解譯器。
+
+**量到的（2026-09-20，Windows 隊長）—— 引號會出事，而且不只一種出法：**
+
+| 你寫的 | bash 實際收到的 | 後果 |
+| --- | --- | --- |
+| `printf "[%s]\n" "a;b"` | `printf "[%s]\n" a;b` | 引號被剝、`\n` 的 `\` 也被吃掉 → `;` 變成真的分隔符 |
+| `grep -E "recipe\|cleanup"` | `grep -E recipe\|cleanup` | `\|` 變成真的管線，後半被當成指令名（`command not found`） |
+| `bg box tag "rm -f /tmp/a /tmp/b"` | body **只有 `rm`** | 遠端 `rm: missing operand`，exit 1 |
+
+第三列是重點：引號包住的 body **不保證只是掉引號，可能被截斷**。
+**所以判準不是「我這次有沒有用到特殊字元」，而是「這個 body 有沒有被引號包住」——
+包了就推檔。**
+
+**這個配方已經實測過（2026-09-20，`martin-deskone`）**：本機寫 LF 的 `.sh` → `push` →
+`bg box tag bash /tmp/x.sh`（帶不帶 `--` 都可以）→ `log`，輸出正常、exit 0。
+**body 請不要加引號**：`bash /tmp/x.sh` 這種沒有特殊字元的形式最安全。
 
 ## `bad interpreter: No such file or directory`
 
