@@ -1,95 +1,69 @@
-# Running a whole stage through the `workflow` tool
+# Running a whole stage as a fan-out
 
-A team is persistent, addressable and steerable. A workflow is the opposite: one script,
-many short-lived children, no mid-run steering, one JSON result at the end. Use each for what
-it is good at.
+A team is persistent, addressable and steerable: you can ask a child how it is going, redirect
+it, and stop it. A fan-out is the opposite — many short-lived lanes, one composite result at the
+end. Use each for what it is good at.
 
-Reach for `workflow` when a **single stage** of the plan is a fan-out:
+Reach for a fan-out when a **single stage** of the plan is many homogeneous items:
 
 - an audit over many files or modules,
-- N independent review angles over one artifact, then a judge,
+- N independent review angles over one artifact, then a synthesis,
 - the same mechanical migration applied to N items,
 - cross-checking one claim against several sources.
 
-The tool's own policy is to be used when the human asked for a workflow or for large
-orchestration, so say which stage and why before you call it. Do not wrap a whole team project
-in one workflow: nothing inside can be re-briefed, corrected, or asked a question.
+## Three ways to run one, cheapest first
 
-## What a workflow cannot do
+1. **A packaged prompt.** `/parallel-review`, `/parallel-cleanup`, `/parallel-research`,
+   `/review-loop`. Same shape every time, nothing to write. Try this before building anything.
+2. **Parallel lanes in one `subagent` call.** `runs.all` for "every lane gets this task",
+   `runs.run` for per-lane tasks. Add `isolation: "worktree"` when the lanes write, so they
+   cannot collide; `none` when they only read.
+3. **`workflowScript`.** Only when the stage genuinely needs sequencing and conditionals that
+   the first two cannot express.
+
+Whichever you use, say **which stage** is fanning out and why before you call it. A whole team
+project does not go inside one fan-out: nothing in it can be re-briefed, corrected, or asked a
+question.
+
+## What a fan-out cannot do
 
 | Limit | Consequence |
 | --- | --- |
-| The parent turn waits for the whole run | Never put a stage in a workflow that the lead needs to steer |
-| Children's intermediate messages never reach the lead | Design each child to fail loudly in its structured result instead |
-| No capability modes | "Read-only" is an instruction in the prompt, not a sandbox; verify with a diff afterwards |
-| Failure resolves to `null` per item (throwing hooks excepted) | Always `.filter(Boolean)` and count what came back |
-| Result text is capped (default 50 000 chars) | Return summaries and file paths, not full transcripts |
-| `agent()` options are `label`, `phase`, `provider`, `model` only | No persona, no tool filter, no depth control |
+| The composite settles as a unit | Never fan out a stage the lead needs to steer item by item |
+| A lane's intermediate messages do not reach the lead | Design each lane to fail loudly in its own result instead |
+| Children do not get the `subagent` tool by default | A lane cannot spawn its own help unless you chartered it, and `maxSubagentDepth` still binds |
+| Children do not receive this skill | The lane knows nothing about the board; the brief carries everything |
+| "Read-only" is an instruction, not a sandbox | Verify with a diff against `baseline.sha` afterwards |
+| Output is truncated by `maxOutput` when set | Return summaries and file paths, not transcripts; use `outputMode: "file-only"` for the big ones |
 
-Schema rules are strict: an object at the root, using only `type`, `properties`, `required`,
-`additionalProperties`, `items`, `enum`, `const`, `oneOf`. Misusing a hook or an unsupported
-schema kills the whole script rather than degrading one item.
+## Make each lane prove itself
 
-## Shape that works
+The same rule as any teammate: a lane's report is a claim. Two things make it checkable.
 
-Phases, then parallel reviewers, then one judge that keeps only evidenced findings — the
-pattern that survives contact with self-reports:
+- **A `gate`.** One host-run command per lane. Its failure rejects that lane's result, and no
+  model opinion overrides it. If the stage has a natural per-item command, it belongs here.
+- **Evidence in the shape you asked for.** Require the command, its real output, and `file:line`
+  for every claim. Then give the synthesizing child the artifact, not just the reports, and tell
+  it to drop every finding it cannot confirm in the current files.
 
-```js
-phase("review");
-const angles = ["safety", "flow", "tests"];
-const schema = {
-  type: "object", required: ["findings"], additionalProperties: false,
-  properties: {
-    findings: {
-      type: "array",
-      items: {
-        type: "object",
-        required: ["id", "severity", "file", "evidence", "problem", "requiredFix"],
-        additionalProperties: false,
-        properties: {
-          id: { type: "string" }, severity: { type: "string" }, file: { type: "string" },
-          evidence: { type: "string" }, problem: { type: "string" }, requiredFix: { type: "string" },
-        },
-      },
-    },
-  },
-};
+Return counts alongside conclusions — `lanes: 7, reported: 6` makes one silent failure visible,
+where a prose summary hides it.
 
-const found = await parallel(
-  angles.map((angle, i) => () =>
-    agent(`${BRIEF}\nYOUR ANGLE: ${angle}\nRead the files; do not answer from memory. Report this angle only.`, {
-      label: `review:${angle}`, phase: "review", schema,
-    }),
-  ),
-);
+## When a lane's infrastructure fails
 
-phase("judge");
-const verdict = await agent(
-  `You are the judge. Drop every finding you cannot confirm in the current files.\n` +
-  `Reports: ${JSON.stringify(found.filter(Boolean))}\n` +
-  `Verdict is "pass" only if no high or medium finding survives.`,
-  { label: "judge", phase: "judge" },
-);
-
-return { angles: angles.length, reported: found.filter(Boolean).length, verdict };
-```
-
-Rules that keep it honest:
-
-- Put the shared briefing in one string, then append the per-item instruction. The brief must
-  be self-contained: workflow children do not see this conversation.
-- Ask for `evidence` (command, output, `file:line`) in the schema. A finding without evidence
-  is dropped by the judge.
-- Give the judge the artifact, not just the reports; it must be able to refuse a claim.
-- Return counts alongside conclusions, so a silent `null` is visible.
-- Write the judge's prose verdict into `reports/<task-id>-<role>.md` and record
-  `verdict`/`attempt` in `team.json`; the workflow's JSON result is not durable state.
+A failure in the fan-out itself — child launch, prompt runtime, extension loading, child tooling
+— is a blocker, **not** permission to quietly redo the work another way. Do not fall back to a
+foreground run, an external CLI, or doing it inline without saying so. Stop, report the exact
+failure with the run status and the repo/worktree/branch state, check whether the tree is clean
+or capture the partial diff, and retry the same way or ask the human.
 
 ## Feeding the result back into the team
 
-A workflow stage is one task in `team.json` with `kind: "review"` (or `verification`) and
-`assignee` set to `stage:<name>`; the lead is the one who reads the returned JSON, writes the
-report file, and decides whether the next task is a re-brief, a fresh builder, or a human
-question. Nothing about the workflow's success makes a *task* pass — a prober still owns the
-acceptance verdict for anything that ships.
+A fan-out stage is one task in `team.json` with `kind: "review"` (or `verification"`) and
+`assignee` set to `stage:<name>` — `validate` accepts that form and expects no member row for it,
+because the lanes have no durable identity. The lead is the one who reads the composite result,
+writes `reports/<task-id>-<role>.md`, and records `verdict`/`attempt` in `team.json`; the
+returned JSON is not durable state.
+
+Nothing about a fan-out's success makes a *task* pass. A prober still owns the acceptance verdict
+for anything that ships, and a batch still does not land until that verdict is `pass`.

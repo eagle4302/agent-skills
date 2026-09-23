@@ -9,8 +9,10 @@ A team is three things and nothing else: **disjoint territories**, **one indepen
 per deliverable**, and **one voice to the human** — you, the lead. Everything below serves
 those three.
 
-Teammates are DSH subagents: durable ids, background runs, one settlement notice each. They do
-not see this conversation, they cannot message each other, and they cannot message the human.
+Teammates are `pi-subagents` children: each has a run id, runs in the background by default,
+and notifies you natively when it settles. A `fresh` child does not see this conversation and
+does not read `AGENTS.md`; they cannot address each other, and they cannot reach the human —
+they raise things to you with `contact_supervisor`.
 
 ## Run the loop
 
@@ -25,7 +27,7 @@ Each step ends when its completion criterion holds.
    | **One helper** | one bounded errand whose reading, fetching or building would flood your context | one background `subagent` call |
    | **Light team** | one deliverable that owes independent verification, work that splits into two disjoint territories, or work that will outlive a compaction | 1–2 builders + 1 prober |
    | **Full team** | 2–3 independent workstreams sharing an artifact, unknown terrain, a high-risk or contract-touching change, or the human asked for a team | scout + builders + prober, plus critic/scribe as needed |
-   | **Stage fan-out** | one stage is many homogeneous items | that stage runs through the `workflow` tool (`workflow-stage.md`) |
+   | **Stage fan-out** | one stage is many homogeneous items | that stage runs as parallel lanes or a packaged `/parallel-*` prompt (`workflow-stage.md`) |
 
    Push **up** a rung when: the human asked for a team; two workers could run at once without
    waiting on each other; the result must be independently reproducible; the job will not
@@ -56,10 +58,10 @@ Each step ends when its completion criterion holds.
    task has an owner or is deliberately `backlog`.
 
 3. **Staff** — spawn independent teammates **in one message** so they run in parallel, each with
-   a self-contained brief from `staffing.md`. On the *team preset* choose the tool by role
-   (`subagent_scout`, `subagent_prober`, `subagent_critic` carry the persona and drop the tools
-   that role may not use); on any other preset carry the charter in the brief and say so in the
-   human report. Delegate what a teammate can finish without you and hand back as evidence; keep
+   a self-contained brief from `staffing.md`. Pick the agent profile that matches the role
+   (`scout`, `worker`, `reviewer`, `oracle`, `evidence-auditor`, `delegate`) and put the task's
+   `verify` command in `gate` so the harness, not a model's word, decides whether the result is
+   accepted. Delegate what a teammate can finish without you and hand back as evidence; keep
    the judgement calls, the integration and anything smaller than the brief it would take.
    Record the returned child id as that member's `agentId`.
    *Done when:* every live member has an `agentId`, and `board.md` shows who owns what.
@@ -67,10 +69,11 @@ Each step ends when its completion criterion holds.
 4. **Run** — you are a working lead: you hold the smallest tasks, the integration, and every
    decision, and you never idle while the team works. Re-size whenever the evidence changes —
    merge two small tasks, split an oversized one, re-assign, interrupt a teammate whose errand
-   turned out trivial, retire a member with nothing left. Read settlement notices, `list_agents`
-   when status is unclear, `send_message` to steer, `interrupt_agent` to stop a teammate that is
-   looping, drifting, or outside its territory — then decide explicitly whether to re-brief it or
-   finish the work yourself. Append every exchange to `inbox.log`.
+   turned out trivial, retire a member with nothing left. Read the settlement notices,
+   `subagent({ action: "status" })` when it is unclear who is running, `action: "steer"` to
+   redirect, `action: "stop"` for a teammate that is looping, drifting, or outside its
+   territory — then decide explicitly whether to re-brief it or finish the work yourself.
+   Append every exchange to `inbox.log`.
    *Done when:* every task is `in_progress`, `in_review`, `blocked`, or `done` — and the board
    plus `inbox.log` say so.
 
@@ -146,7 +149,6 @@ Each step ends when its completion criterion holds.
 | `references/team-state.md` | Creating or reading `team.json`, `board.md`, reports; resuming after a context loss |
 | `references/failure-playbook.md` | Something went wrong: silence, wrong output, conflicts, runaway teammates |
 | `references/workflow-stage.md` | A whole stage is a fan-out over many homogeneous items |
-| `preset/README.md` | Installing the preset that gives the roles their own tools and their own limits |
 
 Related skill: `ssh-captain` (remote machines as a team role) — load it instead of reinventing
 an `ops` teammate. Everything else this skill needs is in the table above; do not go looking for

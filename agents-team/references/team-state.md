@@ -34,9 +34,9 @@ dependency: if it is missing, hand-edit the JSON and keep going.
 
 `init`, `baseline` and `log` write; the rest only read.
 
-`scripts/check-team-preset.mjs` re-checks the role-tool preset after a DSH upgrade (row ids,
-plugin resolution, one model-selection owner, role personas and filters, `maxDepth` semantics);
-run it with `--modules <checkout>/node_modules`.
+Check what the harness currently offers with `subagent({ action: "list" })` for agent profiles
+and `subagent({ action: "doctor" })` for the spawn budget and health — do that before staffing a
+wide team, not after it fails.
 
 ## `team.json` schema v2
 
@@ -97,9 +97,8 @@ Field notes:
 - `evidence` points at `reports/<task-id>-<role>.md`. A `done` task without evidence is a lie
   in JSON form.
 - `attempt` counts verification failures, not edits. `2` is the escalation trigger.
-- Status vocabulary is deliberately the same seven states the DSH Taskboard uses, so a team
-  mirrored onto a Taskboard project needs no translation. This skill never writes to the
-  Taskboard: agents cannot create tasks there, so the board stays the human's to open.
+- The seven task states are deliberately ordinary, so a board can be mirrored onto whatever
+  tracker the project already uses without translation. This skill writes only its own files.
 
 Secrets never go in these files — they are plain text and often land in a repo.
 
@@ -161,9 +160,10 @@ worse than no board, because it is believed.
 ## Resuming after a context loss
 
 1. Read `team.json`, `board.md`, `inbox.log`, then the `reports/` files the open tasks point at.
-2. Run `list_agents` with `descendants` and match ids against `members[].agentId`.
-3. Re-attach with `send_message` to whoever is still `running` or `idle`; re-spawn anyone
-   whose id no longer resolves (`send_message` says the message was not delivered) with a
-   brief rebuilt from the reports.
+2. Run `subagent({ action: "status" })` and `subagent({ action: "children.list" })`, and match
+   run ids against `members[].agentId`.
+3. Re-attach with `action: "steer"` to whoever is still running; a settled child may be
+   resumable — `children.list` says so per row. Re-spawn anyone whose id no longer resolves, or
+   whose row is not resumable, with a brief rebuilt from the reports, and label it a fallback.
 4. Continue from the first task that is not `done`, and say plainly in the human report which
    part of the run predates the context loss.

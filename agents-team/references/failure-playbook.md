@@ -5,16 +5,17 @@ not a diagnosis exercise.
 
 | Symptom | First move | Then |
 | --- | --- | --- |
-| Teammate returns nothing, or a one-line "done" with no evidence | `list_agents` to see `running`/`idle`/`ready` | `send_message` a narrow re-ask naming exactly the missing evidence; if it is `ready`, it stopped — re-brief or re-spawn |
+| Teammate returns nothing, or a one-line "done" with no evidence | `subagent({ action: "status", id })`, and `view: "transcript"` to see what it actually did | Steer a narrow re-ask naming exactly the missing evidence; if the run already settled, re-brief a fresh child or resume it if `children.list` says resumable |
 | Settlement notice says the run failed or was interrupted | Read the notice's stop reason and its diagnostic | Re-brief with the failing reason folded in, or take the task inline if it is small |
 | Prober reports a failure that is in `baseline.knownFailures` | Compare its raw output against the recorded symptom | Not the team's failure: leave `attempt` alone, note it in the verdict, and add the block to the next prober's brief |
 | Prober reports a failure and nobody knows whether it predates the team | Re-run that one command against `baseline.sha` in a scratch worktree | Pre-existing → add it to `knownFailures` and set `verifiedClean`; new → treat as a real FAIL |
 | Teammate broke a project convention nobody told it (build flags, line endings, formatting) | Lead bug, not a teammate bug — `houseRules` was empty or not pasted into the brief | Fix `houseRules`, re-brief with it, and fix the files before the batch lands |
 | Output exists but misses acceptance | Re-brief the same teammate with the exact failing criterion, its raw output, and the required fix | `attempt += 1`; at 2, reassign to a different teammate or shrink the task |
 | Two teammates touched the same file | Stop both, diff the file, pick one owner | The other teammate's brief changes to read-only; record the overlap as a lead error in `inbox.log` |
-| Teammate wrote outside its territory | `interrupt_agent` | Inspect the diff, keep or revert per the lead's judgement, re-brief narrower, tighten the territory glob |
-| Teammate loops, retries the same failing command, or keeps re-reading | `interrupt_agent` | Re-brief with a hard bound (files to touch, one command, one deliverable) or do it inline |
-| `send_message` reports the message was not delivered (ghost id) | Confirm with `list_agents` | Re-spawn a fresh teammate from the last report, update `agentId` in `team.json` |
+| Teammate wrote outside its territory | `subagent({ action: "stop", id })` | Inspect the diff against `baseline.sha`, keep or revert per the lead's judgement, re-brief narrower, tighten the territory glob |
+| Teammate loops, retries the same failing command, or keeps re-reading | `subagent({ action: "stop", id })` | Re-brief with a hard bound (files to touch, one command, one deliverable), add a `toolBudget`, or do it inline |
+| A steer never lands | Check the steer receipt in `action: "status"` — a steer only arrives at a tool boundary | If the child is inside one long command, wait or stop it; do not send the same steer three times |
+| A `gate` failed | Read the gate's own output: the host rejected the run, not a model | Fix the code or fix the gate command — never drop the gate to make a run pass |
 | Teammate asks the human something directly, or takes a human-gated action | Stop it, undo nothing without the human's say, report the breach | Re-brief with the gate list spelled out; nothing ships until the human confirms |
 | Verification passes but the artifact does not match the request | Back to the charter: the acceptance criteria were wrong, not the code | Fix `team.json` acceptance, then re-verify; never patch acceptance to match what was built |
 | A batch is ready but one task in it never got a prober | Do not land it — `team.mjs batch` says `blocked`, believe it | Dispatch the prober, or move that task into its own group and land the rest |

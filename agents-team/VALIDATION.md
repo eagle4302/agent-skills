@@ -1,5 +1,22 @@
 # Validation record — agents-team
 
+> **This record was produced on DSH, not on pi.** It is kept verbatim because rewriting a
+> validation record to match a different harness would falsify it. Read it with that in mind:
+> tool names in it (`subagent_scout`, `send_message`, `list_agents`, `interrupt_agent`, `pwsh`,
+> presets) are DSH's, and the instructional files in this copy have been translated to
+> `pi-subagents` while this file has not.
+>
+> | What it covers | Carries over to pi? |
+> | --- | --- |
+> | `scripts/team.mjs` behaviour — schema, batches, baseline, the log audit, the CRLF and `stage:` fixes | **Yes.** It is plain Node and touches no harness API; re-verified from the pi path on 2026-09-23. |
+> | `team.json` / `board.md` / `inbox.log` formats and the commit-batch rules | **Yes.** Nothing in them is harness-specific. |
+> | The RED/GREEN behaviour runs (rounds 1–2) | **Partly.** They show the skill changes what a lead does; they were run on DSH children, not pi ones. |
+> | Role separation via preset tools | **No.** That preset does not exist here. pi uses agent profiles plus a host-run `gate`; neither has been measured. |
+> | Messaging, steering, status, interrupt semantics | **No.** Rewritten for `pi-subagents` from its own docs, and **not yet exercised on a real run.** |
+>
+> Owed on pi: one real team run using `subagent` dispatch, a `gate`, a steer, and a stop, with
+> the numbers written up here as a new round.
+
 Written 2026-09-17 by the session that created the skill. Every number below comes from a
 transcript on disk (`~/.dsh/sessions/<id>/session.v3.jsonl.zstd`) or from a file still present
 under `%TEMP%\agents-team-validation\`, not from memory.
