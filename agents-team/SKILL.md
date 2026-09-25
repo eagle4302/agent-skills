@@ -52,8 +52,10 @@ Each step ends when its completion criterion holds.
    waiting on each other; the result must be independently reproducible; the job will not
    survive one context; a mistake is expensive or slow to undo.
    Push **down** when: one file, one command, one question; you already hold every fact a
-   teammate would have to go and discover; briefing takes longer than doing; or the harness has
-   no `parallel-spawn`, so a second teammate buys no wall-clock at all.
+   teammate would have to go and discover; briefing takes longer than doing; the harness has
+   no `parallel-spawn`, so a second teammate buys no wall-clock at all; or the tasks form a
+   dependency chain on one shared territory, so only one builder can ever be writing
+   (`staffing.md` → "A chain of tickets").
 
    *Done when:* the scale and its one-line reason exist — in your reply for solo or one-helper,
    in `team.json` for a light or full team. Solo work writes no `.agent-teams/` directory;
@@ -67,7 +69,9 @@ Each step ends when its completion criterion holds.
    existed must never be scored as the team's. Quote the project's own rules into `houseRules`
    (build flags, line endings, formatting): a spawn child never reads `CLAUDE.md` or `AGENTS.md`,
    so whatever is not in the brief does not reach it.
-   Then fill in the tasks — acceptance lines, a paste-ready `verify` command where one exists,
+   Then fill in the tasks — acceptance lines (for work that computes something, concrete
+   known-answer cases, not just "every item of ticket #N" — `staffing.md` → "Known-answer cases
+   before the build"), a paste-ready `verify` command where one exists,
    `inScope` globs, dependencies, and a `commitGroup` on every implementation task: one group
    per territory, so each builder's work lands as its own commit instead of one closing blob.
    Ask the human **once, here**, for the commit authorization (which `mode`, and "may I land
@@ -90,7 +94,9 @@ Each step ends when its completion criterion holds.
 4. **Run** — you are a working lead: you hold the smallest tasks, the integration, and every
    decision, and you never idle while the team works. Re-size whenever the evidence changes —
    merge two small tasks, split an oversized one, re-assign, interrupt a teammate whose errand
-   turned out trivial, retire a member with nothing left. Read the settlement notices, ask for
+   turned out trivial, retire a member with nothing left. When the remaining tasks become a
+   chain, drop to one builder that carries on from ticket to ticket, and have the next ticket's
+   known-answer cases drafted while the current one is built. Read the settlement notices, ask for
    `status` when it is unclear who is running, `steer` to redirect, and `stop` a teammate that
    is looping, drifting, or outside its territory — then decide explicitly whether to re-brief
    it or finish the work yourself. Where `steer` or `stop` is absent, `protocol.md` says what
@@ -101,6 +107,9 @@ Each step ends when its completion criterion holds.
 
 5. **Verify, then land the batch** — dispatch a prober that did not write the code; it re-runs
    `verify` against the frozen artifact and returns per-criterion PASS/FAIL with raw output.
+   Each layer checks once and checks something different — the builder does not mutate, the
+   prober works in the run's persistent probe tree, the lead re-runs only `verify`
+   (`staffing.md` → "One pass per layer of verification").
    On a harness with no `gate`, run every `verify` command yourself before the batch lands —
    the prober's report is the second opinion, your own output is the evidence of record.
    The moment every task in a `commitGroup` is settled and its verdict is `pass`, that batch
@@ -152,6 +161,12 @@ Each step ends when its completion criterion holds.
   briefing took.
 - The lead idle while teammates work, or quietly redoing a teammate's task in parallel with them.
 - Staffing five teammates for two territories, or a teammate spawning its own helpers unasked.
+- A fresh builder spawned for every link of a dependency chain, each re-reading the codebase
+  from zero, while only one of them can ever be writing.
+- A prober's first round on computational work finding edge cases nobody wrote down before the
+  build — the acceptance was a ticket reference, not known-answer cases.
+- Builder and prober both running mutation passes, or a prober copying the repository and
+  building it cold for every probe — verification then costs more wall-clock than the build.
 - Dispatching a builder or a critic without setting the context mode, so it silently inherits
   the whole conversation you were paying a teammate to stay out of.
 - Staffing before reading the adapter, then discovering at step 5 that nothing was ever

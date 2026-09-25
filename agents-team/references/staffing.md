@@ -122,6 +122,72 @@ Size is a decision you revisit, not a decision you make once.
 - **Grow only for a stateable reason**: a newly discovered independent workstream, a verification
   that must be independent, or terrain nobody has mapped. "It felt safer" is not a reason.
 
+## A chain of tickets
+
+When the remaining tasks depend on each other in a line and write the same territory, only one
+builder can ever be writing. More builders buy nothing; what is left to gain is not re-paying
+for context and not re-paying for rework.
+
+- **One builder carries the chain.** When ticket N lands, hand ticket N+1 to the *same* builder
+  with your adapter's follow-up call, instead of spawning a fresh one that re-reads the codebase
+  from zero. Retire it and start fresh only when its context is visibly degrading or the chain
+  moves to a different territory. Independence is unaffected: the prober was never that builder.
+- **Draft ticket N+1's cases while ticket N is being built.** That is the one piece of real
+  parallelism a chain has — see below.
+- **Re-size at the moment the chain starts**, not at the end: a run that staffed two builders
+  for the first wave drops to one builder + one prober once the remaining work is a chain, and
+  says so in `inbox.log`.
+
+## Known-answer cases before the build
+
+A task whose acceptance is only "every item of ticket #N" is not ready for a builder when the
+work computes something — metrics, detection, parsing, thresholds, comparisons. The edge cases
+then get invented by the prober *after* the build, and every one it finds is a serial round of
+re-brief, fix, re-probe.
+
+- Before the builder starts, have a prober (or a scout) draft **known-answer cases**: concrete
+  inputs with the expected output and a tolerance, plus the hostile ones — noiseless input,
+  truncated file, a period that is not the default, a value on the threshold, the degenerate
+  segment. It writes them to `notes/<task>-cases.md` and edits no product file.
+- The lead reviews them, copies them into the task's `acceptance`, and pastes them into the
+  builder's brief. The builder now hits them inside its own loop, where a fix costs minutes.
+- The verifying prober checks every drafted case **and still adds its own**; the drafted list is
+  a floor, not the whole probe. A case it adds that fails goes back into the list for the next
+  ticket's draft.
+- In a chain, draft ticket N+1's cases while ticket N is being built or probed, so the drafting
+  costs no wall-clock.
+
+## One pass per layer of verification
+
+Builder, prober and lead each check the work, but each checks something different. When all
+three run the same heavy checks, verification ends up costing more wall-clock than building.
+
+| Layer | Runs | Does not run |
+| --- | --- | --- |
+| builder | its own tests while iterating, then the task's `verify` once before reporting | mutation testing, repeat-N flakiness loops — do not ask for them in the brief |
+| prober | `verify`, the known-answer cases, its own hostile cases, and **the only mutation pass** | a sweep of every line: mutations target the acceptance criteria and the computational modules, where a test can pass without checking anything |
+| lead | the task's `verify` commands, once, on the tree that is about to land | anything the prober already did — the lead's run is the evidence of record, not a second probe |
+
+- **Repeat loops are bounded.** Re-running a suspect test is a probe for flakiness, capped at
+  about ten runs; run more only when flakiness is itself the acceptance criterion.
+- **The prober gets a persistent tree, not a fresh copy.** Copying the repository and building
+  it cold for every probe (or for every mutation) repeats the slowest step of the project each
+  time. At charter, create one probe tree for the whole run — `git worktree add --detach
+  <probe-dir> <baseline.sha>` — build it once, and name it in every prober brief. Each probe
+  syncs the frozen artifact's sources into it, keeps that tree's own build directories, and
+  builds incrementally:
+
+  ```
+  rsync -a --delete --exclude .git --exclude '<each build dir>' <repo>/ <probe-dir>/
+  ```
+
+  A mutation is made in the probe tree, built incrementally, and reverted with
+  `git -C <probe-dir> checkout -- <file>` before the next one. The main checkout is never
+  mutated, so the builder — or the next ticket in a chain — can keep working there while the
+  probe runs.
+- **Say in `houseRules` which builds are slow**, so the prober budgets its mutation pass
+  instead of discovering the cost one cold build at a time.
+
 ## Spawning
 
 Start every independent teammate **in the same assistant message** so they actually run in
