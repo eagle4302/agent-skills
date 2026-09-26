@@ -1,0 +1,4 @@
+# Shell scripts and the manifest must check out with LF on every machine:
+# core.autocrlf=true (this box) would otherwise hand bash a CRLF script.
+*.sh text eol=lf
+scripts/skill-sources.tsv text eol=lf
