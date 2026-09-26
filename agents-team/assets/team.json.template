@@ -38,7 +38,7 @@
         ".agent-teams/{{SLUG}}/",
         "board.md"
       ],
-      "model": "inherited"
+      "model": "REPLACE: the lead's model id — teammates inherit it"
     }
   ],
   "tasks": [

@@ -68,17 +68,25 @@ git diff --stat <baseline.sha> -- <that member's territory globs>
 Anything changed that is neither in a territory nor in `baseline.dirtyPaths` is a scope breach.
 Run it before the first batch lands, not after the run.
 
-## Model routing
+## Model
 
-- Put routine, mechanical or parallel work on a fast model; put judgement, review and hard
-  diagnosis on the strongest route available.
-- Route a single teammate by naming a model on the dispatch, using whatever form your adapter
-  gives. Copy an exact identifier from the harness's own model listing rather than typing one
-  from memory; an agent name is not a model id.
-- Record the route actually used in `team.json` (`members[].model`). A report that cannot say
-  which model produced a claim cannot be audited later. Record a deliberate inherited context
-  there too (`provider/model (inherited-context)`), so the closing report can say which
-  teammates saw this conversation and which did not.
+Every teammate runs on **the lead's model**. This skill does not pick a route: never pass a model
+on a dispatch, never set a per-agent model in harness settings, and never enable a harness's own
+subagent-model-selection for a team. A team on mixed models cannot be reasoned about while it runs —
+the same brief produces different work depending on who picked up the lane, and the human's choice
+of model for the lead silently stops covering the work the lead delegated. Run the lead on the
+model you want the work done on, and let the teammates inherit it.
+
+- `members[].model` is an **audit field, not a routing field.** Record what a member actually ran
+  on — normally the lead's own model id, copied from the harness's own model listing
+  (`{action:"models"}` on pi) rather than typed from memory; an agent name is not a model id. A
+  report that cannot say which model produced a claim cannot be audited later.
+- Tag a teammate that was deliberately given this conversation with `(fork)`, so the closing report
+  can say who saw it and who did not.
+- `thinking` / reasoning effort is a separate axis, left to the profile and the harness.
+- If a human explicitly asks for a teammate on another model, that is their call to make and to
+  record — it is a change to the team charter, not a staffing default, and it belongs in the human
+  report.
 
 ## What to delegate, what to keep
 

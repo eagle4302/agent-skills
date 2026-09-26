@@ -44,7 +44,16 @@ agent's own `defaultContext` wins otherwise.
 So leaving `context` off a builder or a critic copies the lead's entire conversation into it:
 real tokens per teammate, and on a critic it hands over exactly the framing it was staffed to
 challenge. Pass `context: "fresh"` on every dispatch unless you mean `fork`, and record a
-deliberate fork in `members[].model` as `provider/model (fork)`.
+deliberate fork in `members[].model` as `(fork)`.
+
+## Model: inherited, never routed
+
+Every teammate runs on the lead's model. Do not pass `model` on a `subagent` dispatch, and do not
+set `subagents.defaultModel`, `subagents.agentOverrides.<name>.model`, or a `model:` line in an
+agent definition for a team — the builtins pin no model and inherit the current Pi default, and only
+`thinking` and `defaultContext` differ between them. `members[].model` records what a member
+actually ran on, copied from `{ action: "models" }`; it is not how you choose one. Whether to keep a
+profile's `thinking` level is a separate question this rule does not settle.
 
 ## Edges that shape how a team is run
 

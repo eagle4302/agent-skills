@@ -64,11 +64,13 @@ checks the lead ran and that none was harness-enforced.
 | `maxDepth` on a role tool is the child's **absolute** depth ceiling, not its own budget. | `maxDepth: 0` refuses every call. A role child that may exist at depth 1 and go no further needs `1`. |
 | The human can open any teammate from the session header and stop it independently. | You are not the only brake; say so when the work is long or risky. |
 
-## Model routing
+## Model
 
-Round 2 added a `subagent-model-selection` section to `~/.dsh/settings.yaml`. It is sampled
-when a **fresh top-level session** is composed, so enabling it does not affect a session that is
-already running. Record the route each teammate actually used in `members[].model`.
+Teammates run on the lead's model. The `subagent-model-selection` section that round 2 of
+`VALIDATION.md` added to `~/.dsh/settings.yaml` is **not** to be enabled for a team: it lets the
+harness sample a per-teammate route, which is exactly the divergence the staffing rule forbids.
+Leave it off; if a human asks for it on, that is their call and it belongs in the closing report.
+Record what a member actually ran on in `members[].model` — audit, not routing.
 
 ## Verified / not verified
 
@@ -78,5 +80,6 @@ name, the role personas, the filters and the `maxDepth` semantics, with a negati
 
 Never verified, on DSH or anywhere: **the preset has never been composed.** Role separation in
 round 1 was instruction-level; nothing proves a prober *cannot* write, only that it did not.
-Model routing has never been exercised. And this whole file is a port — the tool names came from
-the DSH-era copy of the skill, not from a session running today.
+Per-teammate model routing is off by design — see the Model section above. And this whole file
+is a port — the tool names came from the DSH-era copy of the skill, not from a session running
+today.

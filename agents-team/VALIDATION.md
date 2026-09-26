@@ -507,6 +507,37 @@ a fourth harness needs one new file rather than a fork. Runtime behaviour on pi 
   subagent inherits the project's `CLAUDE.md`.
 - The other two copies on this machine were **not** touched — the human is reconciling those.
 
+## Round 9 — teammates inherit the lead's model (2026-09-26)
+
+**What changed.** Model routing is gone from the skill. Round 2 gave the lead the job of choosing a
+route per teammate (`staffing.md`, then "Model routing") and round 2's DSH preset gained a
+`subagent-model-selection` section to do the routing with. That is now a rule *against* routing:
+every teammate runs on the lead's model, `members[].model` is an audit field rather than a routing
+field, and the adapter notes refuse a dispatch `model`, `subagents.defaultModel`,
+`subagents.agentOverrides.<name>.model`, and a per-agent `model:` line of a team.
+
+**Why.** The human runs the lead on a model they chose; a per-lane route silently extends that
+choice to work the human never saw. It also makes a team hard to reason about while it runs — the
+same brief produces different work depending on who picked up the lane — and round 2 could not show
+the routing had ever been exercised on any harness (`adapters/dsh.md`, round 2 "Not verified").
+Removing an option is cheaper than proving one.
+
+**Touched:** `references/staffing.md` (section rewritten), `references/team-state.md` (`model` field
+note), `references/protocol.md` (operating rule 3), `adapters/pi.md` (new "Model: inherited, never
+routed"), `adapters/dsh.md` (Model section, plus the not-verified line), `assets/team.json.template`.
+
+**Verified here, on this machine (2026-09-26):** the installed `pi-subagents` pins no model in any
+builtin agent — `agents/{worker,scout,reviewer,oracle,evidence-auditor,researcher,delegate}.md`
+declare `thinking` and `defaultContext` only — so inheritance is already the default, and
+`docs/agents.md:37` says the builtins "do not pin a provider model; they inherit your current Pi
+default model unless you set `subagents.defaultModel` or
+`subagents.agentOverrides.<name>.model`". `docs/tool-reference.md:101` is the dispatch-level `model`
+option this rule refuses. `scripts/team.mjs` never reads `model`, so no code changed.
+
+**Not verified:** nothing about a running team changed — this round removes an option rather than
+adding one. A first real run must still confirm the `members[].model` ids are the lead's own model
+(owed test 4 below).
+
 ## Owed acceptance test (on pi, one real run)
 
 Everything below is still unmeasured on this harness. The old version of this section was a DSH
@@ -520,7 +551,8 @@ pi, so following it would have wasted a session. What is actually owed:
 3. `steer` a running teammate and quote the steer receipt from `action: "status"`; then `stop`
    one and confirm it is gone from the fleet.
 4. Record which `provider/id` each teammate actually ran on in `members[].model`, taken from
-   `action: "models"` rather than guessed.
+   `action: "models"` rather than guessed — and confirm every teammate ran on the lead's own model,
+   with no dispatch `model` and no `subagents.defaultModel` / `agentOverrides.<name>.model` in play.
 5. Confirm on a live run that `context: "fresh"` actually reaches the child — dispatch one
    `worker` with it and ask the child whether it can see anything of the parent conversation.
    The profile defaults were read from the installed package, never observed in a run.

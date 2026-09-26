@@ -47,8 +47,8 @@ runs degraded is worse than one that says which leg it is standing on.
    a brief that depends on inherited context cannot be re-run or audited later.
 3. **Know your context default, and say it out loud.** "Fresh" is not universal and on some
    harnesses is not even the default for the profiles a team uses most. Check your adapter, pass
-   the context mode explicitly where the harness accepts one, and record a deliberate inheritance
-   in `members[].model`.
+   the context mode explicitly where the harness accepts one, and tag a deliberate fork in
+   `members[].model` with `(fork)`.
 4. **Log every exchange.** One `inbox.log` line per brief, steer, block, report, verdict and
    commit. That file is how a fresh session reconstructs the team.
 5. **Answer three questions every loop.** Who is running, what am I waiting on, what is the next

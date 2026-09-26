@@ -74,10 +74,12 @@ Field notes:
 - `agentId` is the durable id the dispatch returned. It is the only way back to a teammate
   after a context loss, and on a harness with no `identity` capability there is no way back at
   all — see the degradation table in `protocol.md`. Leave it empty for the lead.
-- `model` records the route the member actually ran on: `inherited`, or `provider/model` when the
-  delegation named one. Write it when you staff, not at the end. Append `(inherited-context)`
-  when the teammate was deliberately given this conversation, so the closing report can say who
-  saw it and who did not.
+- `model` is an **audit field, not a routing field**: it records the model the member actually ran
+  on, which is the lead's own model unless a human deliberately said otherwise. Write it when you
+  staff, not at the end, and copy the exact id from the harness's model listing rather than from
+  memory. Append `(fork)` when the teammate was deliberately given this conversation, so the
+  closing report can say who saw it and who did not. Never use this field to *choose* a teammate's
+  model — see `staffing.md`, "Model".
 - `territory` (on a member) and `inScope` (on a task) are path globs. Two teammates writing
   the same glob is a lead bug, not a teammate bug.
 - `verify` holds commands that a prober can paste and run unchanged. If you cannot write one,
