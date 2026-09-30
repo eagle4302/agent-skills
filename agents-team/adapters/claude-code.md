@@ -62,6 +62,14 @@ The substitute, and it is not optional:
 Skipping step 2 because a prober said PASS is how a Claude Code team ships an unverified batch.
 On pi the harness would have caught it; here nothing will.
 
+## Model
+
+This adapter records no per-dispatch model parameter on `Agent`, so a route on this harness can only
+come from the human: an instruction for this run, or a model the human already pinned in an agent
+definition (`.claude/agents/*.md` frontmatter). The lead does not route on its own initiative. Record
+what each teammate actually ran on — and where the route came from — in `members[].model`:
+`inherited`, or the specified `provider/model`.
+
 ## Edges that shape how a team is run
 
 | Fact | Consequence |

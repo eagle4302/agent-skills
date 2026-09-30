@@ -70,23 +70,34 @@ Run it before the first batch lands, not after the run.
 
 ## Model
 
-Every teammate runs on **the lead's model**. This skill does not pick a route: never pass a model
-on a dispatch, never set a per-agent model in harness settings, and never enable a harness's own
-subagent-model-selection for a team. A team on mixed models cannot be reasoned about while it runs —
-the same brief produces different work depending on who picked up the lane, and the human's choice
-of model for the lead silently stops covering the work the lead delegated. Run the lead on the
-model you want the work done on, and let the teammates inherit it.
+A teammate runs on the model a human specified for it, and on the lead's own model when nobody
+specified one. That is the whole rule; the half that decides most runs is *who may specify*.
 
-- `members[].model` is an **audit field, not a routing field.** Record what a member actually ran
-  on — normally the lead's own model id, copied from the harness's own model listing
-  (`{action:"models"}` on pi) rather than typed from memory; an agent name is not a model id. A
-  report that cannot say which model produced a claim cannot be audited later.
+**Only the human specifies a model.** An instruction for this run ("run the prober on X"), or a
+model the human already pinned in harness configuration or an agent definition, decides the route.
+The lead does not pick one — not to make a lane cheaper, not to make a review stronger, not "just
+this once". A route the lead chose on its own makes a team hard to reason about while it runs (the
+same brief produces different work depending on who picked up the lane), and silently extends a
+decision the human never made — the model they ran *you* on — to work they never saw.
+
+- **Resolution follows the harness, not this skill.** Use the harness's own precedence rather than
+  inventing a second rule. On pi it is per-run dispatch `model` → provider-scoped role override →
+  `agentOverrides.<name>.model` → the agent's own `model:` line → `subagents.defaultModel` → the
+  parent session model. Nothing specified at any layer resolves to inheritance, which is the normal
+  case. Your adapter names the layers for its harness.
+- **A dispatch `model` argument needs the human's words behind it.** Pass one only when the human
+  named that model for that teammate in this run, and quote them in `inbox.log` so the route is
+  auditable later.
+- **`members[].model` is an audit field.** Record what the member actually ran on, copied from the
+  harness's own model listing (`{action:"models"}` on pi) rather than typed from memory — an agent
+  name is not a model id — and record *where the route came from* (human instruction this run, a
+  settings override, an agent definition, or inheritance). A report that cannot say which model
+  produced a claim, or why that model, cannot be audited later.
+- **A mixed-model team is a recorded exception, not a default.** The closing report says which
+  members ran on a human-specified model, which inherited the lead's, and what the human asked for.
 - Tag a teammate that was deliberately given this conversation with `(fork)`, so the closing report
   can say who saw it and who did not.
 - `thinking` / reasoning effort is a separate axis, left to the profile and the harness.
-- If a human explicitly asks for a teammate on another model, that is their call to make and to
-  record — it is a change to the team charter, not a staffing default, and it belongs in the human
-  report.
 
 ## What to delegate, what to keep
 

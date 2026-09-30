@@ -538,6 +538,37 @@ option this rule refuses. `scripts/team.mjs` never reads `model`, so no code cha
 adding one. A first real run must still confirm the `members[].model` ids are the lead's own model
 (owed test 4 below).
 
+## Round 10 — a specified model wins, otherwise inheritance (2026-09-26)
+
+**What changed.** Round 9 made every teammate inherit the lead's model and forbade routing outright.
+The rule is now: a teammate runs on the model a human specified for it, and on the lead's model when
+nobody specified one. The lead still never routes on its own initiative — no dispatch `model` the
+human did not ask for, no per-agent pin the lead picked, no harness auto-sampling. Resolution follows
+the harness's own precedence (`docs/models.md`, "Precedence": per-run dispatch `model` > provider-scoped
+role override > `agentOverrides.<name>.model` > agent frontmatter `model` > `subagents.defaultModel` >
+parent session model) rather than a second order the skill invents. `members[].model` stays an audit
+field and now records the route's source as well as its id.
+
+**Why.** Round 9 was too strong in both directions. Blocking a human from asking for a model on one
+teammate is a needless restriction; the failure mode it guarded against — a *lead* quietly spreading
+its own choice onto work the human never saw — is still forbidden by "only the human specifies".
+Defaulting to inheritance keeps the common case auditable, and a mixed-model run becomes a deliberate,
+recorded exception.
+
+**Touched:** `references/staffing.md` (Model section rewritten), `references/team-state.md` (`model`
+field note), `adapters/pi.md` (Model section), `adapters/dsh.md` (Model section, not-verified line),
+`adapters/claude-code.md` (Model note), `assets/team.json.template`.
+
+**Verified on this machine (2026-09-26):** `pi-subagents/docs/models.md` states the precedence order
+quoted above and `model: "inherit"` as the explicit parent selection; `docs/agents.md:37` says the
+builtins "do not pin a provider model; they inherit your current Pi default model unless you set
+`subagents.defaultModel` or `subagents.agentOverrides.<name>.model`", so inheritance is already the
+default; `docs/tool-reference.md:101` is the dispatch-level `model` option, now permitted only with
+the human's words behind it. `scripts/team.mjs` never reads `model`, so no code changed in any copy.
+
+**Not verified:** no mixed-model run has been observed here — the rule is written from the installed
+package and this session, not from a live team.
+
 ## Owed acceptance test (on pi, one real run)
 
 Everything below is still unmeasured on this harness. The old version of this section was a DSH
@@ -551,8 +582,9 @@ pi, so following it would have wasted a session. What is actually owed:
 3. `steer` a running teammate and quote the steer receipt from `action: "status"`; then `stop`
    one and confirm it is gone from the fleet.
 4. Record which `provider/id` each teammate actually ran on in `members[].model`, taken from
-   `action: "models"` rather than guessed — and confirm every teammate ran on the lead's own model,
-   with no dispatch `model` and no `subagents.defaultModel` / `agentOverrides.<name>.model` in play.
+   `action: "models"` rather than guessed. Run it both ways: one teammate the human names a model
+   for, one with nothing specified — the first must run on that exact id, the second on the lead's
+   own model, and each `members[].model` entry must say which of the two it was.
 5. Confirm on a live run that `context: "fresh"` actually reaches the child — dispatch one
    `worker` with it and ask the child whether it can see anything of the parent conversation.
    The profile defaults were read from the installed package, never observed in a run.

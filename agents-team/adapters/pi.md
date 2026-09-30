@@ -46,14 +46,25 @@ real tokens per teammate, and on a critic it hands over exactly the framing it w
 challenge. Pass `context: "fresh"` on every dispatch unless you mean `fork`, and record a
 deliberate fork in `members[].model` as `(fork)`.
 
-## Model: inherited, never routed
+## Model: specified wins, otherwise inherited
 
-Every teammate runs on the lead's model. Do not pass `model` on a `subagent` dispatch, and do not
-set `subagents.defaultModel`, `subagents.agentOverrides.<name>.model`, or a `model:` line in an
-agent definition for a team — the builtins pin no model and inherit the current Pi default, and only
-`thinking` and `defaultContext` differ between them. `members[].model` records what a member
-actually ran on, copied from `{ action: "models" }`; it is not how you choose one. Whether to keep a
-profile's `thinking` level is a separate question this rule does not settle.
+A teammate's model comes from whoever specified one, otherwise from the lead. The human is the only
+one who specifies — an instruction for this run ("run the prober on X"), or a pin they already made
+in configuration. The lead does not route on its own initiative: no `model` on a dispatch the human
+did not ask for, no per-agent `model:` line the lead picked, no `subagents.defaultModel` the lead set
+for the team.
+
+Resolution is pi's own, strongest first: per-run dispatch `model` → provider-scoped role override →
+`subagents.agentOverrides.<name>.model` → agent frontmatter `model` → `subagents.defaultModel` →
+the parent session model (`docs/models.md`, "Precedence"). With nothing specified anywhere, the
+builtins pin no model and inherit the current Pi default — the normal case. `model: "inherit"` in a
+definition or an override selects the parent session model explicitly.
+
+Pass a dispatch `model` only when the human named it for that teammate in this run, and quote them in
+`inbox.log`. `members[].model` records what the member actually ran on, copied from
+`{ action: "models" }`, plus the source of the route (human instruction, settings override, agent
+definition, or inheritance); it is an audit field, never how the lead chooses a route. Whether to
+keep a profile's `thinking` level is a separate question this rule does not settle.
 
 ## Edges that shape how a team is run
 

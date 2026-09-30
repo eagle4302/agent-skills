@@ -66,11 +66,15 @@ checks the lead ran and that none was harness-enforced.
 
 ## Model
 
-Teammates run on the lead's model. The `subagent-model-selection` section that round 2 of
-`VALIDATION.md` added to `~/.dsh/settings.yaml` is **not** to be enabled for a team: it lets the
-harness sample a per-teammate route, which is exactly the divergence the staffing rule forbids.
-Leave it off; if a human asks for it on, that is their call and it belongs in the closing report.
-Record what a member actually ran on in `members[].model` — audit, not routing.
+A teammate runs on the model the human specified for it, and on the lead's model when the human
+specified none — the resolution order is the harness's own, and the lead does not route on its own
+initiative. Per-call `provider`/`model`/`reasoning_effort` on the delegation tool is the human's
+channel: use it when the human named a route for this run, and quote them in `inbox.log`. A role's
+`agentOptions` pin in the preset counts as specified only when the human put it there. The
+`subagent-model-selection` section that round 2 of `VALIDATION.md` added to `~/.dsh/settings.yaml`
+samples a per-teammate route inside the harness; that is not a human naming a model, so leave it off
+unless the human asks for it, and say so in the closing report. Record what a member actually ran on,
+and where the route came from, in `members[].model` — audit, not routing.
 
 ## Verified / not verified
 
@@ -80,6 +84,6 @@ name, the role personas, the filters and the `maxDepth` semantics, with a negati
 
 Never verified, on DSH or anywhere: **the preset has never been composed.** Role separation in
 round 1 was instruction-level; nothing proves a prober *cannot* write, only that it did not.
-Per-teammate model routing is off by design — see the Model section above. And this whole file
+Per-teammate model routing is human-specified only — see the Model section above. And this whole file
 is a port — the tool names came from the DSH-era copy of the skill, not from a session running
 today.
