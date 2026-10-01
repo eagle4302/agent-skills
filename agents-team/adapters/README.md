@@ -13,11 +13,12 @@ Look at the tools this session actually has and match the first row that fits:
 | If the session has | You are on | Read |
 | --- | --- | --- |
 | a `subagent` tool taking `agent` + `task` | pi (`pi-subagents`) | `pi.md` |
+| a `subagent` tool taking `agent` + `description` + `prompt`, with an `execute` tool beside it | OpenCode | `opencode.md` |
 | `subagent_scout` / `send_message` / `list_agents` | DSH | `dsh.md` |
 | an `Agent` tool taking `subagent_type` + `prompt` | Claude Code | `claude-code.md` |
 | none of the above | an unlisted harness | the rest of this file |
 
-Do not guess from the machine, the shell or the repo: a machine can have all three installed
+Do not guess from the machine, the shell or the repo: a machine can have all of them installed
 at once, and this one does. The tool list in front of you is the only evidence.
 
 ## The eleven capabilities
