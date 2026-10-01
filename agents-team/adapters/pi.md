@@ -80,6 +80,7 @@ keep a profile's `thinking` level is a separate question this rule does not sett
 | A foreground child never loads the parent's ambient extensions. | A teammate needing MCP tools (`codegraph`, web access) must be a background child. |
 | `maxSubagentDepth` binds nested delegation. | A lane cannot spawn its own help unless you chartered it. |
 | The human can open FleetView (`/subagents-fleet`) and steer or stop anything. | You are not the only brake; say so when a run is long or risky. |
+| **On Windows a settled run does not kill the processes its child started.** Three call sites: `src/runs/shared/background-process-options.js:1-6` spawns the child with `detached: platform !== "win32"` (no process group on win32); `src/runs/background/async-execution.js:248,266,283` terminates with `process.kill(pid, signal)` on the runner pid alone; `src/runs/background/owned-process-tree.js:80-90` returns `{ state: "unknown", reason: "unsupported-platform" }` on win32. `taskkill /PID <pid> /T /F` exists only for external-CLI agents (`src/runs/shared/external-cli-runner.js:104-112`) and worktree setup commands (`src/runs/shared/worktree-setup-command.js:14`), so those are covered and a native child run is not. On POSIX the child gets its own group and teardown kills `-pid` plus enumerates the members — but a job the child detaches itself (`nohup`, `setsid`, `disown`) escapes there too (`knownDetachedDescendants`). | A teammate's bash `… &` grandchildren — CPU-load busy loops, dev servers, watchers, `dotnet run` — outlive the run, so scan and kill them **before** you trust your own build or test output: they hold ports, lock `bin\`/`obj\` files, and turn known-flaky tests red. `yes > /dev/null` writes to the Windows `NUL` device, which never fails, so it cannot die on its own. Observed 2026-10-01: 10 orphaned `yes.exe` loops from one prober, ~2,100 CPU-seconds each, and full-suite runs red under that load. |
 
 ## Gate
 
@@ -113,3 +114,9 @@ packaged prompt names, and the `toolBudget` guidance.
 
 Not observed in a live run: none of it. No full team has been dispatched on pi — see
 `VALIDATION.md`, "Owed acceptance test".
+
+Observed on 2026-10-01 (pi-subagents 0.74.0, Windows): a prober dispatched through this adapter left
+10 orphaned `yes.exe` load loops behind after its run settled, and the lead's own full-suite runs came
+back red while those loops were burning ~10 cores. The Windows branch and the two `taskkill` call sites
+above were re-read from the installed package that night, and the loops were killed by pid
+(`Stop-Process -Id … -Force`; note `taskkill /F /PID` is mangled by MSYS path conversion in Git Bash).
