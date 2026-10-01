@@ -30,6 +30,7 @@ not a diagnosis exercise.
 | A verifier returns "could not determine" for one item | Usually there is no pre-change snapshot to compare against | Before editing, save the pre-change output (a render snapshot) and hand it to the verifier with the brief |
 | One brief carries two deliverables where one depends on the other | Split it | Otherwise revising the upstream artifact forces the downstream one to be redone |
 | The lead is polling with sleeps while teammate runs are open | Do not wait as work | Settlement notices arrive on their own; do queued work, or end the turn |
+| A run settled, but machine load or processes the teammate started are still alive (`yes.exe`, servers, watchers) | Hunt them before trusting any number measured while they ran (`Get-CimInstance Win32_Process` on Windows, `ps` elsewhere), and read the harness's own cleanup story in your adapter — on some it kills only the runner | Re-run the verify you measured under load: a loaded machine turns known-flaky tests red, and you will otherwise chase a defect the team created. Log it, bound the load next time (a counted loop), and have the brief require the teammate to kill its own PIDs before it returns |
 
 ## Standing anti-patterns
 
@@ -68,3 +69,7 @@ not a diagnosis exercise.
 - **A stale frozen artifact** — the lead edits an artifact after freezing its hash, then the
   verifier reports "artifact moved". Freeze, verify, and only then touch it; if you must
   touch it, say so in `inbox.log` and re-freeze before the verifier starts.
+- **Load left running** — a teammate saturates the machine (busy loops, servers, watchers) and
+  nobody checks the load is gone once it settles. The lead's own verify then measures a machine
+  the team still occupies, and reports a flaky red as a real failure. Bound the load, kill it,
+  confirm it is gone, and only then read the numbers.

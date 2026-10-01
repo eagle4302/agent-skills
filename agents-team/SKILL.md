@@ -182,6 +182,9 @@ Each step ends when its completion criterion holds.
   nobody ran the verify commands at charter.
 - Briefing a teammate without the project's own rules, then treating what it built with the
   wrong flags as its mistake.
+- A teammate saturating the machine (load loops, servers, watchers) with no bound, and no check
+  that the load is gone before the lead reads its own build or test numbers — a loaded machine
+  turns known-flaky tests red, so the lead then chases a defect the team itself created.
 
 ## Read next
 
