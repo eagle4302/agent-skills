@@ -158,6 +158,10 @@ Upstream clones are cached in `$HOME/.cache/pi-skill-updates` (override with `--
 `PI_SKILLS_CACHE`). The script fetches each repo's default branch and compares directory trees, so it
 catches added, changed, and deleted files.
 
+**Line endings are ignored.** Upstream trees are exported as LF and the comparison ignores trailing CR, so
+a Windows checkout (`core.autocrlf=true`) does not read every file as a local edit. The earlier "37 copies
+are verbatim but the checker says they all drifted" false positive was exactly this and is fixed in the script.
+
 Verdicts, and what to do:
 
 | Verdict | Meaning | Action |

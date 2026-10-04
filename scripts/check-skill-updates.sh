@@ -24,6 +24,15 @@
 
 set -uo pipefail
 
+# Comparisons must ignore CR/LF differences: a Windows checkout (core.autocrlf=true) stores
+# CRLF in the working tree while upstream exports are LF, which would otherwise read as a local
+# edit in every text file. GNU diff has --strip-trailing-cr; BSD/macOS diff does not, so detect it.
+if diff --strip-trailing-cr --version >/dev/null 2>&1; then
+  DIFF_CR=--strip-trailing-cr
+else
+  DIFF_CR=
+fi
+
 SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$SRC_DIR/.." && pwd)"
 MANIFEST="$SRC_DIR/skill-sources.tsv"
@@ -91,18 +100,19 @@ tree_at() { # repo_dir sha path destdir -> echoes destdir/path
   local dir="$1" sha="$2" path="$3" dest="$4"
   rm -rf "$dest"
   mkdir -p "$dest"
-  if ! git -C "$dir" archive "$sha" "$path" 2>/dev/null | tar -x -C "$dest" 2>/dev/null; then
+  if ! git -c core.autocrlf=false -c core.eol=lf -C "$dir" archive "$sha" "$path" 2>/dev/null \
+       | tar -x -C "$dest" 2>/dev/null; then
     return 1
   fi
   [ -e "$dest/$path" ] || return 1
   printf '%s\n' "$dest/$path"
 }
 
-same_tree() { diff -rq "$1" "$2" >/dev/null 2>&1; }
+same_tree() { diff $DIFF_CR -rq "$1" "$2" >/dev/null 2>&1; }
 
 diff_detail() { # upstream_dir local_dir -> short human list of differences
   local u="$1" l="$2"
-  diff -rq "$u" "$l" 2>/dev/null \
+  diff $DIFF_CR -rq "$u" "$l" 2>/dev/null \
     | sed -e "s|^Files $u/|changed: |" -e "s| and .* differ\$||" \
           -e "s|^Only in $u/|upstream-only: |" \
           -e "s|^Only in $l/|local-only: |" \
