@@ -166,6 +166,8 @@ Tests reveal intent and coverage:
 - Do tests have descriptive names?
 - Would the tests catch a regression if the code changed?
 
+Answer the last question by experiment, not by reading. Invert one condition the change adds (drop a negation, swap `&&` for `||`), run the suite, then restore the file from a copy. A mutation that stays green is a finding: name the test case that is missing. For a project-wide mutation score, see `constraint-driven-development`.
+
 ### Step 3: Review the Implementation
 
 Walk each file against the five axes above — correctness, readability, architecture, security, performance.

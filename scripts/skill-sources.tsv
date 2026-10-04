@@ -15,43 +15,42 @@
 #   notes          short free-text note; do not use tabs. "-" means none.
 #
 # local_dir	source	upstream_path	pinned_sha	local_state	notes
-ask-matt	mattpocock/skills	skills/engineering/ask-matt	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-code-review	mattpocock/skills	skills/engineering/code-review	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-codebase-design	mattpocock/skills	skills/engineering/codebase-design	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-diagnosing-bugs	mattpocock/skills	skills/engineering/diagnosing-bugs	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-domain-modeling	mattpocock/skills	skills/engineering/domain-modeling	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-grill-with-docs	mattpocock/skills	skills/engineering/grill-with-docs	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-implement	mattpocock/skills	skills/engineering/implement	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-improve-codebase-architecture	mattpocock/skills	skills/engineering/improve-codebase-architecture	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-prototype	mattpocock/skills	skills/engineering/prototype	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-research	mattpocock/skills	skills/engineering/research	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-resolving-merge-conflicts	mattpocock/skills	skills/engineering/resolving-merge-conflicts	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-setup-matt-pocock-skills	mattpocock/skills	skills/engineering/setup-matt-pocock-skills	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-tdd	mattpocock/skills	skills/engineering/tdd	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-to-spec	mattpocock/skills	skills/engineering/to-spec	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-to-tickets	mattpocock/skills	skills/engineering/to-tickets	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-triage	mattpocock/skills	skills/engineering/triage	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-wayfinder	mattpocock/skills	skills/engineering/wayfinder	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-wizard	mattpocock/skills	skills/engineering/wizard	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-grill-me	mattpocock/skills	skills/productivity/grill-me	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-grilling	mattpocock/skills	skills/productivity/grilling	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-handoff	mattpocock/skills	skills/productivity/handoff	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-teach	mattpocock/skills	skills/productivity/teach	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-to-questionnaire	mattpocock/skills	skills/productivity/to-questionnaire	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-wait-what	mattpocock/skills	skills/productivity/wait-what	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-writing-for-agents	mattpocock/skills	skills/productivity/writing-for-agents	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-git-guardrails-claude-code	mattpocock/skills	skills/misc/git-guardrails-claude-code	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-migrate-to-shoehorn	mattpocock/skills	skills/misc/migrate-to-shoehorn	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-scaffold-exercises	mattpocock/skills	skills/misc/scaffold-exercises	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-setup-pre-commit	mattpocock/skills	skills/misc/setup-pre-commit	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-claude-handoff	mattpocock/skills	skills/in-progress/claude-handoff	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-implement-spec	mattpocock/skills	skills/in-progress/implement-spec	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-loop-me	mattpocock/skills	skills/in-progress/loop-me	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-retro	mattpocock/skills	skills/in-progress/retro	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	synced 2026-09-26
-setup-ts-deep-modules	mattpocock/skills	skills/in-progress/setup-ts-deep-modules	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-writing-beats	mattpocock/skills	skills/in-progress/writing-beats	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-writing-fragments	mattpocock/skills	skills/in-progress/writing-fragments	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
-writing-shape	mattpocock/skills	skills/in-progress/writing-shape	c55ee46073ed923f86ce59a5eb3b6d895095d1b7	verbatim	-
+ask-matt	mattpocock/skills	skills/engineering/ask-matt	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+code-review	mattpocock/skills	skills/engineering/code-review	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+codebase-design	mattpocock/skills	skills/engineering/codebase-design	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+diagnosing-bugs	mattpocock/skills	skills/engineering/diagnosing-bugs	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+domain-modeling	mattpocock/skills	skills/engineering/domain-modeling	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+grill-with-docs	mattpocock/skills	skills/engineering/grill-with-docs	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+implement	mattpocock/skills	skills/engineering/implement	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+improve-codebase-architecture	mattpocock/skills	skills/engineering/improve-codebase-architecture	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+prototype	mattpocock/skills	skills/engineering/prototype	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+research	mattpocock/skills	skills/engineering/research	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+setup-matt-pocock-skills	mattpocock/skills	skills/engineering/setup-matt-pocock-skills	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+tdd	mattpocock/skills	skills/engineering/tdd	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+to-spec	mattpocock/skills	skills/engineering/to-spec	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+to-tickets	mattpocock/skills	skills/engineering/to-tickets	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+triage	mattpocock/skills	skills/engineering/triage	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+wayfinder	mattpocock/skills	skills/engineering/wayfinder	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+wizard	mattpocock/skills	skills/engineering/wizard	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+grill-me	mattpocock/skills	skills/productivity/grill-me	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+grilling	mattpocock/skills	skills/productivity/grilling	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+handoff	mattpocock/skills	skills/productivity/handoff	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+teach	mattpocock/skills	skills/productivity/teach	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+to-questionnaire	mattpocock/skills	skills/productivity/to-questionnaire	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+wait-what	mattpocock/skills	skills/productivity/wait-what	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+writing-for-agents	mattpocock/skills	skills/productivity/writing-for-agents	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+git-guardrails-claude-code	mattpocock/skills	skills/misc/git-guardrails-claude-code	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+migrate-to-shoehorn	mattpocock/skills	skills/misc/migrate-to-shoehorn	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+scaffold-exercises	mattpocock/skills	skills/misc/scaffold-exercises	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+setup-pre-commit	mattpocock/skills	skills/misc/setup-pre-commit	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+claude-handoff	mattpocock/skills	skills/in-progress/claude-handoff	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+implement-spec	mattpocock/skills	skills/engineering/implement-spec	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	graduated to engineering upstream; synced 2026-10-04
+loop-me	mattpocock/skills	skills/in-progress/loop-me	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+retro	mattpocock/skills	skills/engineering/retro	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	graduated to engineering upstream; synced 2026-10-04
+setup-ts-deep-modules	mattpocock/skills	skills/in-progress/setup-ts-deep-modules	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+writing-beats	mattpocock/skills	skills/in-progress/writing-beats	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+writing-fragments	mattpocock/skills	skills/in-progress/writing-fragments	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+writing-shape	mattpocock/skills	skills/in-progress/writing-shape	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
 show-me	humanlayer/skills	plugins/show-me/skills/show-me	ca7c8088db69e315a8b2deea43820270457f8f3c	modified	removed the disable-model-invocation field
 defuddle	kepano/obsidian-skills	skills/defuddle	3ccff5338ea700537839b21900aa5358a0402c98	modified	description rewritten for routing
 json-canvas	kepano/obsidian-skills	skills/json-canvas	3ccff5338ea700537839b21900aa5358a0402c98	verbatim	-
@@ -59,7 +58,7 @@ knap	kepano/obsidian-skills	skills/knap	3ccff5338ea700537839b21900aa5358a0402c98
 obsidian-bases	kepano/obsidian-skills	skills/obsidian-bases	3ccff5338ea700537839b21900aa5358a0402c98	verbatim	-
 obsidian-cli	kepano/obsidian-skills	skills/obsidian-cli	3ccff5338ea700537839b21900aa5358a0402c98	verbatim	-
 obsidian-markdown	kepano/obsidian-skills	skills/obsidian-markdown	3ccff5338ea700537839b21900aa5358a0402c98	verbatim	-
-code-review-and-quality	addyosmani/agent-skills	skills/code-review-and-quality	2686b620fc1fed2e8f60c704839c766b8594c6b6	divergent	local variant; frontmatter credits addyosmani, body rewritten
+code-review-and-quality	addyosmani/agent-skills	skills/code-review-and-quality	1401c8b8030e023baeebb31781a6653fe8e93026	divergent	local variant; body rewritten, upstream mutation-testing paragraph folded in
 agents-team	-	-	-	local-only	authored here; pi-subagents based
 ai-loop	-	-	-	local-only	authored here
 consult	-	-	-	local-only	authored here

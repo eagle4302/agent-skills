@@ -1,6 +1,6 @@
 # Skills
 
-This directory is the Pi user-level skills root (`~/.pi/agent/skills`). It holds 49 skills — most of
+This directory is the Pi user-level skills root (`~/.pi/agent/skills`). It holds 48 skills — most of
 them copied from public upstream repos, the rest authored here.
 
 It is also a git repository of its own:
@@ -21,14 +21,14 @@ tool in the loop. That is why provenance is written down instead of inferred.
 
 ## Sources at a glance
 
-All four upstream repos last compared on **2026-09-26** by `scripts/check-skill-updates.sh`.
+All four upstream repos last compared on **2026-10-04** by `scripts/check-skill-updates.sh`.
 
 | Upstream repo | Upstream layout | Skills installed | Pinned commit |
 |---|---|---|---|
-| [mattpocock/skills](https://github.com/mattpocock/skills) | `skills/<category>/<name>/` for `engineering`, `productivity`, `misc`, `in-progress` | 37 | `c55ee460` (2026-09-18) |
+| [mattpocock/skills](https://github.com/mattpocock/skills) | `skills/<category>/<name>/` for `engineering`, `productivity`, `misc`, `in-progress` | 36 | `d81f3a1` (2026-09-29) |
 | [humanlayer/skills](https://github.com/humanlayer/skills) | `plugins/<plugin>/skills/<name>/` | 1 | `ca7c8088` (2026-09-17) |
 | [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) | `skills/<name>/` | 6 | `3ccff533` (2026-09-15) |
-| [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | `skills/<name>/` | 1 (divergent copy) | `2686b620` |
+| [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | `skills/<name>/` | 1 (divergent copy) | `1401c8b` (2026-10-03) |
 | authored in this repo | — | 4 | — |
 
 `dirname`-style names match upstream for every skill, so a skill's upstream path is usually
@@ -36,9 +36,11 @@ All four upstream repos last compared on **2026-09-26** by `scripts/check-skill-
 
 ## Provenance by skill
 
-### mattpocock/skills — pinned `c55ee46073ed923f86ce59a5eb3b6d895095d1b7`
+### mattpocock/skills — pinned `d81f3a183412e71a5b1e84ca21bc1a35eea03a60`
 
-All 37 copies are byte-identical to upstream (`verbatim`).
+All 36 copies are byte-identical to upstream (`verbatim`). `resolving-merge-conflicts` was removed
+upstream in v1.3 (commit `daa01d8`), so its local copy was deleted; `implement-spec` and `retro`
+graduated from `in-progress/` to `engineering/`.
 
 | Skill | Upstream path |
 |---|---|
@@ -52,7 +54,6 @@ All 37 copies are byte-identical to upstream (`verbatim`).
 | `improve-codebase-architecture` | `skills/engineering/improve-codebase-architecture` |
 | `prototype` | `skills/engineering/prototype` |
 | `research` | `skills/engineering/research` |
-| `resolving-merge-conflicts` | `skills/engineering/resolving-merge-conflicts` |
 | `setup-matt-pocock-skills` | `skills/engineering/setup-matt-pocock-skills` |
 | `tdd` | `skills/engineering/tdd` |
 | `to-spec` | `skills/engineering/to-spec` |
@@ -72,15 +73,15 @@ All 37 copies are byte-identical to upstream (`verbatim`).
 | `scaffold-exercises` | `skills/misc/scaffold-exercises` |
 | `setup-pre-commit` | `skills/misc/setup-pre-commit` |
 | `claude-handoff` | `skills/in-progress/claude-handoff` |
-| `implement-spec` | `skills/in-progress/implement-spec` |
+| `implement-spec` | `skills/engineering/implement-spec` — graduated from `in-progress` upstream |
 | `loop-me` | `skills/in-progress/loop-me` |
-| `retro` | `skills/in-progress/retro` — synced 2026-09-26, was behind upstream |
+| `retro` | `skills/engineering/retro` — graduated from `in-progress` upstream |
 | `setup-ts-deep-modules` | `skills/in-progress/setup-ts-deep-modules` |
 | `writing-beats` | `skills/in-progress/writing-beats` |
 | `writing-fragments` | `skills/in-progress/writing-fragments` |
 | `writing-shape` | `skills/in-progress/writing-shape` |
 
-Not installed from this repo: `pr` (`skills/in-progress/pr`).
+Not installed from this repo: `pr` (`skills/engineering/pr`).
 
 ### humanlayer/skills — pinned `ca7c8088db69e315a8b2deea43820270457f8f3c`
 
@@ -102,7 +103,7 @@ Not installed from this repo: `build-iterated-agentic-loop`, `design-control-loo
 | `obsidian-cli` | `skills/obsidian-cli` | verbatim |
 | `obsidian-markdown` | `skills/obsidian-markdown` | verbatim |
 
-### addyosmani/agent-skills — compared against `2686b620fc1fed2e8f60c704839c766b8594c6b6`
+### addyosmani/agent-skills — compared against `1401c8b8030e023baeebb31781a6653fe8e93026`
 
 | Skill | Upstream path | Local state |
 |---|---|---|
@@ -122,7 +123,7 @@ license_source: https://github.com/addyosmani/agent-skills/blob/main/LICENSE
 
 ### Authored in this repo
 
-No upstream found as of 2026-09-26 — checked by directory name and by the `name:` frontmatter field
+No upstream found as of 2026-10-04 — checked by directory name and by the `name:` frontmatter field
 against all four repos above.
 
 | Skill | Notes |
@@ -140,7 +141,7 @@ Three skills intentionally differ from upstream. Copying upstream over them lose
 |---|---|---|
 | `show-me` | Removed `disable-model-invocation: true` from the frontmatter **and** did not copy upstream's `agents/openai.yaml` (`policy: allow_implicit_invocation: false`) | Both files say "user-invoked only". Their absence means `show-me` is eligible for automatic model selection here. Pi does support `disable-model-invocation` (see `pi-coding-agent/docs/skills.md`), so this is a deliberate difference, not a portability fix. |
 | `defuddle` | The `description` was rewritten into a longer routing description (adds "use instead of WebFetch", and the "not for `.md` URLs" caveat) | Description text is what the model routes on. Do not let a sync revert it to upstream's one-liner. |
-| `code-review-and-quality` | Body rewritten and condensed relative to upstream (`SKILL.md` only; 360 lines locally vs 396 upstream, different frontmatter) | Upstream renamed/rewrote sections. Treat an upstream update as a source of ideas, not a patch to apply. |
+| `code-review-and-quality` | Body rewritten and condensed relative to upstream (`SKILL.md` only; 362 lines locally vs 396 upstream, different frontmatter) | Upstream renamed/rewrote sections. Treat an upstream update as a source of ideas, not a patch to apply. The 2026-10-04 sync folded upstream's mutation-testing paragraph in at `1401c8b`. |
 
 Everything else is `verbatim`, which makes a clean `cp -r` the correct sync for those skills.
 
