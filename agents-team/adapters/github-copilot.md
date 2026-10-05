@@ -75,10 +75,11 @@ lead does not route on its own initiative. When nothing is specified, the runtim
 model may come from the profile rather than the human — that is still not the lead choosing. Record
 what each member actually ran on in `members[].model` — audit, not routing.
 
-## The lead is the verifier of record
+## Gate
 
-With no `gate`, nothing in the harness rejects a teammate's result. A builder that says "tests pass"
-is a claim with nothing behind it, and there is no host output to quote.
+**None.** There is no `gate` parameter on `task`, so no host-run command can reject a teammate's
+result. A builder that says "tests pass" is a claim with nothing behind it, and there is no host
+output to quote.
 
 The substitute, and it is not optional:
 
@@ -90,12 +91,6 @@ The substitute, and it is not optional:
 
 Skipping step 2 because a prober said PASS is how a Copilot team ships an unverified batch. Nothing
 on this harness will catch it.
-
-## Gate
-
-**None.** There is no `gate` parameter on `task`, so no host-run command can reject a teammate's
-result. The substitute is the lead re-running `verify` before the batch lands, as above — not
-optional, and it must be named in the human report.
 
 ## Edges that shape how a team is run
 
@@ -111,6 +106,7 @@ optional, and it must be named in the human report.
 | `create_session` can give a genuinely separate worktree and branch (with `coordinateWithCreator` and `notifyOnIdle`); `create_chat` instead shares this session's workspace and aggregate diff. | This is the nearest thing to `isolate`, but a session is a peer with its own lifecycle, not a `task` teammate — and it does not aggregate into the same diff. Reach for it only when a writer truly needs its own tree, and say in the report that the team ran without dispatch-level isolation. |
 | Only `explore`, `code-review` and `security-review` are read-only by construction; `general-purpose` and `task` are not. | Read-only is a brief-level promise for every builder and prober; verify it from the diff, not from the profile name. |
 | The tool's own guidance says to default to `sync` and to treat `general-purpose`/`task` as side-effecting. | Parallelism is opt-in: pass `mode: "background"` explicitly on every teammate you want to overlap, or they run one after another and the ladder should drop a rung. |
+| A teammate is a cold start, and the fixed cost is not small: the brief has to carry the contract, the territory and the red lines (4-7k characters in one measured run), and a teammate handed nothing but a seven-line mechanical edit still took 80 s. | Spend a teammate on a real territory. A change small enough that the lead can make it in one tool call is cheaper made by the lead — cheap on the dispatch ladder, expensive in wall-clock. |
 
 ## Verified / not verified
 
@@ -122,9 +118,25 @@ the stateless/fresh-context wording, the `list_agents` / `read_agent` / `write_a
 `gate` or `stop` parameter or tool, of a packaged `fan-out`, and of dispatch-level `isolate`.
 
 Assumed, not verified: that a teammate does not read `AGENTS.md` or
-`.github/copilot-instructions.md` on its way in; that a `task` teammate cannot spawn its own
-helpers; that `write_agent` never reaches a teammate mid-turn; and that the settlement notification
-is the reliable completion channel. The skill's discipline makes all four safe either way — but do
-not claim in a report that a teammate had rules or limits it was never handed.
+`.github/copilot-instructions.md` on its way in, and that a `task` teammate cannot spawn its own
+helpers. The skill's discipline makes both safe either way — but do not claim in a report that a
+teammate had rules or limits it was never handed.
 
-Not observed in a live run: no team has been dispatched on this harness.
+Observed in a live run on 2026-10-05: a four-member team — lead, two builders, one prober — with the
+three teammates dispatched into separate territories. `spawn` returns the `name` you passed as the
+agent id. Two `task` calls in one message do overlap and their results arrive in the same block.
+`read_agent` returns a teammate's turn history, so a revision brief reaches the same teammate with
+its context intact: cheap, and also the reason its blind spots survive every round — the second and
+third revisions of that checker were caught by an independent prober, not by a longer brief. Every
+`write_agent` landed at a turn boundary, and one woke a teammate that had already settled into a new
+turn. Nothing was harness-enforced at any point.
+
+One runtime detail worth knowing before you rely on a teammate's evidence: when a teammate's output
+is large, the runtime offloads it to a temp file that the lead can only read in ranges. A teammate
+that quotes its own raw output inside its report is worth the extra instruction, because you cannot
+replay its side of the transcript.
+
+Still not observed: that `explore`, `code-review` and `security-review` cannot write — none was used
+as a builder or prober, so read-only stayed a brief-level promise; whether a message can reach a
+teammate mid-turn; and `stop`, `raise`, `fan-out` and dispatch-level `isolate`, which this harness
+still does not have.
