@@ -4,7 +4,7 @@ One `Agent` tool. Dispatch takes `subagent_type` + `prompt`; the management verb
 tools (`ListAgents`, `SendMessage`, `TaskOutput`, `TaskStop`), several of which may be deferred
 in a given session and have to be loaded by name before they can be called.
 
-**This is the thinnest of the three harnesses for a team**, in one specific way: there is no
+**This is one of the thinnest shipped harnesses for a team**, in one specific way: there is no
 host-run `gate`. Read "The lead is the verifier of record" below before staffing — it changes
 who owns step 5.
 
