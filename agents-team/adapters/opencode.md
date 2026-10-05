@@ -15,7 +15,7 @@ PowerShell 5.1 a `--data` body is mangled before it reaches the CLI (HTTP 400, "
 JSON body") — see "Management verbs, live" for the quoting that works. The GET rows carry no body
 and are unaffected.
 
-**There is no host-run `gate`.** Read "The lead is the verifier of record" below before staffing —
+**There is no host-run `gate`.** Read "Gate" below before staffing —
 it changes who owns step 5.
 
 ## Capabilities
@@ -61,7 +61,7 @@ one addition worth proposing to the human is a project or global agent definitio
 `shell` — on this harness that is the only way to make a prober's read-only-ness a permission
 instead of a promise. Do not create it silently.
 
-## The lead is the verifier of record
+## Gate
 
 With no `gate`, nothing in the harness rejects a teammate's result. A builder that says "tests pass"
 is a claim with nothing behind it, and there is no host output to quote.
