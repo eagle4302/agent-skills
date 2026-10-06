@@ -46,7 +46,7 @@ under `adapters/` names the calls.
 
 | Block | Fields |
 | --- | --- |
-| top | `schema` (2), `name`, `objective`, `createdAt`, `phase`, `humanGates[]`, `houseRules[]`, `baseline`, `commitPolicy` |
+| top | `schema` (2), `name`, `objective`, `createdAt`, `phase`, `humanGates[]`, `houseRules[]`, `baseline`, `commitPolicy`, `mode`, `fastPathExclusions[]` |
 | `baseline` | `sha`, `branch`, `dirtyPaths[]`, `verifiedClean`, `knownFailures[]`, `capturedAt` |
 | `baseline.knownFailures[]` | `command`, `symptom`, `why` |
 | `commitPolicy` | `mode`, `authorized`, `authorizedAt`, `messagePrefix` |
@@ -62,6 +62,7 @@ Enumerations — keep them exact, the script validates them:
 | --- | --- |
 | `phase` | `chartering`, `staffing`, `running`, `verifying`, `integrating`, `closed` |
 | `commitPolicy.mode` | `per-territory`, `per-task`, `single`, `none` |
+| `mode` | `quick`, `standard`, `thorough` |
 | `baseline.verifiedClean` | `unknown`, `clean`, `known-failures` |
 | `members[].role` | `lead`, `scout`, `builder`, `prober`, `critic`, `scribe`, `ops` |
 | `members[].status` | `running`, `idle`, `ready`, `retired` |
@@ -90,6 +91,11 @@ Field notes:
   tree, and it is the reason a batch is added by pathspec and never with `git add -A`. It is
   also the only thing that makes "did a teammate write outside its territory?" answerable —
   `git status --short` against `baseline.sha` is the lead's scope check.
+- `mode` is the human's answer, asked once at charter (`references/modes.md`), and
+  `fastPathExclusions[]` is the classes they kept off the quick path — the shape quick mode may
+  never take for this run. Quick mode implies `commitPolicy.mode: "per-task"`: one commit per
+  ticket. A board that cannot name its mode is a run nobody can audit for how much verification
+  it actually got, so the closing report quotes both fields.
 - `commitGroup` decides what lands together; `commitSha` records that it did. Under the default
   `per-territory` mode one group means one builder's territory, so the group is normally named
   after that member (`builder-recipe`). A task that changes no tracked file leaves it empty.

@@ -74,12 +74,14 @@ Each step ends when its completion criterion holds.
    before the build"), a paste-ready `verify` command where one exists,
    `inScope` globs, dependencies, and a `commitGroup` on every implementation task: one group
    per territory, so each builder's work lands as its own commit instead of one closing blob.
-   Ask the human **once, here**, for the commit authorization (which `mode`, and "may I land
-   each batch once its prober passes"), and record the answer in `commitPolicy`. Run `validate`
-   until it exits 0.
+   Ask the human **once, here**, for two things. First the **run mode** — quick / standard /
+   thorough, with your recommendation and the classes they want kept off the quick path
+   (`references/modes.md` has the paste-ready question); a Solo or one-helper run asks nothing.
+   Then the commit authorization ("may I land each batch once its verifier passes"). Record
+   both — `mode` + `fastPathExclusions`, and `commitPolicy`. Run `validate` until it exits 0.
    *Done when:* validation passes, `baseline.sha` and `verifiedClean` are filled, `houseRules`
-   carries whatever the project insists on, `commitPolicy` carries the human's answer, and every
-   task has an owner or is deliberately `backlog`.
+   carries whatever the project insists on, `mode` and `commitPolicy` carry the human's answers,
+   and every task has an owner or is deliberately `backlog`.
 
 3. **Staff** — spawn independent teammates **in one message** so they run in parallel, each with
    a self-contained brief from `staffing.md`. Pick the agent profile that matches the role from
@@ -107,6 +109,8 @@ Each step ends when its completion criterion holds.
 
 5. **Verify, then land the batch** — dispatch a prober that did not write the code; it re-runs
    `verify` against the frozen artifact and returns per-criterion PASS/FAIL with raw output.
+   In quick mode the verifier is the lead re-running `verify` in the same tree — independence is
+   the rule, the dispatch is only how it is usually bought (`references/modes.md`).
    Each layer checks once and checks something different — the builder does not mutate, the
    prober works in the run's persistent probe tree, the lead re-runs only `verify`
    (`staffing.md` → "One pass per layer of verification").
@@ -135,7 +139,9 @@ Each step ends when its completion criterion holds.
 ## Hard rules
 
 1. **One writer per territory.** Overlapping edits are a lead bug, not a teammate bug.
-2. **A teammate's report is a claim, not evidence.** Only a prober's raw output closes a task.
+2. **A teammate's report is a claim, not evidence.** Only a verifier's raw output closes a task
+   — a prober's, or the lead's own run where the harness has no `gate` or the mode makes the lead
+   the verifier of record (`references/modes.md`). Whoever it is, it is never the author.
 3. **Verifiers and critics are read-only.** They report; the builder fixes.
 4. **Evidence format is mandatory** — commands, real output with numbers, `file:line`, status,
    and what was *not* verified. "Should work" is a failed report.
@@ -149,6 +155,13 @@ Each step ends when its completion criterion holds.
 7. **Scale down as fast as you scale up.** A teammate whose task shrinks, or whose results you
    no longer need, is stopped and retired — not kept busy to justify the team. Say in the human
    report that the team was resized, and why.
+8. **A tree handed to a teammate is green there first.** A patch that applies cleanly has not
+   passed: run `verify` in the tree the teammate will work in, and only then brief anyone into
+   it. Scaffolding that fails on the first command spends a whole round on the lead's mistake.
+9. **The mode is asked for, recorded, and never changed silently.** It is the human's call at
+   charter, for a Light team or larger (`references/modes.md`); it lives in `team.json.mode`,
+   and the closing report quotes it. Escalating needs their confirmation; downgrading is
+   theirs alone.
 
 ## Red flags — stop and correct
 
@@ -178,10 +191,14 @@ Each step ends when its completion criterion holds.
 - `git add -A`, `git add .` or `git commit -a` on a tree that `baseline.dirtyPaths` says was
   already dirty — that sweeps the human's own unrelated work into the team's commit.
 - Landing a batch whose prober has not returned `pass`, or before the human answered at charter.
+- Taking the quick path without asking, or using a mode to lower an acceptance bar — a mode
+  changes the coordination, never what counts as done.
 - Burning two attempts on a failure that was already red before the team existed, because
   nobody ran the verify commands at charter.
 - Briefing a teammate without the project's own rules, then treating what it built with the
   wrong flags as its mistake.
+- Handing a teammate a worktree or a patch you checked only by "it applies cleanly", so its
+  first command is a compile error and the round is spent on your scaffolding.
 - A teammate saturating the machine (load loops, servers, watchers) with no bound, and no check
   that the load is gone before the lead reads its own build or test numbers — a loaded machine
   turns known-flaky tests red, so the lead then chases a defect the team itself created.
@@ -193,6 +210,7 @@ Each step ends when its completion criterion holds.
 | `adapters/README.md` | **First, every run.** Which harness you are on, and the eleven capabilities |
 | `adapters/<harness>.md` | The actual calls: dispatch, status, steer, stop, gate, fan-out |
 | `references/staffing.md` | Choosing roles, writing a brief, deciding team shape and size |
+| `references/modes.md` | **At charter, every Light-or-larger run**: quick / standard / thorough, and the classes kept off the quick path |
 | `references/protocol.md` | The capability contract, **what to do when one is missing**, escalation, `inbox.log` format |
 | `references/team-state.md` | Creating or reading `team.json`, `board.md`, reports; resuming after a context loss |
 | `references/failure-playbook.md` | Something went wrong: silence, wrong output, conflicts, runaway teammates |

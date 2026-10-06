@@ -28,6 +28,8 @@
     "authorizedAt": "",
     "messagePrefix": ""
   },
+  "mode": "",
+  "fastPathExclusions": [],
   "members": [
     {
       "name": "lead",

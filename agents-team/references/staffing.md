@@ -175,6 +175,10 @@ re-brief, fix, re-probe.
   ticket's draft.
 - In a chain, draft ticket N+1's cases while ticket N is being built or probed, so the drafting
   costs no wall-clock.
+- In **quick** mode the same rule is paid differently: the writer writes the **failing test**
+  first — boundaries included — and the lead reads it before implementation starts, instead of a
+  separate drafting round. A test the writer cannot make fail is not a case: send it back. The
+  verifier still adds its own hostile cases at verification time.
 
 ## One pass per layer of verification
 
@@ -186,6 +190,13 @@ three run the same heavy checks, verification ends up costing more wall-clock th
 | builder | its own tests while iterating, then the task's `verify` once before reporting | mutation testing, repeat-N flakiness loops — do not ask for them in the brief |
 | prober | `verify`, the known-answer cases, its own hostile cases, and **the only mutation pass** | a sweep of every line: mutations target the acceptance criteria and the computational modules, where a test can pass without checking anything |
 | lead | the task's `verify` commands, once, on the tree that is about to land | anything the prober already did — the lead's run is the evidence of record, not a second probe |
+
+In **quick** mode (`references/modes.md`) the layers collapse to two: the writer runs its own
+tests and then the task's `verify`; **the lead re-runs `verify` in the same tree and is the
+verifier of record** — no prober dispatch, no probe tree, no wait. The mutation pass does not
+disappear with the prober: it moves to the lead, once per `commitGroup`, aimed at the acceptance
+criteria. Two things put the prober back: the lead wrote the code, or the human kept that class
+off the quick path.
 
 - **Repeat loops are bounded.** Re-running a suspect test is a probe for flakiness, capped at
   about ten runs; run more only when flakiness is itself the acceptance criterion.
@@ -262,7 +273,12 @@ Adapt for the other roles:
 - `scout` — deliverables are facts and a recommendation; add "read-only, write no files".
 - `prober` — replaces ACCEPTANCE with the other teammate's acceptance list, adds "you did
   not write this code; reproduce every criterion from scratch; on failure report the exact
-  command and the mismatch, do not fix it", and requires a per-criterion verdict. Its
+  command and the mismatch, do not fix it", and requires a per-criterion verdict. **One round
+  covers a whole batch:** group the tasks that share a territory and a risk profile into a
+  single prober run instead of one round per task — a round costs the round-trip, not the
+  ticket count. The frozen artifact may be an **uncommitted** tree: name its exact paths in the
+  brief, say that state is the thing under test, and have the prober leave the tree
+  byte-for-byte as it found it, with its own probe files deleted. Its
   ALREADY BROKEN block is not optional: without it a prober re-discovers a failure that
   predates the team, calls it a FAIL, and the lead burns two attempts on nothing. Say it
   plainly — *"reproducing one of these is not a FAIL of this task; only a new failure is.

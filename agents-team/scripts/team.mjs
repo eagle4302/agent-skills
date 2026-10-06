@@ -31,7 +31,7 @@ const VERDICTS = [null, 'pass', 'needs_revision', 'reject'];
 // A real run writes far more of the second group than the first; both belong in the log.
 const LOG_KINDS = [
   'brief', 'steer', 'block', 'report', 'verdict', 'human', 'commit',
-  'note', 'finding', 'verified', 'decision', 'action',
+  'note', 'finding', 'verified', 'decision', 'action', 'takeover',
 ];
 // Vocabulary real boards already use. Normalised before anything reads a kind.
 const LOG_ALIASES = {
@@ -45,6 +45,8 @@ const normKind = (k) => {
   return LOG_ALIASES[l] ?? l;
 };
 const COMMIT_MODES = ['per-territory', 'per-task', 'single', 'none'];
+// How much coordination the run gets; see references/modes.md. Asked at charter.
+const RUN_MODES = ['quick', 'standard', 'thorough'];
 const VERIFIED_CLEAN = ['unknown', 'clean', 'known-failures'];
 const SHA = /^[0-9a-f]{7,40}$/;
 // Project convention files that spawn children never see unless the lead quotes them.
@@ -483,6 +485,18 @@ function cmdValidate(args) {
       if (cp.authorized !== true && cp.mode !== 'none' && doc.phase !== 'chartering') {
         warn(`commits are unauthorized at phase "${doc.phase}" — ask the human once, at charter, not at the end`);
       }
+    }
+
+    const runMode = doc.mode;
+    if (runMode === undefined || runMode === null || String(runMode).trim() === '') {
+      warn('no "mode" recorded — ask the human for quick|standard|thorough at charter (references/modes.md)');
+    } else if (!RUN_MODES.includes(runMode)) {
+      err(`"mode" must be one of ${RUN_MODES.join('|')}, got ${JSON.stringify(doc.mode)}`);
+    } else if (runMode === 'quick' && cp?.mode === 'per-territory') {
+      warn('quick mode lands one commit per ticket ("commitPolicy.mode": "per-task") — a territory-sized batch is a bigger diff than the mode promises');
+    }
+    if (doc.fastPathExclusions !== undefined && !Array.isArray(doc.fastPathExclusions)) {
+      err('"fastPathExclusions" must be an array of class names — the classes the human kept off the quick path');
     }
 
     const mode = cp?.mode;

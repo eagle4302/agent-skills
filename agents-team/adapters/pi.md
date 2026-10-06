@@ -80,7 +80,22 @@ keep a profile's `thinking` level is a separate question this rule does not sett
 | A foreground child never loads the parent's ambient extensions. | A teammate needing MCP tools (`codegraph`, web access) must be a background child. |
 | `maxSubagentDepth` binds nested delegation. | A lane cannot spawn its own help unless you chartered it. |
 | The human can open FleetView (`/subagents-fleet`) and steer or stop anything. | You are not the only brake; say so when a run is long or risky. |
+| A pi **goal** in `running` state fires a continuation about every two seconds while the session waits, and every one of those turns re-injects the goal's objective and task snapshot. | Waiting an hour on a long child costs more than the child's own work: hundreds of turns of the lead's context. Park the goal (`update_goal({status:"paused"})`) while a long child runs — the child's completion notice still arrives, and the human resumes with `/goal-resume` or a plain "go on". The alternative that pays for itself is to give the lead real work in its own worktree instead of a wait. |
 | **On Windows a settled run does not kill the processes its child started.** Three call sites: `src/runs/shared/background-process-options.js:1-6` spawns the child with `detached: platform !== "win32"` (no process group on win32); `src/runs/background/async-execution.js:248,266,283` terminates with `process.kill(pid, signal)` on the runner pid alone; `src/runs/background/owned-process-tree.js:80-90` returns `{ state: "unknown", reason: "unsupported-platform" }` on win32. `taskkill /PID <pid> /T /F` exists only for external-CLI agents (`src/runs/shared/external-cli-runner.js:104-112`) and worktree setup commands (`src/runs/shared/worktree-setup-command.js:14`), so those are covered and a native child run is not. On POSIX the child gets its own group and teardown kills `-pid` plus enumerates the members — but a job the child detaches itself (`nohup`, `setsid`, `disown`) escapes there too (`knownDetachedDescendants`). | A teammate's bash `… &` grandchildren — CPU-load busy loops, dev servers, watchers, `dotnet run` — outlive the run, so scan and kill them **before** you trust your own build or test output: they hold ports, lock `bin\`/`obj\` files, and turn known-flaky tests red. `yes > /dev/null` writes to the Windows `NUL` device, which never fails, so it cannot die on its own. Observed 2026-10-01: 10 orphaned `yes.exe` loops from one prober, ~2,100 CPU-seconds each, and full-suite runs red under that load. |
+
+## Modes on pi
+
+The mode decides how much of the table above gets used (`references/modes.md`).
+
+| Mode | Dispatch shape |
+| --- | --- |
+| quick | One `worker` per territory, `context: "fresh"`, the task's `verify` command in `gate`; **no prober dispatch** — the lead runs the acceptance itself in the same tree, adds its own hostile cases, and does the single mutation pass. `isolation: "worktree"` only when two writers run at once; otherwise the shared cwd is fine because nothing is probing it. Park the goal before any command that could run for minutes. |
+| standard | The dispatch table above: `worker` writers, then one `reviewer` round per batch with `gate` set and `cwd` at the run's probe tree (`staffing.md` → "One pass per layer of verification"). |
+| thorough | Standard, plus `oracle` as critic, plus whatever real-machine or integration check the project has — and the report says which of those were host-run. |
+
+Quick mode's two exceptions — the lead wrote the code, or the human kept a class off the fast path
+— put the `reviewer` back, with the same 10-minute timebox, and with `cwd` at the probe tree so it
+cannot fight the writer for `bin\`, `obj\` or a test-host lock.
 
 ## Gate
 
