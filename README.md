@@ -19,6 +19,27 @@ So there are **two layers of versioning**, and they are independent:
 An upstream sync is a **manual copy followed by a commit** — there are no submodules and no vendoring
 tool in the loop. That is why provenance is written down instead of inferred.
 
+## Using these skills from Claude Code
+
+Claude Code does not look in this directory. It loads skills only from `~/.claude/skills/<name>/SKILL.md`
+(user level), `.claude/skills/` inside a project, and installed plugins. To share one copy between Pi and
+Claude Code, point Claude's user-level skills directory at this repo with a directory junction:
+
+```powershell
+New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills" -Target "$env:USERPROFILE\.agents\skills"
+```
+
+On macOS or Linux, use `ln -s ~/.agents/skills ~/.claude/skills` instead.
+
+- **Disable the overlapping plugins.** If the `mattpocock-skills@mattpocock` or `obsidian@obsidian-skills`
+  plugins are installed, set them to `false` under `enabledPlugins` in `~/.claude/settings.json`.
+  Otherwise each skill shows up twice (`tdd` and `mattpocock-skills:tdd`), and the plugin copy lags
+  behind the version pinned here.
+- **Restart the session.** Claude Code reads the skill list at startup, so a running session keeps the old list.
+- **No per-skill setup.** Every skill directory here already has `name` and `description` frontmatter, which
+  is all Claude Code needs. `scripts/` has no `SKILL.md` and is ignored. Skills added or synced later are
+  picked up on the next session.
+
 ## Sources at a glance
 
 All four upstream repos last compared on **2026-10-04** by `scripts/check-skill-updates.sh`.
@@ -214,6 +235,7 @@ local_dir  source  upstream_path  pinned_sha  local_state  notes
   `allowed-tools`, and `disable-model-invocation`. 22 of the skills here carry
   `disable-model-invocation: true` straight from upstream — keep it.
 - `argument-hint` (used by `claude-handoff`, `handoff`, `loop-me`, `teach`) is a Claude Code field that
-  Pi does not read. It is harmless and is left in place to stay close to upstream.
+  Pi does not read. It is harmless in Pi, used by Claude Code (see "Using these skills from Claude Code"),
+  and left in place to stay close to upstream.
 - Skills with a `description` are the only ones Pi loads; a missing or malformed `description` means the
   skill is silently skipped. If you add a skill, check the startup diagnostics or `/skill:<name>`.
