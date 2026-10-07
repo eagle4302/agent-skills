@@ -14,6 +14,7 @@ Look at the tools this session actually has and match the first row that fits:
 | --- | --- | --- |
 | a `subagent` tool taking `agent` + `task` | pi (`pi-subagents`) | `pi.md` |
 | a `subagent` tool taking `agent` + `description` + `prompt`, with an `execute` tool beside it | OpenCode | `opencode.md` |
+| a `task` tool taking `agent_type` + `prompt`, with `list_agents` / `read_agent` / `write_agent` beside it | GitHub Copilot | `github-copilot.md` |
 | `subagent_scout` / `send_message` / `list_agents` | DSH | `dsh.md` |
 | an `Agent` tool taking `subagent_type` + `prompt` | Claude Code | `claude-code.md` |
 | none of the above | an unlisted harness | the rest of this file |
@@ -46,7 +47,7 @@ is gone, and the sizing ladder drops a rung.
 
 ## Writing an adapter for a harness that has none
 
-Fill the same five sections the three shipped ones use, and do not invent a row:
+Fill the same five sections the shipped ones use, and do not invent a row:
 
 1. **Capability table** — the eleven above, each with the exact call or `absent`.
 2. **Role dispatch** — which agent profile or subagent type each of `scout`, `builder`,
