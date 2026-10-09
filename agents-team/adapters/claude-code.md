@@ -4,8 +4,8 @@ One `Agent` tool. Dispatch takes `subagent_type` + `prompt`; the management verb
 tools (`ListAgents`, `SendMessage`, `TaskOutput`, `TaskStop`), several of which may be deferred
 in a given session and have to be loaded by name before they can be called.
 
-**This is the thinnest of the three harnesses for a team**, in one specific way: there is no
-host-run `gate`. Read "The lead is the verifier of record" below before staffing — it changes
+**This is one of the thinnest shipped harnesses for a team**, in one specific way: there is no
+host-run `gate`. Read "Gate" below before staffing — it changes
 who owns step 5.
 
 ## Capabilities
@@ -46,7 +46,7 @@ may define its own. Two consequences of `general-purpose` carrying no role postu
 - **Independence is entirely the lead's job.** Spawn a separate agent for the prober, and never
   `SendMessage` the builder a second brief asking it to verify itself.
 
-## The lead is the verifier of record
+## Gate
 
 With no `gate`, nothing in the harness rejects a teammate's result. A builder that says "tests
 pass" is a claim with nothing behind it, and there is no host output to quote.

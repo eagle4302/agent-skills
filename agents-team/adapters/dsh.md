@@ -41,7 +41,9 @@ composition, so a session already running on `standard` cannot use the `team` pr
 role tools are not in your tool list, you are not on that preset: run the team with plain
 `subagent` and say in the human report that role separation was instruction-level only.
 
-## No gate: the lead is the verifier of record
+## Gate
+
+The harness has no gate.
 
 Same consequence as Claude Code, for a different reason. A `toolFilter` proves a prober
 *could not* edit; it does not prove the acceptance command ran or what it printed.
