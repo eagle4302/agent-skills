@@ -17,6 +17,7 @@ Look at the tools this session actually has and match the first row that fits:
 | a `task` tool taking `agent_type` + `prompt`, with `list_agents` / `read_agent` / `write_agent` beside it | GitHub Copilot | `github-copilot.md` |
 | `subagent_scout` / `send_message` / `list_agents` | DSH | `dsh.md` |
 | an `Agent` tool taking `subagent_type` + `prompt` | Claude Code | `claude-code.md` |
+| a `spawn_subagent` tool taking `description` + `prompt`, with `get_command_or_subagent_output` / `kill_command_or_subagent` beside it | Grok Build | `grok.md` |
 | none of the above | an unlisted harness | the rest of this file |
 
 Do not guess from the machine, the shell or the repo: a machine can have all of them installed

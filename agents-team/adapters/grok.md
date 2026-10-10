@@ -33,7 +33,7 @@ No agent profiles. Every role is the same tool. The brief is the whole contract.
 
 Read-only and independence are not enforced by the tool. Write them in the brief and check the diff afterwards. Never hand the prober's task to the child that wrote the code.
 
-## The lead is the verifier of record
+## Gate
 
 No gate. A builder that says "tests pass" is a claim.
 
@@ -45,7 +45,7 @@ No gate. A builder that says "tests pass" is a claim.
 
 `spawn_subagent` has no model parameter. The child inherits the session model. The lead does not route. Record `inherited (<session model>, fresh context)` in `members[].model`.
 
-## Edges
+## Edges that shape how a team is run
 
 | Fact | Consequence |
 | --- | --- |
