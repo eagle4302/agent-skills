@@ -182,3 +182,21 @@ skill asks for; with no `gate`, the lead's output is the load-bearing one.
   stdout verbatim) and reached no write path at all — the `edit`/`write`/`patch` tools were absent
   from its catalog, so `probe-write-test.txt` was never created. First time on this harness that a
   prober's read-only-ness is a permission rather than a promise.
+
+### Full light team with the enforced prober, live (2026-10-10)
+
+A second light team ran end to end on a scratch repo (`textkit-e2e`): the lead wrote
+`manifest.json` + two known-answer suites, two builders on disjoint territories
+(`src/slugify.mjs`, `src/truncate.mjs`) spawned as two `subagent` calls in one message, one
+independent **`prober`** child, **standard** mode, commits authorized at charter.
+
+| Check | Result |
+| --- | --- |
+| prober role | dispatched with `agent: "prober"`; it re-ran both suites (9/9, 9/9), added 14 hostile cases (14/14), and ran a two-module **mutation pass** (each mutation → exit 1); the read-only posture held — it left the repo byte-for-byte unchanged |
+| `parallel-spawn` / `identity` | builders spawned together; both `ses…` ids recorded in `members[].agentId` |
+| no gate → lead verifier | the lead re-ran `node acceptance/*.test.mjs` itself (9/9, 9/9, exit 0) as the evidence of record before each batch landed |
+| batches | three `commitGroup`s landed as three by-pathspec commits (`8376990`, `00b012b`, `ed75ee3`); `human-wip.txt` (a `baseline.dirtyPaths` entry) was never swept in |
+| close | archived to `.agent-teams/archive/`; `validate` **0 errors, 0 warnings**; every batch `committed` |
+
+The prober's independence is now enforced by the harness, not asked for in a brief — the reason
+this run exists.
