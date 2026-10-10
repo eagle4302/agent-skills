@@ -45,7 +45,7 @@ The usable builtins, read from `opencode api get /api/agent` on 2026-10-01:
 | --- | --- | --- | --- |
 | scout | `explore` | read-only **when its permission list wins**: the builtin denies `*` then allows `read`/`glob`/`grep`/`webfetch`/`websearch` — no `shell`, no `edit`. **Verify it per machine** (see below); a global `"permission": "allow"` can re-allow everything | thoroughness, and that it locates code rather than judging it |
 | builder | `general` | full tool access, multi-step | its territory; that it must not spawn help |
-| prober | `general`, a **second** child | nothing role-specific | independence, the acceptance list, the evidence format, "edit nothing" |
+| prober | `prober` — a custom subagent this skill installs at `~/.config/opencode/agents/prober.md` | `edit`/`write`/`patch` and `subagent` are **denied** by permission; `shell` is allowed so it can re-run `verify` | independence, the acceptance list, the evidence format |
 | critic | `general`, a second child | nothing role-specific | the two axes, the verdict vocabulary, "edit nothing" |
 | scribe | `general` | nothing role-specific | doc conventions |
 
@@ -54,12 +54,13 @@ The usable builtins, read from `opencode api get /api/agent` on 2026-10-01:
 machine:** read its effective rules (`opencode api get /api/agent`, or `opencode debug agent explore`)
 and confirm the list still ends in `deny *`. A global `"permission": "allow"` in the user's config is
 serialized *after* the builtin rules, so `explore` can come back with `bash` — and possibly
-`edit`/`write` — re-allowed. A prober here cannot be given a read-only posture by
-the builtins: re-running `verify` needs `shell`, and no builtin grants `shell` without `edit`. The
-one addition worth proposing to the human is a project or global agent definition
-(`.opencode/agents/<name>.md`, `~/.config/opencode/agents/<name>.md`) that denies `edit` and allows
-`shell` — on this harness that is the only way to make a prober's read-only-ness a permission
-instead of a promise. Do not create it silently.
+`edit`/`write` — re-allowed. The prober's read-only posture **is** enforced: this skill ships a custom subagent at
+`~/.config/opencode/agents/prober.md` whose permission list ends in `edit`/`write`/`patch` and
+`subagent` denied, leaving `shell` allowed so it can re-run `verify`. No builtin can do this —
+re-running `verify` needs `shell`, and no builtin grants `shell` without `edit` — so the agent
+definition is the only way here to turn read-only-ness into a permission instead of a promise. A
+project or global `.opencode/agents/<name>.md` is where a read-only *scout* would go if the human
+also wants `explore`'s posture enforced. Do not create further agents silently.
 
 ## Gate
 
@@ -168,3 +169,16 @@ writing the shared `test.mjs` and re-running every `verify` itself (no gate).
 
 The prober's tamper pass and the lead's own re-run agreeing is exactly the "one pass per layer" the
 skill asks for; with no `gate`, the lead's output is the load-bearing one.
+
+### PATH and prober re-check, live (2026-10-10)
+
+- **PATH** — `where opencode` resolves to a single binary and `opencode --version` reports
+  **v2.0.21**; there is no V1 `opencode` shadowing it and no separate `opencode-cli`, so the V1 trap
+  above does not bite on this machine. `opencode api get /api/session/active` returned three running
+  sessions. The trap stays documented because it is machine-specific, not skill-wide.
+- **prober read-only, enforced** — `~/.config/opencode/agents/prober.md` (mode `subagent`) is picked
+  up live with no service restart: `opencode api get /api/agent` shows its permission list ending in
+  `subagent` deny then `edit` deny. A dispatched `prober` child ran `echo PROBE_SHELL_OK` (exit 0,
+  stdout verbatim) and reached no write path at all — the `edit`/`write`/`patch` tools were absent
+  from its catalog, so `probe-write-test.txt` was never created. First time on this harness that a
+  prober's read-only-ness is a permission rather than a promise.
