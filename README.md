@@ -59,9 +59,10 @@ All four upstream repos last compared on **2026-10-04** by `scripts/check-skill-
 
 ### mattpocock/skills — pinned `d81f3a183412e71a5b1e84ca21bc1a35eea03a60`
 
-All 36 copies are byte-identical to upstream (`verbatim`). `resolving-merge-conflicts` was removed
-upstream in v1.3 (commit `daa01d8`), so its local copy was deleted; `implement-spec` and `retro`
-graduated from `in-progress/` to `engineering/`.
+Most of the 36 copies are byte-identical to upstream (`verbatim`); eight carry a local edit (the
+grilling family and its callers — see "Local edits that a re-sync would clobber").
+`resolving-merge-conflicts` was removed upstream in v1.3 (commit `daa01d8`), so its local copy was
+deleted; `implement-spec` and `retro` graduated from `in-progress/` to `engineering/`.
 
 | Skill | Upstream path |
 |---|---|
@@ -156,15 +157,17 @@ against all four repos above.
 
 ## Local edits that a re-sync would clobber
 
-Three skills intentionally differ from upstream. Copying upstream over them loses the edit; merge instead.
+These skills intentionally differ from upstream. Copying upstream over them loses the edit; merge instead.
 
 | Skill | Edit | Why it matters |
 |---|---|---|
 | `show-me` | Removed `disable-model-invocation: true` from the frontmatter **and** did not copy upstream's `agents/openai.yaml` (`policy: allow_implicit_invocation: false`) | Both files say "user-invoked only". Their absence means `show-me` is eligible for automatic model selection here. Pi does support `disable-model-invocation` (see `pi-coding-agent/docs/skills.md`), so this is a deliberate difference, not a portability fix. |
 | `defuddle` | The `description` was rewritten into a longer routing description (adds "use instead of WebFetch", and the "not for `.md` URLs" caveat) | Description text is what the model routes on. Do not let a sync revert it to upstream's one-liner. |
 | `code-review-and-quality` | Body rewritten and condensed relative to upstream (`SKILL.md` only; 362 lines locally vs 396 upstream, different frontmatter) | Upstream renamed/rewrote sections. Treat an upstream update as a source of ideas, not a patch to apply. The 2026-10-04 sync folded upstream's mutation-testing paragraph in at `1401c8b`. |
+| `grilling` | Added a "Closed questions: ask with the harness's ask tool" section and a harness→tool table (`ask_user_question`, `AskUserQuestion`, `question`, `vscode_askQuestions`, `request_user_input`, …) | Makes the interview deliver multiple-choice questions through each harness's native ask UI instead of plain text. |
+| `improve-codebase-architecture`, `triage`, `wayfinder`, `to-questionnaire`, `loop-me`, `writing-fragments`, `writing-shape` | One-line pointers to `/grilling`'s ask-tool rule, at the spot each asks the human a closed question | The rule lives once, in `grilling`. `grill-me` and `grill-with-docs` are **not** edited: they are one-line delegators to `/grilling` and inherit it. |
 
-Everything else is `verbatim`, which makes a clean `cp -r` the correct sync for those skills.
+Everything not listed above is `verbatim`, which makes a clean `cp -r` the correct sync for those skills.
 
 ## Checking for updates
 

@@ -22,21 +22,21 @@ diagnosing-bugs	mattpocock/skills	skills/engineering/diagnosing-bugs	d81f3a18341
 domain-modeling	mattpocock/skills	skills/engineering/domain-modeling	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
 grill-with-docs	mattpocock/skills	skills/engineering/grill-with-docs	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
 implement	mattpocock/skills	skills/engineering/implement	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
-improve-codebase-architecture	mattpocock/skills	skills/engineering/improve-codebase-architecture	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+improve-codebase-architecture	mattpocock/skills	skills/engineering/improve-codebase-architecture	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	modified	closed-option questions ask via the harness ask tool (see grilling)
 prototype	mattpocock/skills	skills/engineering/prototype	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
 research	mattpocock/skills	skills/engineering/research	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
 setup-matt-pocock-skills	mattpocock/skills	skills/engineering/setup-matt-pocock-skills	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
 tdd	mattpocock/skills	skills/engineering/tdd	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
 to-spec	mattpocock/skills	skills/engineering/to-spec	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
 to-tickets	mattpocock/skills	skills/engineering/to-tickets	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
-triage	mattpocock/skills	skills/engineering/triage	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
-wayfinder	mattpocock/skills	skills/engineering/wayfinder	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+triage	mattpocock/skills	skills/engineering/triage	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	modified	closed-option questions ask via the harness ask tool (see grilling)
+wayfinder	mattpocock/skills	skills/engineering/wayfinder	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	modified	closed-option questions ask via the harness ask tool (see grilling)
 wizard	mattpocock/skills	skills/engineering/wizard	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
 grill-me	mattpocock/skills	skills/productivity/grill-me	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
-grilling	mattpocock/skills	skills/productivity/grilling	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+grilling	mattpocock/skills	skills/productivity/grilling	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	modified	closed-option questions ask via the harness ask tool (see grilling)
 handoff	mattpocock/skills	skills/productivity/handoff	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
 teach	mattpocock/skills	skills/productivity/teach	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
-to-questionnaire	mattpocock/skills	skills/productivity/to-questionnaire	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+to-questionnaire	mattpocock/skills	skills/productivity/to-questionnaire	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	modified	closed-option questions ask via the harness ask tool (see grilling)
 wait-what	mattpocock/skills	skills/productivity/wait-what	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
 writing-for-agents	mattpocock/skills	skills/productivity/writing-for-agents	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
 git-guardrails-claude-code	mattpocock/skills	skills/misc/git-guardrails-claude-code	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
@@ -45,12 +45,12 @@ scaffold-exercises	mattpocock/skills	skills/misc/scaffold-exercises	d81f3a183412
 setup-pre-commit	mattpocock/skills	skills/misc/setup-pre-commit	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
 claude-handoff	mattpocock/skills	skills/in-progress/claude-handoff	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
 implement-spec	mattpocock/skills	skills/engineering/implement-spec	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	graduated to engineering upstream; synced 2026-10-04
-loop-me	mattpocock/skills	skills/in-progress/loop-me	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+loop-me	mattpocock/skills	skills/in-progress/loop-me	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	modified	closed-option questions ask via the harness ask tool (see grilling)
 retro	mattpocock/skills	skills/engineering/retro	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	graduated to engineering upstream; synced 2026-10-04
 setup-ts-deep-modules	mattpocock/skills	skills/in-progress/setup-ts-deep-modules	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
 writing-beats	mattpocock/skills	skills/in-progress/writing-beats	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
-writing-fragments	mattpocock/skills	skills/in-progress/writing-fragments	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
-writing-shape	mattpocock/skills	skills/in-progress/writing-shape	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	verbatim	-
+writing-fragments	mattpocock/skills	skills/in-progress/writing-fragments	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	modified	closed-option questions ask via the harness ask tool (see grilling)
+writing-shape	mattpocock/skills	skills/in-progress/writing-shape	d81f3a183412e71a5b1e84ca21bc1a35eea03a60	modified	closed-option questions ask via the harness ask tool (see grilling)
 show-me	humanlayer/skills	plugins/show-me/skills/show-me	ca7c8088db69e315a8b2deea43820270457f8f3c	modified	removed the disable-model-invocation field
 defuddle	kepano/obsidian-skills	skills/defuddle	3ccff5338ea700537839b21900aa5358a0402c98	modified	description rewritten for routing
 json-canvas	kepano/obsidian-skills	skills/json-canvas	3ccff5338ea700537839b21900aa5358a0402c98	verbatim	-

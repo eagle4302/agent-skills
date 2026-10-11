@@ -53,6 +53,8 @@ The maintainer invokes `/triage` and describes what they want in natural languag
 - "Move #42 to ready-for-agent"
 - "What's ready for agents to pick up?"
 
+When a question to the maintainer has a closed set of answers, put it to them with the harness's ask tool, as `/grilling` prescribes.
+
 ## Show what needs attention
 
 Query the issue tracker and present three buckets, oldest first:

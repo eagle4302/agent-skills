@@ -40,7 +40,7 @@ The lever is what you make a prerequisite versus what you ground inside the arti
 
 ## Conversational feel
 
-This is a grilling session inverted. In ideation, the question was "what are you actually noticing?" Here it's "what is this article actually arguing, and in what order does the reader need to hear it?" Push back. Refuse to let weak transitions slide. If a paragraph doesn't earn its place, cut it.
+This is a grilling session inverted. When a question has a closed set of answers — which opening, which format — put it to the user with the harness's ask tool, as `/grilling` prescribes. In ideation, the question was "what are you actually noticing?" Here it's "what is this article actually arguing, and in what order does the reader need to hear it?" Push back. Refuse to let weak transitions slide. If a paragraph doesn't earn its place, cut it.
 
 Specific moves to keep using:
 

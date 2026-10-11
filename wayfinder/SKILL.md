@@ -104,6 +104,8 @@ Ruling something out of scope is a scoping act, not a step on the route. When a 
 
 Two modes. Either way, **never resolve more than one ticket per session**, with the exception of research tickets.
 
+When a question to the human has a closed set of answers — how to proceed, which frontier ticket to take — put it to them with the harness's ask tool, as `/grilling` prescribes.
+
 ### Chart the map
 
 User invokes with a loose idea.
