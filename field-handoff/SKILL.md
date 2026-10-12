@@ -70,7 +70,7 @@ description: 辦公室與真機現場之間的工作交接 —— 寫一份帶�
 ## 流程
 
 1. **選方向、定檔名**。Done when：方向與檔名都定了。
-2. **盤點現況**：`git log`／`git status`、兩邊部署版本、`ready-for-human` 的票清單。Done when：你手上有版本號與那張清單。
+2. **盤點現況**：`git log`／`git status`、兩邊部署版本、`ready-for-human` 的票清單。Done when：你手上有版本號與那張清單。 MetalAutoUQDwpf 的票清單與 A／B／C 分層用 `field-office-checklist` 產。
 3. **只讀取證**：照對應方向的骨架，一節一節蒐集事實；取不到的當場記成「量不到＋為什麼」。Done when：每一節都有一個事實或一句明講的「還沒有」。
 4. **寫交接檔**到 `.scratch/`，照骨架。**引用不複製**：票、spec、ADR、commit 用路徑／編號指過去，不要把內容抄進來。Done when：每個 bullet 指向一個路徑或一句事實。
 5. **（只有辦公室 → 真機）產生現場提示詞**，若對象是沒有 repo 的電腦。Done when：它自帶全部字串與量法，貼上就能用。

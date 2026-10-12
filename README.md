@@ -153,6 +153,7 @@ against all four repos above.
 | `agents-team` | team/lead-plus-specialists workflow, built on `pi-subagents` |
 | `ai-loop` | bounded spec-build-review loop |
 | `consult` | read-only advisor model at decision checkpoints |
+| `field-office-checklist` | MetalAutoUQDwpf only: list what still needs the real machine vs the office, field items layered by who can verify them |
 | `ssh-captain` | drive remote dev/build/test boxes over SSH |
 
 ## Local edits that a re-sync would clobber
