@@ -64,3 +64,5 @@ ai-loop	-	-	-	local-only	authored here
 consult	-	-	-	local-only	authored here
 ssh-captain	-	-	-	local-only	authored here
 field-office-checklist	-	-	-	local-only	authored here; MetalAutoUQDwpf-specific field/office checklist
+field-handoff	-	-	-	local-only	authored here
+git-janitor	-	-	-	local-only	authored here

@@ -1,6 +1,6 @@
 # Skills
 
-This directory is the Pi user-level skills root (`~/.pi/agent/skills`). It holds 48 skills — most of
+This directory is the Pi user-level skills root (`~/.pi/agent/skills`). It holds 51 skills — most of
 them copied from public upstream repos, the rest authored here.
 
 It is also a git repository of its own:
@@ -50,7 +50,7 @@ All four upstream repos last compared on **2026-10-04** by `scripts/check-skill-
 | [humanlayer/skills](https://github.com/humanlayer/skills) | `plugins/<plugin>/skills/<name>/` | 1 | `ca7c8088` (2026-09-17) |
 | [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) | `skills/<name>/` | 6 | `3ccff533` (2026-09-15) |
 | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | `skills/<name>/` | 1 (divergent copy) | `1401c8b` (2026-10-03) |
-| authored in this repo | — | 4 | — |
+| authored in this repo | — | 7 | — |
 
 `dirname`-style names match upstream for every skill, so a skill's upstream path is usually
 `<layout prefix>/<skill dir name>/`.
@@ -153,7 +153,9 @@ against all four repos above.
 | `agents-team` | team/lead-plus-specialists workflow, built on `pi-subagents` |
 | `ai-loop` | bounded spec-build-review loop |
 | `consult` | read-only advisor model at decision checkpoints |
+| `field-handoff` | office ↔ field handoff file (and paste-ready field-agent prompt) between the office and the real machine |
 | `field-office-checklist` | MetalAutoUQDwpf only: list what still needs the real machine vs the office, field items layered by who can verify them |
+| `git-janitor` | sweep a messy working tree: commit, push, .gitignore, or delete each stray entry |
 | `ssh-captain` | drive remote dev/build/test boxes over SSH |
 
 ## Local edits that a re-sync would clobber
