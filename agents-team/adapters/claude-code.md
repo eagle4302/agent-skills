@@ -96,4 +96,6 @@ Assumed, not verified: that a subagent does not pick up the project's `CLAUDE.md
 The skill's discipline makes this safe either way — `houseRules` is pasted into every brief — but
 do not claim in a report that a teammate had rules it was never handed.
 
-Not observed in a live run: no team has been dispatched on this harness.
+Observed in a live run on 2026-10-13 (`VALIDATION.md` → Round 11): two `Agent` calls in one message ran
+concurrently, settlement notices carry `duration_ms`, and `SendMessage` resumes a settled agent
+with its context. Not yet observed: `TaskStop`, and `SendMessage` to an agent that is still running.

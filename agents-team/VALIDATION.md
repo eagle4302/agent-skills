@@ -569,6 +569,54 @@ the human's words behind it. `scripts/team.mjs` never reads `model`, so no code 
 **Not verified:** no mixed-model run has been observed here — the rule is written from the installed
 package and this session, not from a live team.
 
+## Round 11 — the paired build, first live team on Claude Code (2026-10-13)
+
+The first team this skill dispatched on Claude Code, run to test `staffing.md` → "Paired build"
+as written. Scenario: a throwaway Node 24 repo in the session scratchpad; contract for
+`parseDuration` / `formatDuration` with 37 known-answer rows; standard mode; sandbox commits
+authorized by the human in chat. Every number below is from the settlement notices
+(`duration_ms`) or a command run by the lead.
+
+| Step | Who | Result | Wall-clock |
+| --- | --- | --- | --- |
+| stubs + contract + 3 trees seeded and green | lead | 0 tests / 0 fail in each tree | — |
+| implementation | builder-impl | self-check 37/37 rows (claim) | 92 s |
+| tests, in parallel | builder-tests | 97 tests, 0 pass / 97 fail on stubs (lead re-ran: same) | 205 s |
+| first integration | lead | 97 pass / 0 fail | — |
+| probe | prober-a | `needs_revision`: 28 mutations, 24 killed, 3 argued equivalent, **1 real survivor** (no `typeof` check: `new String("5s")` → 5000, 97/97 still green) | 304 s |
+| contract decided, sent to both sides (step 4) | lead | builder-impl: 3/3 already `TypeError`, no change (18 s); builder-tests: +2 tests, 99 red on stubs (48 s) | — |
+| re-probe | prober-a | `pass`: survivor now fails 2 tests; two variants of its own killed | 73 s |
+| land | lead | `84123c6` impl alone 0 tests / 0 fail; `c80a703` + tests 99 / 99; `validate` 0 errors, 0 warnings | — |
+
+The build phase took 205 s against 297 s for the two builders back to back. The whole run took
+about 14 minutes from spawn to the last commit, and verification was most of it.
+
+### What the run changed in `staffing.md`
+
+- **Stubs after `baseline`.** The lead wrote them first, and `baseline` recorded `src/` as
+  pre-existing dirt; `dirtyPaths` was fixed by hand.
+- **No `rsync` on this Windows box.** The trees were seeded with `tar … | tar …`, now named in step 2.
+  Incremental probe sync with deletion is still owed.
+- **The test builder built its own reference implementation**, unasked, to self-check (97/97).
+  That doubled its share of the work; the brief now says to write none.
+- **The surviving mutant sat on a contract gap the test builder had already listed** (String
+  wrapper objects). Step 5 now has the lead decide every listed gap before integrating.
+- **An uncommitted artifact cannot be restored with `git checkout`.** The prober noticed and used
+  a pristine copy outside the tree; step 7 now says so.
+
+### Verified on Claude Code in this run
+
+`parallel-spawn` (two `Agent` calls in one message ran concurrently), background settlement
+notices with `duration_ms`, and `SendMessage` resuming a **settled** agent with its context (three
+follow-ups: two contract notices, one re-probe).
+
+### Not verified
+
+- `TaskStop` and a mid-run `SendMessage` to a running agent; neither was needed.
+- Any compiled language. In a .NET repo every tree costs a cold build, which this run did not price.
+- Whether the parallel gain holds when the tests are small; here they were 340 lines against an
+  87-line implementation.
+
 ## Owed acceptance test (on pi, one real run)
 
 Everything below is still unmeasured on this harness. The old version of this section was a DSH

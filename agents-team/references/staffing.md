@@ -199,7 +199,8 @@ implicit choices. Why the test builder never sees the code: in AgentCoder's abla
 (`arXiv 2312.13010`) a separate test designer that wrote tests without the code raised test
 accuracy on HumanEval from 61.0% to 87.8%; tests written beside the code inherit its mistakes.
 
-1. **Freeze the contract — the lead's job, before anyone is spawned.** Write the public
+1. **Freeze the contract — the lead's job, after `baseline` and before anyone is spawned.**
+   Stubs written before `baseline` are recorded as dirt that predates the team. Write the public
    signatures as compiling stubs whose bodies fail loudly ("not implemented"), and the
    known-answer cases (above) into `notes/<task>-contract.md`. The stubs sit in the builder's
    territory and land in its batch; the lead writes them once and then leaves them alone.
@@ -208,13 +209,17 @@ accuracy on HumanEval from 61.0% to 87.8%; tests written beside the code inherit
 2. **Give each builder its own tree.** Tests compile against the implementation, so in one tree
    a half-finished edit on one side breaks the other side's build, and two builds fight over the
    build directories. Create both trees the way the probe tree is created (from `baseline.sha`,
-   then synced from the lead's tree, stubs included), and build each once — Hard rule 8. A
-   harness `isolate` that branches from anywhere but the lead's tree arrives without the stubs;
-   your adapter says where its trees start.
+   then synced from the lead's tree, stubs included), and build each once — Hard rule 8. Where
+   `rsync` is missing, `tar -C <repo> --exclude=./.git --exclude=./.agent-teams -cf - . | tar -C
+   <tree> -xf -` seeds a fresh tree (it copies; it never deletes). A harness `isolate` that
+   branches from anywhere but the lead's tree arrives without the stubs; your adapter says where
+   its trees start.
 3. **Brief both in one message**, each with the contract file and its tree's path:
    - The test builder's territory is the test files. It works from the contract and the cases,
      adds its own hostile cases, and runs **every test red against the stubs** — that output is
-     its evidence. A test that passes against a stub checks nothing: send it back.
+     its evidence. A test that passes against a stub checks nothing: send it back. A reference
+     implementation of its own duplicates the builder's job, so the brief says to write none.
+     It ends its report with every **contract gap** it found.
    - The builder's territory is the implementation files. It implements against the cases,
      runs its own checks while iterating, and reads the tests without editing them; a case it
      believes is wrong is reported with its reasoning.
@@ -224,7 +229,10 @@ accuracy on HumanEval from 61.0% to 87.8%; tests written beside the code inherit
    substitute in `protocol.md`) — to the one who did not ask as much as the one who did. In
    `arXiv 2609.25396`, telling an agent what a concurrent change did recovered 82% of the
    combined runs that had failed.
-5. **Integrate in the main checkout.** Copy each territory's changed, new and deleted files back
+5. **Decide every contract gap, then integrate in the main checkout.** Each gap either builder
+   listed goes into the contract (step 4) or into the report as out of scope; surviving mutants
+   hide in them — in the first trial run the one mutant the tests missed sat on a gap the test
+   builder had listed. Then copy each territory's changed, new and deleted files back
    from its tree (`git -C <tree> status --short -- <territory globs>` lists them); disjoint
    territories make this a copy. Run `verify` there.
 6. **Classify every red against the contract**, never by which side is easier to change: the
@@ -233,12 +241,15 @@ accuracy on HumanEval from 61.0% to 87.8%; tests written beside the code inherit
    applies. The `attempt` goes to the side that owns the fix.
 7. **Verify and land as usual.** The prober is neither builder, and its mutation pass aims at the
    new tests: a broken implementation that they still pass is a FAIL of the test builder's task.
+   The artifact is uncommitted, so the brief tells the prober to revert each mutation from a
+   pristine copy kept outside the tree — `git checkout` cannot restore an untracked file.
    Land the implementation batch first, then the tests batch, so each commit point builds and
    passes on its own.
 
 On the board: two `builder` members (`builder-impl`, `builder-tests`), two `commitGroup`s, and
-one verification task, owned by the prober, whose `dependencies` name both implementation tasks. Each extra tree costs a cold build, and
-`houseRules` says which builds are slow — price the pair before staffing it.
+one verification task, owned by the prober, whose `dependencies` name both implementation tasks.
+Each extra tree costs a cold build, and `houseRules` says which builds are slow — price the pair
+before staffing it.
 
 In a chain of tickets the pair pipelines: the test builder writes ticket N+1's tests while the
 builder implements ticket N, so every ticket starts with its red tests waiting.
