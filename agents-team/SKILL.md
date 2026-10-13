@@ -1,6 +1,6 @@
 ---
 name: agents-team
-description: Use when the user asks for an agent team, multiple agents, a lead plus specialists, or teammates; also use when a deliverable needs 2+ independent workstreams sharing one artifact, a durable task board with dependencies, agents handed off across a context loss, or an independent verification pass before anything is called done. One bounded delegation does not need this.
+description: Use when the user asks for an agent team, multiple agents, a lead plus specialists, or teammates; also use when a deliverable needs 2+ independent workstreams sharing one artifact, a durable task board with dependencies, agents handed off across a context loss, an independent verification pass before anything is called done, or one agent writing an implementation while another writes its tests. One bounded delegation does not need this.
 ---
 
 # Agents Team
@@ -44,7 +44,7 @@ Each step ends when its completion criterion holds.
    | --- | --- | --- |
    | **Solo** | one workstream, one pass, nothing that must be reproduced by a second pair of eyes | you do it yourself, inline — and create **no team state at all** |
    | **One helper** | one bounded errand whose reading, fetching or building would flood your context | one background teammate |
-   | **Light team** | one deliverable that owes independent verification, work that splits into two disjoint territories, or work that will outlive a compaction | 1–2 builders + 1 prober |
+   | **Light team** | one deliverable that owes independent verification, work that splits into two disjoint territories (an implementation and its tests count as two — `staffing.md` → "Paired build"), or work that will outlive a compaction | 1–2 builders + 1 prober |
    | **Full team** | 2–3 independent workstreams sharing an artifact, unknown terrain, a high-risk or contract-touching change, or the human asked for a team | scout + builders + prober, plus critic/scribe as needed |
    | **Stage fan-out** | one stage is many homogeneous items | that stage runs as parallel lanes, or as a packaged prompt where the harness ships one (`workflow-stage.md`) |
 
@@ -168,6 +168,8 @@ Each step ends when its completion criterion holds.
 - Reporting progress to the human by quoting a teammate's summary.
 - A verification task assigned to whoever wrote the code, or to a re-briefed same child.
 - Two builders whose territories touch, or a teammate that "also cleaned up" a nearby file.
+- In a paired build, a test builder briefed with the implementation, or a builder editing a red
+  test until it passes — the tests then confirm the code instead of checking it.
 - Skipping the board on a team run because the job "looks small" — then losing the thread after a
   compaction.
 - Building team state, briefs or a helper for work you could have finished in the time the
@@ -209,7 +211,7 @@ Each step ends when its completion criterion holds.
 | --- | --- |
 | `adapters/README.md` | **First, every run.** Which harness you are on, and the eleven capabilities |
 | `adapters/<harness>.md` | The actual calls: dispatch, status, steer, stop, gate, fan-out |
-| `references/staffing.md` | Choosing roles, writing a brief, deciding team shape and size |
+| `references/staffing.md` | Choosing roles, writing a brief, deciding team shape and size, pairing an implementation with its tests |
 | `references/modes.md` | **At charter, every Light-or-larger run**: quick / standard / thorough, and the classes kept off the quick path |
 | `references/protocol.md` | The capability contract, **what to do when one is missing**, escalation, `inbox.log` format |
 | `references/team-state.md` | Creating or reading `team.json`, `board.md`, reports; resuming after a context loss |

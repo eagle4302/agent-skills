@@ -80,6 +80,7 @@ what each teammate actually ran on — and where the route came from — in `mem
 | A new `Agent` call starts fresh; `fork` is the explicit inheritance. | The default is the one you want. Still write a self-contained brief and paste `houseRules` — do not rely on a subagent inheriting the project's conventions. |
 | `Workflow` needs the user's explicit opt-in and can spawn dozens of agents. | Never reach for it on your own initiative for a fan-out stage. Ask, or use parallel `Agent` calls. |
 | Several management tools are deferred. | Load `SendMessage`, `TaskStop`, `TaskOutput` by name in one batched call before you need them, not one at a time mid-run. |
+| `isolation: "worktree"` branches from the **default branch**, not the lead's `HEAD`, and carries nothing uncommitted. | A teammate that must start from the lead's scaffolding (a paired build's stubs, any uncommitted contract) gets a tree the lead made — `git worktree add --detach` plus the probe-tree sync in `staffing.md` — named by path in its brief. |
 
 ## Verified / not verified
 
@@ -87,6 +88,9 @@ Read from the live tool schemas in a Claude Code session on 2026-09-23: the `Age
 background-by-default, `isolation`, the built-in `subagent_type` list, the absence of any gate
 parameter, the "final report is not shown to the user" behaviour, and which management tools
 arrive deferred.
+
+Read from the Claude Code sub-agents docs on 2026-10-13: an `isolation: "worktree"` tree is
+branched from the default branch rather than the parent session's `HEAD`.
 
 Assumed, not verified: that a subagent does not pick up the project's `CLAUDE.md` on its way in.
 The skill's discipline makes this safe either way — `houseRules` is pasted into every brief — but

@@ -23,6 +23,8 @@ skill instead of reinventing it here.
 Team shapes:
 
 - **Light team** — 1 builder + 1 prober. Small work that still needs a second pair of eyes.
+- **Paired build** — a Light team whose two builders split one feature into its implementation
+  and its tests, + 1 prober; see "Paired build" below.
 - **Full team** — scout (if the terrain is unknown) + 2–3 builders on disjoint territories
   + 1 prober + 1 critic (high-risk) + 1 scribe (only if the project keeps docs).
 - **Stage fan-out** — when one stage has many homogeneous items, run it as parallel lanes
@@ -179,6 +181,67 @@ re-brief, fix, re-probe.
   first — boundaries included — and the lead reads it before implementation starts, instead of a
   separate drafting round. A test the writer cannot make fail is not a case: send it back. The
   verifier still adds its own hostile cases at verification time.
+
+## Paired build
+
+One builder writes the implementation while a second, the **test builder**, writes its tests,
+both from the same frozen **contract**. It is how two writers share one feature without sharing
+a file: the territories are disjoint by construction, so the end is an integration, not a merge.
+
+Reach for it when the tests are a real share of the work (many cases, fixtures, hostile inputs)
+and the acceptance can be written before any code exists. When the tests are a few lines, one
+writer making the failing test first is cheaper than a second brief.
+
+Why this split and not two writers on one file: CooperBench (`arXiv 2601.13295`) measured two
+agents building independent features in one repository at about 30% lower success than either
+alone, and Cognition (2026) still finds that parallel writers on shared code make conflicting
+implicit choices. Why the test builder never sees the code: in AgentCoder's ablation
+(`arXiv 2312.13010`) a separate test designer that wrote tests without the code raised test
+accuracy on HumanEval from 61.0% to 87.8%; tests written beside the code inherit its mistakes.
+
+1. **Freeze the contract — the lead's job, before anyone is spawned.** Write the public
+   signatures as compiling stubs whose bodies fail loudly ("not implemented"), and the
+   known-answer cases (above) into `notes/<task>-contract.md`. The stubs sit in the builder's
+   territory and land in its batch; the lead writes them once and then leaves them alone.
+   *Done when:* the tree builds with the stubs and the existing tests are as green as `baseline`
+   says.
+2. **Give each builder its own tree.** Tests compile against the implementation, so in one tree
+   a half-finished edit on one side breaks the other side's build, and two builds fight over the
+   build directories. Create both trees the way the probe tree is created (from `baseline.sha`,
+   then synced from the lead's tree, stubs included), and build each once — Hard rule 8. A
+   harness `isolate` that branches from anywhere but the lead's tree arrives without the stubs;
+   your adapter says where its trees start.
+3. **Brief both in one message**, each with the contract file and its tree's path:
+   - The test builder's territory is the test files. It works from the contract and the cases,
+     adds its own hostile cases, and runs **every test red against the stubs** — that output is
+     its evidence. A test that passes against a stub checks nothing: send it back.
+   - The builder's territory is the implementation files. It implements against the cases,
+     runs its own checks while iterating, and reads the tests without editing them; a case it
+     believes is wrong is reported with its reasoning.
+   - Both stop and report when the contract itself has to change.
+4. **A contract change reaches both sides in the same step.** The lead amends the contract file
+   and the stubs, logs a `decision`, and sends the change to both builders with `steer` (or its
+   substitute in `protocol.md`) — to the one who did not ask as much as the one who did. In
+   `arXiv 2609.25396`, telling an agent what a concurrent change did recovered 82% of the
+   combined runs that had failed.
+5. **Integrate in the main checkout.** Copy each territory's changed, new and deleted files back
+   from its tree (`git -C <tree> status --short -- <territory globs>` lists them); disjoint
+   territories make this a copy. Run `verify` there.
+6. **Classify every red against the contract**, never by which side is easier to change: the
+   implementation misses a case → re-brief the builder; a test asserts what the contract does not
+   say → re-brief the test builder; the contract was ambiguous → the lead fixes it and step 4
+   applies. The `attempt` goes to the side that owns the fix.
+7. **Verify and land as usual.** The prober is neither builder, and its mutation pass aims at the
+   new tests: a broken implementation that they still pass is a FAIL of the test builder's task.
+   Land the implementation batch first, then the tests batch, so each commit point builds and
+   passes on its own.
+
+On the board: two `builder` members (`builder-impl`, `builder-tests`), two `commitGroup`s, and
+one verification task, owned by the prober, whose `dependencies` name both implementation tasks. Each extra tree costs a cold build, and
+`houseRules` says which builds are slow — price the pair before staffing it.
+
+In a chain of tickets the pair pipelines: the test builder writes ticket N+1's tests while the
+builder implements ticket N, so every ticket starts with its red tests waiting.
 
 ## One pass per layer of verification
 
