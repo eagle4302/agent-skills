@@ -1,6 +1,6 @@
 ---
 name: git-janitor
-description: Sweep a messy working tree and put every entry in its right place — commit what belongs, push what is ready, .gitignore what should never be tracked, delete proven junk. Use when `git status` has accumulated untracked or stray files, before wrapping up a task or ending a session, when the user says "commit", "push", "clean up", "tidy this repo", "what do I do with these files", or asks whether to track, ignore, or delete something.
+description: Sweep a messy working tree — every entry triaged into commit, push, .gitignore, or delete. Use when `git status` has accumulated untracked or stray files, before wrapping up a task or ending a session, when the user says "commit", "push", "clean up", "tidy this repo", or "what do I do with these files".
 ---
 
 # Git Janitor: Sweep the Working Tree
@@ -49,14 +49,10 @@ git branch -vv                      # does this branch track an upstream?
 
 ### 2. Triage every entry
 
-Walk the survey list and assign each entry exactly one bin from the table above. Branch on the entry, not on your mood:
+Walk the survey list and assign each entry exactly one bin from the table above. Two overrides:
 
-- Changed source/config/docs → **commit**.
-- Generated output, deps, caches, `.env`-like files, editor/OS files → **ignore**.
-- A proven-junk signature (rule above) → **delete**.
+- A file that looks like a secret (`.env`, `*.pem`, `id_rsa`, `credentials.*`, key-shaped strings) → **ignore** or **flag**. A tracked secret is a leak, not a commit.
 - Anything you cannot classify with confidence → **flag**.
-
-Route any file that looks like a secret (`.env`, `*.pem`, `id_rsa`, `credentials.*`, key-shaped strings) to **ignore** or **flag**. A tracked secret is a leak, not a commit.
 
 **Done when** every entry has one bin — no entry left unassigned.
 

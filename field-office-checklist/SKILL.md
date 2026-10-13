@@ -1,6 +1,6 @@
 ---
 name: field-office-checklist
-description: 盤點 MetalAutoUQDwpf（WPF HMI）與後端 MaertinEtherCAT 還沒結的票、GitHub issue 與還沒上機的程式改動，分成「真機才能驗」與「辦公室要完成」兩張清單；真機那張再依「agent 自己能驗／要人按／要教點或跑 Auto」排先後，必要時寫成下一版現場交接提示詞。使用者只要問到「明天去現場要驗什麼」「上機清單」「真機還剩哪些票」「辦公室還有什麼能做」「整理 ready-for-human」「寫現場交接提示詞（第 N 版）」「從現場回來還剩什麼」，或要排上機／回辦公室的工作順序，就用這個 skill，即使沒講出「清單」兩個字。只適用 MetalAutoUQDwpf 這個 repo；交接檔本身的骨架歸 field-handoff。
+description: 盤點 MetalAutoUQDwpf（WPF HMI）與後端 MaertinEtherCAT 還沒結的票、GitHub issue 與還沒上機的程式改動，分成「真機才能驗」與「辦公室要完成」兩張清單；真機那張再依「agent 自己能驗／要人按／要教點或跑 Auto」排先後，必要時寫成下一版現場交接提示詞。使用者問真機還剩哪些、辦公室還有什麼能做、明天去現場要驗什麼，或要排上機／回辦公室順序、整理 ready-for-human、寫現場交接提示詞（第 N 版），就用這個 skill。只適用 MetalAutoUQDwpf；交接檔與提示詞的通用骨架歸 field-handoff。
 ---
 
 # 現場／辦公室待辦盤點
@@ -9,7 +9,7 @@ MetalAutoUQDwpf 的工作在兩個地方做完：辦公室（寫程式、測試�
 
 **範圍**：只在 MetalAutoUQDwpf 的 checkout 裡用（cwd 在 repo 根）。腳本靠它的 `.scratch/<feature>/issues/` 票格式、`.scratch/field-report-*.md` 現場回報、`.scratch/check-deployed-config.ps1`，在別的 repo 跑不出東西。
 
-**跟 `field-handoff` 的分工**：`field-handoff` 管交接檔怎麼寫（方向、檔名、骨架、鐵律）；這支管**清單內容**：還剩哪些、真機哪幾格誰能驗、先後順序。要寫交接檔或現場提示詞時，用這支產出的 A／B／C 清單去填 `field-handoff` 的骨架。這個 repo 實際的提示詞檔名是 `.scratch/handoff-field-agent-prompt-<N>.md`（依版號遞增），不是 `field-handoff` 寫的日期檔名，沿用 repo 的寫法。
+**跟 `field-handoff` 的分工**：`field-handoff` 管交接檔的通用骨架（方向、提示詞必要元素、鐵律）；這支管**清單內容與 repo 專屬形狀**：還剩哪些、真機哪幾格誰能驗、先後順序，現場提示詞用 `.scratch/handoff-field-agent-prompt-<N>.md`（依版號遞增，取代 `field-handoff` 的日期檔名）。要寫交接檔或提示詞時，用這支產出的 A／B／C 清單去填 `field-handoff` 的骨架。
 
 ## 步驟
 
@@ -46,6 +46,8 @@ bash ~/.agents/skills/field-office-checklist/scripts/scan-open-work.sh
 
 腳本只看票面 `**Status:**` 的開頭幾個字，所以只是粗分。**以票面為準、不要信舊總表**：`handoff-*-field-visit.md` 是某一天的快照，裡面打勾的、沒打勾的都可能已經過時。
 
+Done when：四段都看過；基準 commit 有值（沒有就記下來，輸出時問使用者）。
+
 ### 2. 讀最新的現場脈絡
 
 照第 1 段列出的檔，依序讀：
@@ -55,7 +57,7 @@ bash ~/.agents/skills/field-office-checklist/scripts/scan-open-work.sh
 3. 最新的 `.scratch/handoff-*-office-end.md` 或 `HANDOFF-*-field-to-office.md`：辦公室出貨了什麼、拍板了什麼、剩什麼。
 4. `git log` 上最近幾筆 vault commit（`開發進度`、`驗證紀錄`）：常寫著「真機都還沒驗」的新改動。
 
-先把 `DONE-NEW` 歸到它所屬功能的驗收票（同一個資料夾裡標題有「驗收／field／acceptance」的那張），歸不進去的才當成獨立一格。歸完之後，`FIELD`＋`FIELD?`＋歸不進去的 `DONE-NEW` 加起來多於 10 張，就派唯讀 `Explore` agent 分頭讀，每個 agent 約 15 張、最多 3 個。下一步要等它們的結果，所以用**前景**（`run_in_background: false`），不要開背景再自己等。給它們的 prompt 骨架：
+先把 `DONE-NEW` 歸到它所屬功能的驗收票（同一個資料夾裡標題有「驗收／field／acceptance」的那張），歸不進去的才當成獨立一格。歸完之後，`FIELD`＋`FIELD?`＋歸不進去的 `DONE-NEW` 加起來多於 10 張，就派唯讀 `Explore` agent 分頭讀，每個 agent 約 15 張、最多 3 個。下一步要等它們的結果，所以用**前景**（Claude Code：`run_in_background: false`；OpenCode：`background: false`），不要開背景再自己等。給它們的 prompt 骨架：
 
 ```text
 唯讀。逐張讀下面這些票的 Status、「剩什麼／現場要做的／驗收」段，每張回一行：
@@ -64,6 +66,8 @@ bash ~/.agents/skills/field-office-checklist/scripts/scan-open-work.sh
 ```
 
 lead 只拿結論，不自己把 40 張全讀一遍。
+
+Done when：四個來源都讀過、Explore agent 的結論都回來；每個 `DONE-NEW` 都有落點（歸進驗收票或自成一格）。
 
 ### 3. 分類
 
@@ -87,7 +91,6 @@ lead 只拿結論，不自己把 40 張全讀一遍。
 - **畫面上的數字照畫面格式寫**：先去讀格式化那一行再寫（例：`MetalAutoUQD.AppModel/ViewModels/CommissioningViewModel.RebuildParams.cs:543` 一萬以上用 `#,0`，所以畫面是 `1,223,339`），不要寫算出來的 `1,223,338.7`，否則現場 agent 會判成不過。
 - **分清 exe 旁的 `uqd.json` 和 `profiles\`**：硬體切換頁與 profile 讀的是 `profiles\`（建置時由 `Machine/uqd.json` 複製），不是現場手改過的那一份；切換 profile 會整份覆蓋現場檔。
 - **上一次現場已經抄到的值**（例如 field-report 裡寫著 17:29 看到 `slaves_not_in_op:[]`），標成「寫回就能收」放在 A 層，不要再叫人去量。
-- **第 3 段每一筆 commit 都要有落點**。對不上任何票的，就在開工前那張表直接寫「驗哪一格」。
 - **後端 GitHub issue** 標 `ready-for-human` 的，只挑跟這次上機有關的（剛部署的、現場票提到的），其餘寫成「後端 #N–#M 那一串」，不要逐張列。
 
 #### 辦公室那張
@@ -106,6 +109,8 @@ lead 只拿結論，不自己把 40 張全讀一遍。
 
 - **`ASK`（`needs-info`）**：列成「順手問使用者」，一張一行講要問什麼。
 - **可能已經過時的票**：票面要驗的功能已經拿掉了（例如示範模式：2026-10-09 拍板拿掉、2026-10-10 落地），就列在「要你決定」，建議結成 wontfix。**不要自己改票面狀態**。
+
+Done when：每張票都有落點（真機／辦公室／ASK／要你決定／FIELD-WAIT），沒有票被無聲省略；真機那張每一格都有層（A／B／C）與依據；第 3 段每一筆 commit 都有落點（對不上的寫進開工前的表「驗哪一格」）。
 
 ### 4. 輸出
 
@@ -130,6 +135,8 @@ lead 只拿結論，不自己把 40 張全讀一遍。
 ## 辦公室（有才寫）
 ## 順手問你（needs-info）
 ```
+
+Done when：骨架每一節都有內容或明說沒有；每一格都指到票、檔案或指令。
 
 開工前那幾步永遠排最前：現場檔設定錯了，後面全部會量錯。
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 把「還沒結的事」一次倒出來，給 field-office-checklist skill 分類用。
-# 用法：bash .claude/skills/field-office-checklist/scripts/scan-open-work.sh [現場 exe 的 commit]
+# 用法：bash ~/.agents/skills/field-office-checklist/scripts/scan-open-work.sh [現場 exe 的 commit]
 # 不給 commit 就從最新一份 .scratch/field-report-*.md 抓第一個 1.0.0+<sha>。
 # 只讀，不改任何檔。
 set -u

@@ -1,6 +1,6 @@
 ---
 name: field-handoff
-description: 辦公室與真機現場之間的工作交接 —— 寫一份帶日期的交接檔（辦公室→真機、或真機→辦公室），必要時附一段能直接貼給現場 agent 的提示詞。Use when leaving the office for the machine (要回現場、明天上機), coming back from the field (現場回來、換電腦), when someone or an agent will pick up at the other site, or when the user says 交接、交接檔、交接提示詞、現場、真機、上機驗收。不處理同一台電腦上的 session 續接（那用 handoff / claude-handoff）。
+description: 辦公室與真機現場之間的工作交接 —— 寫一份帶日期的交接檔（辦公室→真機、或真機→辦公室），必要時附一段能直接貼給現場 agent 的提示詞。Use when leaving the office for the machine（要去／要回現場）, coming back from the field（現場回來、換電腦）, when someone or an agent will pick up at the other site, or when the user says 交接檔、交接提示詞。不處理同一台電腦上的 session 續接（那用 handoff / claude-handoff）。
 ---
 
 # 現場交接：辦公室 ↔ 真機
@@ -20,7 +20,7 @@ description: 辦公室與真機現場之間的工作交接 —— 寫一份帶�
 |---|---|---|
 | 離開辦公室、要去（或要去人）**真機** | **辦公室 → 真機** | `.scratch/HANDOFF-<YYYY-MM-DD>-field.md` |
 | 從真機收工、要回**辦公室** | **真機 → 辦公室** | `.scratch/HANDOFF-<YYYY-MM-DD>-field-to-office.md` |
-| 要給現場一台**沒有 repo** 的電腦一份自帶資訊的提示詞 | 附在辦公室 → 真機那份旁 | `.scratch/handoff-<YYYY-MM-DD>-field-agent-prompt.md` |
+| 要給現場一台**沒有 repo** 的電腦一份自帶資訊的提示詞 | 附在辦公室 → 真機那份旁 | `.scratch/handoff-<YYYY-MM-DD>-field-agent-prompt.md`；MetalAutoUQDwpf 例外：`.scratch/handoff-field-agent-prompt-<N>.md`，形狀見 `field-office-checklist` |
 
 不確定方向就問使用者。**舊交接檔不要刪、不要改** —— 新版在開頭寫一句「前一份是 …，本檔只補今天多的」，讓它自然退場。
 
@@ -53,6 +53,8 @@ description: 辦公室與真機現場之間的工作交接 —— 寫一份帶�
 - **環境**：哪一台、後端連哪、當天該看哪份 log。
 - **優先序（P0→P3）**：先做哪幾張、為什麼（哪張卡住其他驗收）。
 - **回報骨架**：一段現成的 markdown，讓它填完就成報告（版本、每一項要抄的原文／數字、結論、量不到的）。
+
+MetalAutoUQDwpf 的專用版由 `field-office-checklist` 產（A／B／C 三層、每格寫「怎麼做、要看到什麼、票」、檔名 `handoff-field-agent-prompt-<N>.md`）；這節只定通用必要元素。
 
 ## 鐵律（兩個方向共用，比任務更嚴）
 
