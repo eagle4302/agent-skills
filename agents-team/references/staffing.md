@@ -274,6 +274,16 @@ off the quick path.
   rsync -a --delete --exclude .git --exclude '<each build dir>' <repo>/ <probe-dir>/
   ```
 
+  Without `rsync` (Git Bash on Windows), `robocopy` mirrors the same way. Its exit codes 0–7
+  all mean success (a normal sync returns 1–3), so test the code instead of chaining on it;
+  `MSYS_NO_PATHCONV=1` stops Git Bash rewriting `/MIR` into a path, so give both trees as
+  `C:/...` paths (`pwd -W`); `/XF .git` keeps the probe's own `.git` file when the lead's tree
+  is itself a worktree, where `/XD .git` alone lets the lead's `.git` file overwrite it:
+
+  ```
+  { MSYS_NO_PATHCONV=1 robocopy <repo> <probe-dir> /MIR /XD .git <each build dir> /XF .git /R:1 /W:1 /NFL /NDL /NJH /NJS /NP || [ $? -lt 8 ]; }
+  ```
+
   A mutation is made in the probe tree, built incrementally, and reverted with
   `git -C <probe-dir> checkout -- <file>` before the next one. The main checkout is never
   mutated, so the builder — or the next ticket in a chain — can keep working there while the
