@@ -21,9 +21,7 @@ Skip a step that has nothing to look up; the order still holds for the steps you
 
 Jev fits a **narrow** judgment: one label from a list, yes/no on a stated condition, a score on a described scale. Examples: which skill or tool fits this request, which folder a note belongs in, which ticket label applies, is this task done per its stated acceptance list, how hard is this task on a 1–5 scale.
 
-- Load `typesafe:typesafe-ai` for question design. Write `{state, model:"jev-latest", questions:{id:{type:choice|noul|score, instructions, criteria}}}` to a temp file and run `bash ~/.claude/hooks/jev.sh <file>`.
-- `criteria` for a choice is a dict of `option → description`; add a `none` option when nothing may fit.
-- Put the facts Jev needs into `state`; it sees nothing else.
+- Design the questions with the `typesafe:typesafe-ai` skill. Write `{state, model:"jev-latest", questions:{...}}` to a temp file and run `bash ~/.claude/hooks/jev.sh <file>`. A choice's `criteria` must be a dict (a list returns 422).
 - Report the pick and its probability. Top < 0.6 or a failed call → decide yourself, say so, and ask the user when the choice matters.
 - Keep these with Claude and the user: code design, debugging, multi-step reasoning, and any safety, risk, destructive-action, deploy, or go-live call.
 
