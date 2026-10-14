@@ -153,6 +153,7 @@ against all four repos above.
 | `agents-team` | team/lead-plus-specialists workflow, built on `pi-subagents` |
 | `ai-loop` | bounded spec-build-review loop |
 | `consult` | read-only advisor model at decision checkpoints |
+| `context-first` | lookup order for dev work: CodeGraph → Obsidian vault → TypeSafe Jev (narrow and batch classification) → plan and edit |
 | `field-handoff` | office ↔ field handoff file (and paste-ready field-agent prompt) between the office and the real machine |
 | `field-office-checklist` | MetalAutoUQDwpf only: list what still needs the real machine vs the office, field items layered by who can verify them |
 | `git-janitor` | sweep a messy working tree: commit, push, .gitignore, or delete each stray entry |
