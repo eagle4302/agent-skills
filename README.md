@@ -1,6 +1,6 @@
 # Skills
 
-This directory is the Pi user-level skills root (`~/.pi/agent/skills`). It holds 51 skills — most of
+This directory is the Pi user-level skills root (`~/.pi/agent/skills`). It holds 53 skills — most of
 them copied from public upstream repos, the rest authored here.
 
 It is also a git repository of its own:
@@ -42,7 +42,7 @@ On macOS or Linux, use `ln -s ~/.agents/skills ~/.claude/skills` instead.
 
 ## Sources at a glance
 
-All four upstream repos last compared on **2026-10-04** by `scripts/check-skill-updates.sh`.
+All five upstream repos last compared on **2026-10-15** by `scripts/check-skill-updates.sh`.
 
 | Upstream repo | Upstream layout | Skills installed | Pinned commit |
 |---|---|---|---|
@@ -50,7 +50,8 @@ All four upstream repos last compared on **2026-10-04** by `scripts/check-skill-
 | [humanlayer/skills](https://github.com/humanlayer/skills) | `plugins/<plugin>/skills/<name>/` | 1 | `ca7c8088` (2026-09-17) |
 | [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) | `skills/<name>/` | 6 | `3ccff533` (2026-09-15) |
 | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | `skills/<name>/` | 1 (divergent copy) | `1401c8b` (2026-10-03) |
-| authored in this repo | — | 7 | — |
+| [typesafe-ai/skills](https://github.com/typesafe-ai/skills) | `skills/<name>/` | 1 | `65a39f3` (2026-09-12) |
+| authored in this repo | — | 8 | — |
 
 `dirname`-style names match upstream for every skill, so a skill's upstream path is usually
 `<layout prefix>/<skill dir name>/`.
@@ -143,17 +144,26 @@ license: MIT
 license_source: https://github.com/addyosmani/agent-skills/blob/main/LICENSE
 ```
 
+### typesafe-ai/skills — pinned `65a39f393687675ce170e6094757de20370365b9`
+
+| Skill | Upstream path | Local state |
+|---|---|---|
+| `typesafe-ai` | `skills/typesafe-ai` | verbatim |
+
+The repo holds one skill (Release v0.5.7). The local copy matches the pin; the working tree carries CRLF
+because this box runs `core.autocrlf=true`, which `scripts/check-skill-updates.sh` ignores.
+
 ### Authored in this repo
 
-No upstream found as of 2026-10-04 — checked by directory name and by the `name:` frontmatter field
-against all four repos above.
+No upstream found as of 2026-10-15 — checked by directory name and by the `name:` frontmatter field
+against all five repos above.
 
 | Skill | Notes |
 |---|---|
 | `agents-team` | team/lead-plus-specialists workflow, built on `pi-subagents` |
 | `ai-loop` | bounded spec-build-review loop |
 | `consult` | read-only advisor model at decision checkpoints |
-| `context-first` | lookup order for dev work: CodeGraph → Obsidian vault → TypeSafe Jev (narrow and batch classification) → plan and edit |
+| `context-first` | lookup order for dev work: CodeGraph → TypeSafe Jev (narrow and batch classification) → Obsidian vault → plan and edit |
 | `field-handoff` | office ↔ field handoff file (and paste-ready field-agent prompt) between the office and the real machine |
 | `field-office-checklist` | MetalAutoUQDwpf only: list what still needs the real machine vs the office, field items layered by who can verify them |
 | `git-janitor` | sweep a messy working tree: commit, push, .gitignore, or delete each stray entry |

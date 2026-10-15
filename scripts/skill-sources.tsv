@@ -59,9 +59,11 @@ obsidian-bases	kepano/obsidian-skills	skills/obsidian-bases	3ccff5338ea700537839
 obsidian-cli	kepano/obsidian-skills	skills/obsidian-cli	3ccff5338ea700537839b21900aa5358a0402c98	verbatim	-
 obsidian-markdown	kepano/obsidian-skills	skills/obsidian-markdown	3ccff5338ea700537839b21900aa5358a0402c98	verbatim	-
 code-review-and-quality	addyosmani/agent-skills	skills/code-review-and-quality	1401c8b8030e023baeebb31781a6653fe8e93026	divergent	local variant; body rewritten, upstream mutation-testing paragraph folded in
+typesafe-ai	typesafe-ai/skills	skills/typesafe-ai	65a39f393687675ce170e6094757de20370365b9	verbatim	-
 agents-team	-	-	-	local-only	authored here; pi-subagents based
 ai-loop	-	-	-	local-only	authored here
 consult	-	-	-	local-only	authored here
+context-first	-	-	-	local-only	authored here; lookup order for dev work: CodeGraph, then narrow judgments to Jev, then the Obsidian vault, then plan and edit
 ssh-captain	-	-	-	local-only	authored here
 field-office-checklist	-	-	-	local-only	authored here; MetalAutoUQDwpf-specific field/office checklist
 field-handoff	-	-	-	local-only	authored here
