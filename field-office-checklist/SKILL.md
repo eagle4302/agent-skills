@@ -157,6 +157,8 @@ B 層的排序，前一條比後一條優先：
    pwsh -File .scratch\check-deployed-config.ps1
    ```
    它不開程式，直接呼叫開機用的 `DeployedConfig.Resolve`，印出 `FellBack` 與後端位址；退回時 exit 1 並印出原因。要 PowerShell 7.6 以上（.NET 10）。
+   P0 還要寫這一條**現場檔留底**：開工先把 exe 旁 `uqd.json`、`io-list.csv`、`homing-plan.json` 各複製一份 `<原檔>.bak-start-<YYYYMMDD>`；之後每次抄雜湊發現跟上一次不同（使用者在 HMI 自己改的也算），先再複製一份 `<原檔>.bak-<HHMM>-<YYYYMMDD>`、記進回報，再往下做。
+   理由：2026-10-15 使用者在 HMI 改了 `io-list.csv` 三色燈序號，「改現場檔前先備份」只管 agent 自己改的，那次現場沒有任何備份。
 4. A／B／C 三層，每格寫：怎麼做、要看到什麼（數字或原句）、票。
 5. 順手問使用者、已知不用驗、回報骨架（`.scratch/field-report-<日期>.md`）、收工整理。
 
