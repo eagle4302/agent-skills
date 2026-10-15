@@ -40,6 +40,15 @@ On macOS or Linux, use `ln -s ~/.agents/skills ~/.claude/skills` instead.
   is all Claude Code needs. `scripts/` has no `SKILL.md` and is ignored. Skills added or synced later are
   picked up on the next session.
 
+## Using these skills from OpenCode
+
+OpenCode V2 needs no junction: `~/.agents/skills` and `~/.claude/skills` are both **global compatibility
+sources**, so this directory is read as-is, and a project-local `.agents/skills` is picked up from the
+project root down to the current directory. Nothing goes in `opencode.jsonc` — extra directories and HTTP
+catalogs are optional, via its `skills` array. The skill ID is the path-derived, case-sensitive directory
+name (`typesafe-ai`), and as in Pi a skill with no `description` is not advertised to the model. Verify
+with `opencode debug skill`, which lists every registered skill with its `location`.
+
 ## Sources at a glance
 
 All five upstream repos last compared on **2026-10-15** by `scripts/check-skill-updates.sh`.
