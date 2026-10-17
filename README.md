@@ -51,14 +51,14 @@ with `opencode debug skill`, which lists every registered skill with its `locati
 
 ## Sources at a glance
 
-All five upstream repos last compared on **2026-10-15** by `scripts/check-skill-updates.sh`.
+All five upstream repos last compared on **2026-10-18** by `scripts/check-skill-updates.sh`.
 
 | Upstream repo | Upstream layout | Skills installed | Pinned commit |
 |---|---|---|---|
-| [mattpocock/skills](https://github.com/mattpocock/skills) | `skills/<category>/<name>/` for `engineering`, `productivity`, `misc`, `in-progress` | 36 | `d81f3a1` (2026-09-29) |
-| [humanlayer/skills](https://github.com/humanlayer/skills) | `plugins/<plugin>/skills/<name>/` | 1 | `ca7c8088` (2026-09-17) |
+| [mattpocock/skills](https://github.com/mattpocock/skills) | `skills/<category>/<name>/` for `engineering`, `productivity`, `misc`, `in-progress` | 36 | `49dd158` (2026-10-09) |
+| [humanlayer/skills](https://github.com/humanlayer/skills) | `plugins/<plugin>/skills/<name>/` | 1 | `653b641` (2026-10-08) |
 | [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) | `skills/<name>/` | 6 | `3ccff533` (2026-09-15) |
-| [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | `skills/<name>/` | 1 (divergent copy) | `1401c8b` (2026-10-03) |
+| [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | `skills/<name>/` | 1 (divergent copy) | `aeac41d` (2026-10-13) |
 | [typesafe-ai/skills](https://github.com/typesafe-ai/skills) | `skills/<name>/` | 1 | `65a39f3` (2026-09-12) |
 | authored in this repo | — | 8 | — |
 
@@ -67,12 +67,18 @@ All five upstream repos last compared on **2026-10-15** by `scripts/check-skill-
 
 ## Provenance by skill
 
-### mattpocock/skills — pinned `d81f3a183412e71a5b1e84ca21bc1a35eea03a60`
+### mattpocock/skills — pinned `49dd158d1076134a641b33efb035946536778336`
 
 Most of the 36 copies are byte-identical to upstream (`verbatim`); eight carry a local edit (the
 grilling family and its callers — see "Local edits that a re-sync would clobber").
 `resolving-merge-conflicts` was removed upstream in v1.3 (commit `daa01d8`), so its local copy was
 deleted; `implement-spec` and `retro` graduated from `in-progress/` to `engineering/`.
+
+The 2026-10-18 sync moved the pin from `d81f3a1` to `49dd158` and refreshed 13 skills: eleven
+`verbatim` copies (`ask-matt`, `code-review`, `diagnosing-bugs`, `implement`,
+`setup-matt-pocock-skills`, `tdd`, `to-tickets`, `wizard`, `handoff`, `teach`, `claude-handoff`) plus
+`grilling` and `wayfinder`, which carry a local edit and were merged by hand. Everything else in this
+repo was already identical to `49dd158`.
 
 | Skill | Upstream path |
 |---|---|
@@ -113,16 +119,19 @@ deleted; `implement-spec` and `retro` graduated from `in-progress/` to `engineer
 | `writing-fragments` | `skills/in-progress/writing-fragments` |
 | `writing-shape` | `skills/in-progress/writing-shape` |
 
-Not installed from this repo: `pr` (`skills/engineering/pr`).
+Not installed from this repo: `chief-of-staff` (experimental), `pr` (`skills/engineering/pr`).
 
-### humanlayer/skills — pinned `ca7c8088db69e315a8b2deea43820270457f8f3c`
+### humanlayer/skills — pinned `653b6411c1f70c275a18e37673b042ff99f67ceb`
 
 | Skill | Upstream path | Local state |
 |---|---|---|
 | `show-me` | `plugins/show-me/skills/show-me` | modified — see below |
 
+The repo moved from `ca7c8088` to `653b641` (2026-10-08), which added `rpi`; `show-me`'s own tree did
+not change, so the pin moved without a copy.
+
 Not installed from this repo: `build-iterated-agentic-loop`, `design-control-loop`, `improve-claude-md`,
-`narrow-react-prop-types`, `visual-pr`.
+`narrow-react-prop-types`, `rpi`, `visual-pr`.
 
 ### kepano/obsidian-skills — pinned `3ccff5338ea700537839b21900aa5358a0402c98`
 
@@ -135,7 +144,7 @@ Not installed from this repo: `build-iterated-agentic-loop`, `design-control-loo
 | `obsidian-cli` | `skills/obsidian-cli` | verbatim |
 | `obsidian-markdown` | `skills/obsidian-markdown` | verbatim |
 
-### addyosmani/agent-skills — compared against `1401c8b8030e023baeebb31781a6653fe8e93026`
+### addyosmani/agent-skills — compared against `aeac41d4d005999432bb7312f7ff06383a91d59d`
 
 | Skill | Upstream path | Local state |
 |---|---|---|
@@ -152,6 +161,10 @@ date_added: 2026-07-01
 license: MIT
 license_source: https://github.com/addyosmani/agent-skills/blob/main/LICENSE
 ```
+
+The repo moved from `1401c8b` to `aeac41d` (2026-10-13); the `code-review-and-quality` tree is unchanged
+between the two, so the pin moved without a copy. The local variant is still the divergence described
+below, not a stale copy of upstream.
 
 ### typesafe-ai/skills — pinned `65a39f393687675ce170e6094757de20370365b9`
 
