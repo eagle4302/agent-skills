@@ -184,6 +184,15 @@ The repo moved from `1401c8b` to `aeac41d` (2026-10-13); the `code-review-and-qu
 between the two, so the pin moved without a copy. The local variant is still the divergence described
 below, not a stale copy of upstream.
 
+**Known optional pointer.** `code-review-and-quality/SKILL.md:169` closes a paragraph with "For a
+project-wide mutation score, see `constraint-driven-development`", which is not installed. It is not a
+`pr`-style gap: the sentences before it instruct the agent to invert a condition, run the suite and name
+the missing test case, and only the project-wide score points outside the skill. Checked 2026-10-18 with
+a Jev call — `optional_see_also` at confidence 1.00 against the `same_as_pr` shape, `blocks_instructed_step`
+0.20, and the remaining-gap class `optional_pointers_only` at 0.91. Left uninstalled on purpose.
+Installing it would add two more optional pointers of the same kind: its own overview names
+`test-driven-development` and `security-and-hardening`, also not installed.
+
 ### typesafe-ai/skills — pinned `65a39f393687675ce170e6094757de20370365b9`
 
 | Skill | Upstream path | Local state |
@@ -235,6 +244,12 @@ scripts/check-skill-updates.sh --offline    # reuse the cached upstream clones, 
 Upstream clones are cached in `$HOME/.cache/pi-skill-updates` (override with `--cache DIR` or
 `PI_SKILLS_CACHE`). The script fetches each repo's default branch and compares directory trees, so it
 catches added, changed, and deleted files.
+
+**It compares trees, so it cannot see a skill referenced by name but absent.** That is the shape of the
+`pr` gap: `ask-matt` handed the PR body to `/pr` while `pr` was uninstalled. `--sources` lists upstream
+skills that are not installed, but nothing connects that list to the skills that mention them. To
+re-check by hand, grep the installed skills for each uninstalled upstream name; as of 2026-10-18 the
+only hit is the optional pointer recorded under addyosmani/agent-skills.
 
 **Line endings are ignored.** Upstream trees are exported as LF and the comparison ignores trailing CR, so
 a Windows checkout (`core.autocrlf=true`) does not read every file as a local edit. The earlier "37 copies
