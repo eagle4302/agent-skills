@@ -23,6 +23,7 @@ domain-modeling	mattpocock/skills	skills/engineering/domain-modeling	49dd158d107
 grill-with-docs	mattpocock/skills	skills/engineering/grill-with-docs	49dd158d1076134a641b33efb035946536778336	verbatim	-
 implement	mattpocock/skills	skills/engineering/implement	49dd158d1076134a641b33efb035946536778336	verbatim	-
 improve-codebase-architecture	mattpocock/skills	skills/engineering/improve-codebase-architecture	49dd158d1076134a641b33efb035946536778336	modified	closed-option questions ask via the harness ask tool (see grilling)
+pr	mattpocock/skills	skills/engineering/pr	49dd158d1076134a641b33efb035946536778336	verbatim	model-invoked PR body; ask-matt routes to it
 prototype	mattpocock/skills	skills/engineering/prototype	49dd158d1076134a641b33efb035946536778336	verbatim	-
 research	mattpocock/skills	skills/engineering/research	49dd158d1076134a641b33efb035946536778336	verbatim	-
 setup-matt-pocock-skills	mattpocock/skills	skills/engineering/setup-matt-pocock-skills	49dd158d1076134a641b33efb035946536778336	verbatim	-

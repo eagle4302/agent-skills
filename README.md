@@ -1,6 +1,6 @@
 # Skills
 
-This directory is the Pi user-level skills root (`~/.pi/agent/skills`). It holds 57 skills — most of
+This directory is the Pi user-level skills root (`~/.pi/agent/skills`). It holds 58 skills — most of
 them copied from public upstream repos, the rest authored here.
 
 It is also a git repository of its own:
@@ -55,7 +55,7 @@ All five upstream repos last compared on **2026-10-18** by `scripts/check-skill-
 
 | Upstream repo | Upstream layout | Skills installed | Pinned commit |
 |---|---|---|---|
-| [mattpocock/skills](https://github.com/mattpocock/skills) | `skills/<category>/<name>/` for `engineering`, `productivity`, `misc`, `in-progress` | `in-progress` | 37 | `49dd158` (2026-10-09) |
+| [mattpocock/skills](https://github.com/mattpocock/skills) | `skills/<category>/<name>/` for `engineering`, `productivity`, `misc`, `in-progress` | 38 | `49dd158` (2026-10-09) |
 | [humanlayer/skills](https://github.com/humanlayer/skills) | `plugins/<plugin>/skills/<name>/` | 4 | `653b641` (2026-10-08) |
 | [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) | `skills/<name>/` | 6 | `3ccff533` (2026-09-15) |
 | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | `skills/<name>/` | 1 (divergent copy) | `aeac41d` (2026-10-13) |
@@ -69,7 +69,7 @@ All five upstream repos last compared on **2026-10-18** by `scripts/check-skill-
 
 ### mattpocock/skills — pinned `49dd158d1076134a641b33efb035946536778336`
 
-Most of the 37 copies are byte-identical to upstream (`verbatim`); eight carry a local edit (the
+Most of the 38 copies are byte-identical to upstream (`verbatim`); eight carry a local edit (the
 grilling family and its callers — see "Local edits that a re-sync would clobber").
 `resolving-merge-conflicts` was removed upstream in v1.3 (commit `daa01d8`), so its local copy was
 deleted; `implement-spec` and `retro` graduated from `in-progress/` to `engineering/`.
@@ -82,7 +82,10 @@ repo was already identical to `49dd158`.
 
 The same day, `chief-of-staff` was added — the one skill upstream gained between `d81f3a1` and
 `49dd158`. It is `verbatim`, and keeps upstream's `disable-model-invocation: true`, so it is invoked by
-name only.
+name only. `pr` was added the same day to close the flow: `ask-matt` hands the PR body to `/pr` and
+notes that it is model-invoked, so leaving it out left that pointer dangling. It is `verbatim` too, and
+its `agents/openai.yaml` carries only `interface:` metadata — no `policy:` block — so nothing
+suppresses automatic invocation.
 
 | Skill | Upstream path |
 |---|---|
@@ -94,6 +97,7 @@ name only.
 | `grill-with-docs` | `skills/engineering/grill-with-docs` |
 | `implement` | `skills/engineering/implement` |
 | `improve-codebase-architecture` | `skills/engineering/improve-codebase-architecture` |
+| `pr` | `skills/engineering/pr` |
 | `prototype` | `skills/engineering/prototype` |
 | `research` | `skills/engineering/research` |
 | `setup-matt-pocock-skills` | `skills/engineering/setup-matt-pocock-skills` |
@@ -124,7 +128,7 @@ name only.
 | `writing-shape` | `skills/in-progress/writing-shape` |
 | `chief-of-staff` | `skills/in-progress/chief-of-staff` |
 
-Not installed from this repo: `pr` (`skills/engineering/pr`).
+Every skill in this repo is now installed.
 
 ### humanlayer/skills — pinned `653b6411c1f70c275a18e37673b042ff99f67ceb`
 
