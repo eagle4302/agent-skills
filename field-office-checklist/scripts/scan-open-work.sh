@@ -5,6 +5,12 @@
 # 只讀，不改任何檔。
 set -u
 
+office_only=0
+if [ "${1:-}" = "--office" ]; then
+  office_only=1
+  shift
+fi
+
 root=$(git rev-parse --show-toplevel 2>/dev/null) || { echo "不在 git repo 裡"; exit 1; }
 cd "$root" || exit 1
 
@@ -44,7 +50,7 @@ echo "      OFFICE｜BLOCKED｜LATER 以後再做｜NO-STATUS／OTHER 要讀票�
 echo "分類 | 檔案 | 標題 | Status 前 160 字"
 # 一支 gawk 掃完全部票（逐檔開子程序在 Windows 上要一分多鐘）。
 # 中文要按字元截，所以釘 UTF-8 locale。
-LC_ALL=C.UTF-8 gawk -v base="$base_date" '
+tickets=$(LC_ALL=C.UTF-8 gawk -v base="$base_date" '
   function emit(   s, low, bucket, d, pending) {
     if (file == "") return
     s = status
@@ -79,16 +85,45 @@ LC_ALL=C.UTF-8 gawk -v base="$base_date" '
     if (old_pending > 0)
       printf "~ （另有 %d 張基準日以前 done、票面寫著真機沒驗的舊票沒列：多半已由各功能的真機驗收票涵蓋，要查再 grep「未上真機」）\n", old_pending
   }
-' .scratch/*/issues/*.md | sort -t'|' -k1,1 -s
+' .scratch/*/issues/*.md | sort -t'|' -k1,1 -s)
+
+if [ "$office_only" -eq 1 ]; then
+  printf '%s\n' "$tickets" | grep -E '^(OFFICE|BLOCKED|LATER|ASK|NO-STATUS|FIELD-WAIT)' || true
+else
+  printf '%s\n' "$tickets"
+fi
 echo
 
-echo "# 3. 現場 exe 之後還沒上機的程式改動"
-if [ -n "$since" ]; then
-  echo "基準：$since（$(git log -1 --format='%ad %s' --date=format:'%m-%d %H:%M' "$since" | cut -c1-80)）"
-  git log --no-merges --format='- %h %ad %s' --date=format:'%m-%d %H:%M' "$since"..HEAD \
-    -- '*.cs' '*.xaml' '*.csproj' '*.slnx' 'Machine/*'
+echo "# 2b. FIELD tickets with a possible office half"
+field_candidates=$(printf '%s\n' "$tickets" | awk -F' \\| ' '$1 == "FIELD" { print $2 }')
+if [ -n "$field_candidates" ]; then
+  found=0
+  while IFS= read -r rel; do
+    [ -n "$rel" ] || continue
+    matches=$(grep -nE 'ADR.*(未更新|沒更新)|AutomationProperties\.Name|pendingNote|artifact.*(未|待|republish)|辦公室[^。]{0,30}(還沒|未做|未完成|待做|缺口)|45 格還沒|UIA.*(讀不到|只讀到|值沒|未|待)' ".scratch/$rel" 2>/dev/null | head -1 | cut -c1-180)
+    if [ -n "$matches" ]; then
+      printf 'OFFICE-HALF | %s | %s\n' "$rel" "$matches"
+      found=$((found + 1))
+      [ "$found" -ge 20 ] && { echo "（只列前 20；其餘請逐張讀 FIELD 票）"; break; }
+    fi
+  done <<EOF
+$field_candidates
+EOF
+  [ "$found" -eq 0 ] && echo "（沒有命中；仍要逐張讀 FIELD 票的『剩什麼／驗收』）"
 else
-  echo "（找不到基準 commit：給參數，或在現場回報寫上 1.0.0+<sha>）"
+  echo "（沒有 FIELD 票）"
+fi
+echo
+
+if [ "$office_only" -eq 0 ]; then
+  echo "# 3. 現場 exe 之後還沒上機的程式改動"
+  if [ -n "$since" ]; then
+    echo "基準：$since（$(git log -1 --format='%ad %s' --date=format:'%m-%d %H:%M' "$since" | cut -c1-80)）"
+    git log --no-merges --format='- %h %ad %s' --date=format:'%m-%d %H:%M' "$since"..HEAD \
+      -- '*.cs' '*.xaml' '*.csproj' '*.slnx' 'Machine/*'
+  else
+    echo "（找不到基準 commit：給參數，或在現場回報寫上 1.0.0+<sha>）"
+  fi
 fi
 echo
 

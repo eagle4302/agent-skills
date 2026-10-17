@@ -33,7 +33,13 @@ A minimal request:
 {"state":{"issue":"Login page breaks in Safari"},"model":"jev-latest","questions":{"label":{"type":"choice","instructions":"Which label fits this issue?","criteria":{"bug":"broken behavior","feature":"new capability","none":"nothing fits"}}}}
 ```
 
-- Design the questions with the `typesafe-ai` skill when it is available (`typesafe:typesafe-ai` in Claude Code); the schema above is enough when it is not. Write `{state, model:"jev-latest", questions:{...}}` to a temp file, then send it: if the machine has a `~/.claude/hooks/jev.sh` hook, run `bash ~/.claude/hooks/jev.sh <file>`; otherwise POST it directly. There is no MCP tool. A `choice`'s `criteria` is an object (a list returns 422); a `score`'s `criteria` is an array of level descriptions.
+For a yes/no question use `noul`; it carries no separate confidence, only the returned probability:
+
+```json
+{"state":{"ticket":"..."},"model":"jev-latest","questions":{"meets":{"type":"noul","instructions":"Does this ticket meet its stated acceptance list?"}}}
+```
+
+- Design the questions with the `typesafe-ai` skill when it is available (`typesafe:typesafe-ai` in Claude Code); the schema above is enough when it is not. Write `{state, model:"jev-latest", questions:{...}}` to a temp file, then send it: if the machine has a `~/.claude/hooks/jev.sh` hook, run `bash ~/.claude/hooks/jev.sh <file>`; otherwise POST it directly. There is no MCP tool. `type`, `instructions` and `criteria` sit **directly under the question**; do not wrap them in a `choice` object (that shape returns 422). A `choice`'s `criteria` is an object (a list returns 422); a `score`'s `criteria` is an array of level descriptions.
 
   ```bash
   curl -sS -X POST https://api.typesafe.ai/v1/systemone \

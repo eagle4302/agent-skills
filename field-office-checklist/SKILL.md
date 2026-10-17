@@ -17,9 +17,10 @@ MetalAutoUQDwpf 的工作在兩個地方做完：辦公室（寫程式、測試�
 
 ```bash
 bash ~/.agents/skills/field-office-checklist/scripts/scan-open-work.sh
+bash ~/.agents/skills/field-office-checklist/scripts/scan-open-work.sh --office
 ```
 
-想指定現場 exe 的版本，就把 commit 當參數傳進去。不給參數時，腳本會從最新一份 `.scratch/field-report-*.md` 抓第一個 `1.0.0+<sha>`。
+想指定現場 exe 的版本，就把 commit 當參數傳進去（`--office` 後面也可以再接 commit）。不給參數時，腳本會從最新一份 `.scratch/field-report-*.md` 抓第一個 `1.0.0+<sha>`。`--office` 只印交接文件、`OFFICE`／`BLOCKED`／`LATER`／`ASK`／`FIELD-WAIT`、第 2b 段的辦公室候選與 GitHub，不印整張 FIELD 表與 commit 長列表。
 
 腳本吐出四段：
 
@@ -27,7 +28,8 @@ bash ~/.agents/skills/field-office-checklist/scripts/scan-open-work.sh
 | --- | --- | --- |
 | 1 | 最新現場回報（和它照哪一版提示詞做）、全部的現場提示詞、field-to-office、office-end、field-visit 總表 | 下一步要讀的檔 |
 | 2 | 票，已粗分（見下表） | 分類的原料 |
-| 3 | 現場 exe 之後的程式 commit（`*.cs`、`*.xaml`、專案檔、`Machine/`） | 「還沒上機的改動」那張表 |
+| 2b | `FIELD` 票裡可能還有「辦公室那一半」的候選（`辦公室…未`、ADR 未更新、UIA、`pendingNote`、artifact 等） | 交回辦公室清單；仍要逐張讀票確認 |
+| 3 | 現場 exe 之後的程式 commit（`*.cs`、`*.xaml`、專案檔、`Machine/`） | 「還沒上機的改動」那張表（`--office` 不印） |
 | 4 | 兩個 repo 在 GitHub 上的 open issue 與標籤 | 補進兩張清單 |
 
 第 2 段的粗分：
@@ -44,7 +46,9 @@ bash ~/.agents/skills/field-office-checklist/scripts/scan-open-work.sh
 
 基準日以前 `done`、票面寫著「未上真機」的舊票只報張數：它們通常已由各功能的真機驗收票涵蓋，全列會淹掉清單。
 
-腳本只看票面 `**Status:**` 的開頭幾個字，所以只是粗分。**以票面為準、不要信舊總表**：`handoff-*-field-visit.md` 是某一天的快照，裡面打勾的、沒打勾的都可能已經過時。
+腳本只看票面 `**Status:**` 的開頭幾個字，所以只是粗分。第 2b 段只是把可能藏著辦公室工作的 FIELD 票挑出來，命中仍要逐張讀；沒命中也不代表一定沒有。**以票面為準、不要信舊總表**：`handoff-*-field-visit.md` 是某一天的快照，裡面打勾的、沒打勾的都可能已經過時。
+
+`nested` 的 `.scratch/*/work/**/issues/` 是別的工作區、常被 gitignore；本腳本只掃 `.scratch/*/issues/`，那些舊副本不要重做。
 
 Done when：四段都看過；基準 commit 有值（沒有就記下來，輸出時問使用者）。
 
@@ -102,7 +106,7 @@ Done when：四個來源都讀過、Explore agent 的結論都回來；每個 `D
 | `LATER`（`以後再做`） | 只寫張數與一行主題，除非使用者問 |
 | GitHub `needs-triage`（後端常有） | 辦公室要先對帳：是不是已經做掉了（`.scratch/backlog-triage-*.md` 有前例） |
 | 現場回報「下一步（要辦公室決定的）」 | 逐條搬過來 |
-| `FIELD` 票裡的辦公室那一半（例：「剩 artifact republish」） | 兩張都列：真機那張放量測，辦公室這張放 republish；先查是不是已經做了 |
+| `FIELD` 票裡的辦公室那一半（例：「剩 artifact republish」、UIA 值、`pendingNote`） | 先看第 2b 段的候選；兩張都列：真機那張放量測，辦公室這張放文件／UI；先查是不是已經做了 |
 | `NO-STATUS`／`OTHER` | 讀票面判斷，修好狀態行 |
 
 #### 另外兩類
