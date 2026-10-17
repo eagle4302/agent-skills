@@ -51,7 +51,11 @@ setup-ts-deep-modules	mattpocock/skills	skills/in-progress/setup-ts-deep-modules
 writing-beats	mattpocock/skills	skills/in-progress/writing-beats	49dd158d1076134a641b33efb035946536778336	verbatim	-
 writing-fragments	mattpocock/skills	skills/in-progress/writing-fragments	49dd158d1076134a641b33efb035946536778336	modified	closed-option questions ask via the harness ask tool (see grilling)
 writing-shape	mattpocock/skills	skills/in-progress/writing-shape	49dd158d1076134a641b33efb035946536778336	modified	closed-option questions ask via the harness ask tool (see grilling)
+chief-of-staff	mattpocock/skills	skills/in-progress/chief-of-staff	49dd158d1076134a641b33efb035946536778336	verbatim	upstream marks it experimental (in-progress/); carries disable-model-invocation: true
 show-me	humanlayer/skills	plugins/show-me/skills/show-me	653b6411c1f70c275a18e37673b042ff99f67ceb	modified	removed the disable-model-invocation field
+improve-claude-md	humanlayer/skills	plugins/improve-claude-md/skills/improve-claude-md	653b6411c1f70c275a18e37673b042ff99f67ceb	verbatim	-
+rpi	humanlayer/skills	plugins/rpi/skills/rpi	653b6411c1f70c275a18e37673b042ff99f67ceb	verbatim	user-invoked via its description; the plugin-level agents/ dir is not part of the skill
+visual-pr	humanlayer/skills	plugins/visual-pr/skills/visual-pr	653b6411c1f70c275a18e37673b042ff99f67ceb	verbatim	user-invoked via its description; plugin.json is not part of the skill
 defuddle	kepano/obsidian-skills	skills/defuddle	3ccff5338ea700537839b21900aa5358a0402c98	modified	description rewritten for routing
 json-canvas	kepano/obsidian-skills	skills/json-canvas	3ccff5338ea700537839b21900aa5358a0402c98	verbatim	-
 knap	kepano/obsidian-skills	skills/knap	3ccff5338ea700537839b21900aa5358a0402c98	verbatim	-

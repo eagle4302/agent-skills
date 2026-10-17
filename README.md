@@ -1,6 +1,6 @@
 # Skills
 
-This directory is the Pi user-level skills root (`~/.pi/agent/skills`). It holds 53 skills — most of
+This directory is the Pi user-level skills root (`~/.pi/agent/skills`). It holds 57 skills — most of
 them copied from public upstream repos, the rest authored here.
 
 It is also a git repository of its own:
@@ -55,8 +55,8 @@ All five upstream repos last compared on **2026-10-18** by `scripts/check-skill-
 
 | Upstream repo | Upstream layout | Skills installed | Pinned commit |
 |---|---|---|---|
-| [mattpocock/skills](https://github.com/mattpocock/skills) | `skills/<category>/<name>/` for `engineering`, `productivity`, `misc`, `in-progress` | 36 | `49dd158` (2026-10-09) |
-| [humanlayer/skills](https://github.com/humanlayer/skills) | `plugins/<plugin>/skills/<name>/` | 1 | `653b641` (2026-10-08) |
+| [mattpocock/skills](https://github.com/mattpocock/skills) | `skills/<category>/<name>/` for `engineering`, `productivity`, `misc`, `in-progress` | `in-progress` | 37 | `49dd158` (2026-10-09) |
+| [humanlayer/skills](https://github.com/humanlayer/skills) | `plugins/<plugin>/skills/<name>/` | 4 | `653b641` (2026-10-08) |
 | [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) | `skills/<name>/` | 6 | `3ccff533` (2026-09-15) |
 | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | `skills/<name>/` | 1 (divergent copy) | `aeac41d` (2026-10-13) |
 | [typesafe-ai/skills](https://github.com/typesafe-ai/skills) | `skills/<name>/` | 1 | `65a39f3` (2026-09-12) |
@@ -69,7 +69,7 @@ All five upstream repos last compared on **2026-10-18** by `scripts/check-skill-
 
 ### mattpocock/skills — pinned `49dd158d1076134a641b33efb035946536778336`
 
-Most of the 36 copies are byte-identical to upstream (`verbatim`); eight carry a local edit (the
+Most of the 37 copies are byte-identical to upstream (`verbatim`); eight carry a local edit (the
 grilling family and its callers — see "Local edits that a re-sync would clobber").
 `resolving-merge-conflicts` was removed upstream in v1.3 (commit `daa01d8`), so its local copy was
 deleted; `implement-spec` and `retro` graduated from `in-progress/` to `engineering/`.
@@ -79,6 +79,10 @@ The 2026-10-18 sync moved the pin from `d81f3a1` to `49dd158` and refreshed 13 s
 `setup-matt-pocock-skills`, `tdd`, `to-tickets`, `wizard`, `handoff`, `teach`, `claude-handoff`) plus
 `grilling` and `wayfinder`, which carry a local edit and were merged by hand. Everything else in this
 repo was already identical to `49dd158`.
+
+The same day, `chief-of-staff` was added — the one skill upstream gained between `d81f3a1` and
+`49dd158`. It is `verbatim`, and keeps upstream's `disable-model-invocation: true`, so it is invoked by
+name only.
 
 | Skill | Upstream path |
 |---|---|
@@ -118,20 +122,30 @@ repo was already identical to `49dd158`.
 | `writing-beats` | `skills/in-progress/writing-beats` |
 | `writing-fragments` | `skills/in-progress/writing-fragments` |
 | `writing-shape` | `skills/in-progress/writing-shape` |
+| `chief-of-staff` | `skills/in-progress/chief-of-staff` |
 
-Not installed from this repo: `chief-of-staff` (experimental), `pr` (`skills/engineering/pr`).
+Not installed from this repo: `pr` (`skills/engineering/pr`).
 
 ### humanlayer/skills — pinned `653b6411c1f70c275a18e37673b042ff99f67ceb`
 
 | Skill | Upstream path | Local state |
 |---|---|---|
 | `show-me` | `plugins/show-me/skills/show-me` | modified — see below |
+| `improve-claude-md` | `plugins/improve-claude-md/skills/improve-claude-md` | verbatim |
+| `rpi` | `plugins/rpi/skills/rpi` | verbatim |
+| `visual-pr` | `plugins/visual-pr/skills/visual-pr` | verbatim |
 
 The repo moved from `ca7c8088` to `653b641` (2026-10-08), which added `rpi`; `show-me`'s own tree did
 not change, so the pin moved without a copy.
 
-Not installed from this repo: `build-iterated-agentic-loop`, `design-control-loop`, `improve-claude-md`,
-`narrow-react-prop-types`, `rpi`, `visual-pr`.
+`rpi` and `visual-pr` declare "only use when the user explicitly invokes this skill by name" in their
+`description` rather than with `disable-model-invocation`. Copied verbatim, so both keep upstream's
+wording. For each of the three newer skills only the skill directory came over: the plugin-level
+`agents/` (rpi's five subagent definitions) and `.claude-plugin/plugin.json` belong to the Claude Code
+plugin, not to the skill, and `rpi` resolves its subagents from its own `references/subagents/`.
+
+Not installed from this repo: `build-iterated-agentic-loop`, `design-control-loop`,
+`narrow-react-prop-types`.
 
 ### kepano/obsidian-skills — pinned `3ccff5338ea700537839b21900aa5358a0402c98`
 
