@@ -39,7 +39,7 @@ For a yes/no question use `noul`; it carries no separate confidence, only the re
 {"state":{"ticket":"..."},"model":"jev-latest","questions":{"meets":{"type":"noul","instructions":"Does this ticket meet its stated acceptance list?"}}}
 ```
 
-- Design the questions with the `typesafe-ai` skill when it is available (`typesafe:typesafe-ai` in Claude Code); the schema above is enough when it is not. Write `{state, model:"jev-latest", questions:{...}}` to a temp file, then send it: if the machine has a `~/.claude/hooks/jev.sh` hook, run `bash ~/.claude/hooks/jev.sh <file>`; otherwise POST it directly. On Windows — and in DeepSeek Harness, which does not inherit the key — run `pwsh ~/.claude/hooks/jev-dsh.ps1 <file>` instead: same `{state, model, questions}` contract, but it reads `TYPESAFE_API_KEY` from the Windows user scope when the process environment has none, and exits 2 (no key), 3 (bad request), 4 (HTTP/transport failure). There is no MCP tool. `type`, `instructions` and `criteria` sit **directly under the question**; do not wrap them in a `choice` object (that shape returns 422). A `choice`'s `criteria` is an object (a list returns 422); a `score`'s `criteria` is an array of level descriptions.
+- Design the questions with the `typesafe-ai` skill when it is available (`typesafe:typesafe-ai` in Claude Code); the schema above is enough when it is not. Write `{state, model:"jev-latest", questions:{...}}` to a temp file, then send it: if the machine has a `~/.claude/hooks/jev.sh` hook, run `bash ~/.claude/hooks/jev.sh <file>`; otherwise POST it directly. On Windows — and in DeepSeek Harness, which does not inherit the key — run `~/.claude/hooks/jev-dsh.ps1 -Request '<JSON>'` instead (inline beats a temp file; pass a file path when the JSON contains single quotes or gets long): same `{state, model, questions}` contract, but it reads `TYPESAFE_API_KEY` from the Windows user scope when the process environment has none, and exits 2 (no key), 3 (bad request), 4 (HTTP/transport failure). There is no MCP tool. `type`, `instructions` and `criteria` sit **directly under the question**; do not wrap them in a `choice` object (that shape returns 422). A `choice`'s `criteria` is an object (a list returns 422); a `score`'s `criteria` is an array of level descriptions.
 
   ```bash
   curl -sS -X POST https://api.typesafe.ai/v1/systemone \
@@ -58,6 +58,7 @@ For a yes/no question use `noul`; it carries no separate confidence, only the re
 - Report the pick and its `confidence`, and gate on that field: `confidence` ≥ 0.6 → use the pick; below it, or a failed call → decide yourself, say so, and ask the user when the choice matters.
   - `confidence` is **not** the top probability. TypeSafe rescales the peak by the number of options — all the probability on one option is 1, an even split is 0 (Choice: `(p_max − 1/n) / (1 − 1/n)`). So 0.6 means different top probabilities at different option counts: ≈ 0.8 with two options, ≈ 0.68 with five. Threshold on the same field everywhere; read `probabilities` when the number itself matters.
   - A **`noul` answer carries no `confidence`**. Gate on the probability it returns: near 0.5 means it is genuinely unsure, not "medium".
+  - A **`score` answer** returns `score` as a 0–1 position across the levels plus a `legend` mapping index → level text. Report the level, not the fraction.
 - Keep these for yourself and the user: code design, debugging, multi-step reasoning, and any safety, risk, destructive-action, deploy, or go-live call.
 
 ### Batch classification
@@ -66,11 +67,11 @@ For many items (files, symbols, tests, tickets) against one fixed label set:
 
 1. Sort out the **rule-decidable** items first: anything a path, namespace, extension, or name pattern settles (everything under a `*.Tests` project is a test) gets its label by rule, with no Jev call.
 2. For the rest, build each item's one-line description from CodeGraph — kind, name, signature, a short summary of what it does — rather than its full source; Jev sees only what is in `state`.
-3. One request per chunk: `state.items` maps an id to its description; `questions` has one `choice` per id with the same `criteria` (label → meaning, plus `none`). Start with chunks of about 20 items; the per-request limit is untested.
+3. One request per chunk: `state.items` maps an id to its description; `questions` has one `choice` per id with the same `criteria` (label → meaning, plus `none`). **Each question's `instructions` must name its own item by path — `` `items.<id>` ``.** A shared instruction with no path makes every answer identical: measured 2026-10-18, 20 items with one shared instruction returned the same label 20/20 at ≈0.57 confidence; the same 20 with the path returned 5 different labels, 3 of them under 0.6. Chunks of 20 work; the per-request limit is untested.
 4. Read each answer's `choice` and `confidence`. `confidence` ≥ 0.6 → accept; below it, or `none` → a review list that the agent judges item by item, handing the user any that stay unclear.
 5. Report counts per label, how many came from rules vs Jev, and the review list.
 
-Measured 2026-10-14: 3 items in one request, all correct, 0.36 s, 641 input tokens.
+Measured 2026-10-14: 3 items in one request, all correct, 0.36 s, 641 input tokens. Measured 2026-10-18: 20 items, 5.7 k input / 1.2 k output tokens, 0.34 s — batching saves round-trips, not tokens, because `criteria` repeats per question.
 
 ## Writing back
 
