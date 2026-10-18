@@ -13,11 +13,13 @@
 
 ## Install
 
-The preset list is a profile patch layer; the app reads it at startup.
+The preset list is a profile patch layer; the app reads it at startup. The desktop app boots
+`profiles\desktop` — `profiles\web` belongs to the `dsh` CLI, which is a different install and
+never sees this patch.
 
 ```powershell
-# 1. append team.patch.yml's `- insert:` block to the profile's user patch
-notepad "$env:USERPROFILE\.dsh\profiles\web\cordis.patch.yml"
+# 1. append team.patch.yml's `- insert:` block to the desktop profile's user patch
+notepad "$env:USERPROFILE\.dsh\profiles\desktop\cordis.patch.yml"
 
 # 2. restart the DeepSeek Harness app, then start a NEW session on 團隊模式（Agents Team）
 ```
@@ -49,7 +51,7 @@ non-mutating by construction.
 ```powershell
 node ..\scripts\check-team-preset.mjs `
   --modules "$env:USERPROFILE\.dsh\profiles\node_modules" `
-  --install "$env:USERPROFILE\.dsh\profiles\web\cordis.patch.yml"
+  --install "$env:USERPROFILE\.dsh\profiles\desktop\cordis.patch.yml"
 ```
 
 Checks that the patch parses, that every role declares the right mounts, that the lead's

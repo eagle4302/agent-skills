@@ -1,7 +1,8 @@
-# agents-team preset for DSH 0.1.5-rc.2 and later.
+# agents-team preset for DSH 0.2.1-rc.2.
 #
-# Install: append this file's entries to <dshHome>/profiles/web/cordis.patch.yml,
-# or preview it with `dsh --profile web --patch <this file> --dump-config`.
+# Install: append this file's entries to the patch layer of the profile the app
+# boots — <dshHome>/profiles/desktop/cordis.patch.yml for the desktop app. The
+# `web` profile belongs to the `dsh` CLI, which is a different install.
 #
 # What it registers: five child presets (`team-scout`, `team-builder`, `team-prober`,
 # `team-critic`, `team-scribe`) and one lead preset (`team`). The lead is the shipped

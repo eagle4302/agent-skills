@@ -55,7 +55,8 @@ allowlist on the `subagent` row.
 
 ```powershell
 # append the patch's `- insert:` block to the profile's user patch, then restart the app
-notepad "$env:USERPROFILE\.dsh\profiles\web\cordis.patch.yml"
+# the desktop app boots `desktop`; `web` belongs to the dsh CLI and never sees it
+notepad "$env:USERPROFILE\.dsh\profiles\desktop\cordis.patch.yml"
 ```
 
 The preset list is read when a session is created, and the composition is fixed for that
