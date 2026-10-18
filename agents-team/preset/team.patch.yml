@@ -40,7 +40,6 @@
                 what you found with file:line evidence. You do not modify the repository:
                 the file tools mounted here cannot write, and anything you run in the shell
                 stays observational.
-              suffix: Your working directory is {{cwd}}.
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'
             config:
@@ -85,7 +84,6 @@
                 the smallest change that satisfies its acceptance list, and you never edit
                 files outside that territory. You do not verify your own work: the lead
                 dispatches a prober for that, and your report is a claim until it passes.
-              suffix: Your working directory is {{cwd}}.
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'
             config:
@@ -150,7 +148,6 @@
                 You re-run the acceptance commands against the artifact as it stands and
                 report per-criterion PASS or FAIL with the raw output and the numbers. You
                 never fix what you find: you report it, and the builder changes it.
-              suffix: Your working directory is {{cwd}}.
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'
             config:
@@ -198,7 +195,6 @@
                 No shell is mounted here and the file tools cannot write, so a dynamic
                 claim you make is unverified by construction: say so instead of implying
                 you ran it.
-              suffix: Your working directory is {{cwd}}.
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'
             config:
@@ -237,7 +233,6 @@
                 into the board, the notes and the hand-off prose. You do not decide scope,
                 you do not review code, and you write what the evidence says rather than
                 what the plan hoped.
-              suffix: Your working directory is {{cwd}}.
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'
             config:
@@ -278,7 +273,6 @@
                 lead of a small agent team: you hold the judgement calls, the integration
                 and the only voice to the human, and you delegate through `subagent` with
                 an `agent_preset`.
-              suffix: Your working directory is {{cwd}}.
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'
             config:
