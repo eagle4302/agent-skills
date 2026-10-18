@@ -5,11 +5,11 @@
 | Preset id | Display name | What it is |
 | --- | --- | --- |
 | `team` | 團隊模式（Agents Team） | the shipped `standard` composition plus an `agent_preset` allowlist on `subagent` — the lead |
-| `team-scout` | Team scout | read-only reconnaissance; `dsh-tool-fs` mounted with `write: false, edit: false` |
-| `team-builder` | Team builder | full file and shell tools, no delegation |
-| `team-prober` | Team prober | verifier: no `write` / `edit`, keeps the shell for acceptance commands |
-| `team-critic` | Team critic | no shell at all; cannot change a byte or run a command |
-| `team-scribe` | Team scribe | file tools only, for board and hand-off prose |
+| `team-scout` | 團隊 · 偵查 scout | read-only reconnaissance; `dsh-tool-fs` mounted with `write: false, edit: false` |
+| `team-builder` | 團隊 · 實作 builder | full file and shell tools, no delegation |
+| `team-prober` | 團隊 · 驗收 prober | verifier: no `write` / `edit`, keeps the shell for acceptance commands |
+| `team-critic` | 團隊 · 審查 critic | no shell at all; cannot change a byte or run a command |
+| `team-scribe` | 團隊 · 文件 scribe | file tools only, for board and hand-off prose |
 
 ## Install
 

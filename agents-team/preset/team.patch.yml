@@ -26,11 +26,11 @@
       name: '@deepseek-ai/dsh-agent-preset'
       config:
         id: team-scout
-        name: Team scout
+        name: 團隊 · 偵查 scout
         description: >-
           Read-only reconnaissance. Reports what the code does and where, with file:line,
           and changes nothing.
-        order: 21
+        order: 91
         plugins:
           - id: persona
             name: '@deepseek-ai/dsh-persona'
@@ -71,11 +71,11 @@
       name: '@deepseek-ai/dsh-agent-preset'
       config:
         id: team-builder
-        name: Team builder
+        name: 團隊 · 實作 builder
         description: >-
           Writes the implementation inside one territory. Full file and shell tools, no
           delegation.
-        order: 22
+        order: 92
         plugins:
           - id: persona
             name: '@deepseek-ai/dsh-persona'
@@ -136,11 +136,11 @@
       name: '@deepseek-ai/dsh-agent-preset'
       config:
         id: team-prober
-        name: Team prober
+        name: 團隊 · 驗收 prober
         description: >-
           Independent verifier. Re-runs the acceptance commands and returns PASS/FAIL with
           raw output; cannot edit files.
-        order: 23
+        order: 93
         plugins:
           - id: persona
             name: '@deepseek-ai/dsh-persona'
@@ -183,11 +183,11 @@
       name: '@deepseek-ai/dsh-agent-preset'
       config:
         id: team-critic
-        name: Team critic
+        name: 團隊 · 審查 critic
         description: >-
           Read-only reviewer on two axes, spec compliance and red lines. No shell, so it
           cannot change a byte or run a command.
-        order: 24
+        order: 94
         plugins:
           - id: persona
             name: '@deepseek-ai/dsh-persona'
@@ -223,11 +223,11 @@
       name: '@deepseek-ai/dsh-agent-preset'
       config:
         id: team-scribe
-        name: Team scribe
+        name: 團隊 · 文件 scribe
         description: >-
           Writes the board, notes and hand-off prose from what the lead supplies. Does not
           decide scope and cannot delegate.
-        order: 25
+        order: 95
         plugins:
           - id: persona
             name: '@deepseek-ai/dsh-persona'
