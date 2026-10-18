@@ -1,48 +1,68 @@
-# team preset — the role tools the skill delegates to
+# team preset — role-scoped delegation for DSH 0.2.1-rc.2
 
-`agent.cordis.yml` is a full agent composition (the shipped `standard` preset plus three
-role-scoped delegation tools). `preset.yml` is the picker metadata.
+`team.patch.yml` registers six presets as a profile patch layer:
+
+| Preset id | Display name | What it is |
+| --- | --- | --- |
+| `team` | 團隊模式（Agents Team） | the shipped `standard` composition plus an `agent_preset` allowlist on `subagent` — the lead |
+| `team-scout` | Team scout | read-only reconnaissance; `dsh-tool-fs` mounted with `write: false, edit: false` |
+| `team-builder` | Team builder | full file and shell tools, no delegation |
+| `team-prober` | Team prober | verifier: no `write` / `edit`, keeps the shell for acceptance commands |
+| `team-critic` | Team critic | no shell at all; cannot change a byte or run a command |
+| `team-scribe` | Team scribe | file tools only, for board and hand-off prose |
 
 ## Install
 
+The preset list is a profile patch layer; the app reads it at startup.
+
 ```powershell
-New-Item -ItemType Directory -Path "$env:USERPROFILE\.dsh\.agent-presets\team" -Force
-Copy-Item ".\*" "$env:USERPROFILE\.dsh\.agent-presets\team\" -Force
+# 1. append team.patch.yml's `- insert:` block to the profile's user patch
+notepad "$env:USERPROFILE\.dsh\profiles\web\cordis.patch.yml"
+
+# 2. restart the DeepSeek Harness app, then start a NEW session on 團隊模式（Agents Team）
 ```
 
-DSH scans `<dshHome>/.agent-presets` unmemoized, so a new **top-level session** sees the preset
-without restarting the harness (a session already running keeps the composition it started with).
-Pick **團隊模式（Agents Team）** in the preset picker.
+A session's composition is fixed when it is created: an existing session keeps the preset it
+started with, so the preset picker only offers presets to a session that has produced nothing.
+
+The five role presets also appear in the picker. Do not start a session on one — they exist to
+be selected per child through `agent_preset`; a session on `team-critic` would be a coding
+session that can neither write nor run anything.
 
 ## What the role tools change
 
-| Tool | Denied tools | Effect |
-| --- | --- | --- |
-| `subagent_scout` | `write`, `edit` | read-only reconnaissance |
-| `subagent_prober` | `write`, `edit` | independent verification, still able to run the acceptance commands |
-| `subagent_critic` | `write`, `edit`, `pwsh` | cannot change a byte through any mounted tool |
+Roles are enforced by what the preset **mounts**, not by filtering a catalog afterwards.
 
-Each carries a fixed `persona` (it shadows the deployment persona section for that child) and
-`maxDepth: 1`, which is the *absolute* depth ceiling for the child — `resolveChildDepth` computes
-`parentDepth + 1` and refuses above the cap, so `0` would refuse every call while `1` is what
-"this teammate may not recruit its own helpers" actually costs.
+| Row | Effect |
+| --- | --- |
+| `dsh-tool-fs` with `write: false, edit: false` | `write` and `edit` are not registered at all — there is no tool to call |
+| no `dsh-tool-bash` / `dsh-tool-pwsh` row | no shell, so the critic cannot run anything |
+| no `dsh-tool-subagent` row | a teammate cannot recruit its own helpers |
 
-`toolFilter` removes named tools; it does **not** sandbox the shell. The scout and prober keep
-`pwsh`, so "read-only" for them means "no file tools" — only the critic is non-mutating by
-construction. The skill's briefs therefore still send a prober to a scratch copy and the lead
-still checks the diff.
+The shell is *not* sandboxed. `toolFilter` used to remove the file tools but never the shell;
+the same limit applies here — scout and prober keep a shell that can write, so "read-only"
+means "no file tools", and the lead's diff check stays the backstop. Only the critic is
+non-mutating by construction.
 
 ## Verify
 
 ```powershell
-node <skill>/scripts/check-team-preset.mjs --modules <checkout>/node_modules --preset <skill>/preset
+node ..\scripts\check-team-preset.mjs `
+  --modules "$env:USERPROFILE\.dsh\profiles\node_modules" `
+  --install "$env:USERPROFILE\.dsh\profiles\web\cordis.patch.yml"
 ```
 
-Checks that every plugin row resolves, that exactly one tool owns model selection
-(`list_subagent_models` is a global name), that each role tool has a persona and denies
-`write`/`edit`, and that `maxDepth` is not `0`.
+Checks that the patch parses, that every role declares the right mounts, that the lead's
+`allowedAgentPresets` matches the declared role ids and `maxDepth` is 1, that the lead still
+carries every row of the shipped `standard` preset, and that the installed profile patch holds
+all six rows.
 
-Runtime state: the composition has **not** been composed by a session yet — static checks pass,
-and the acceptance test is listed at the end of `../VALIDATION.md`. Re-copy this directory after a
-DSH upgrade only if `standard` gained rows the team depends on; the checker reports missing
-shipped rows as drift warnings.
+`preset/reference/standard-0.2.1-rc.2.patch.yml` is the drift baseline, extracted from
+`app.asar`. Refresh it after a DSH upgrade; the checker reports any shipped row the lead is
+missing.
+
+## Runtime state
+
+Static checks pass; **the composition has never been mounted by a live 0.2.1 session.** The
+first real check is a new session on 團隊模式 with `agent_preset` visible in the `subagent`
+schema, and a scout child that has no `write` tool.

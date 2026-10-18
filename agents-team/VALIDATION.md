@@ -17,6 +17,17 @@
 > Owed on pi: one real team run using `subagent` dispatch, a `gate`, a steer, and a stop, with
 > the numbers written up here as a new round.
 
+> **Round 3 — 2026-10-18, DSH 0.2.1-rc.2.** The three role tools this record measured
+> (`subagent_scout` / `subagent_prober` / `subagent_critic`) no longer exist. DSH's preset
+> declaration is a plugin row now, a directory under `~/.dsh/.agent-presets` is not scanned, and
+> `dsh-tool-subagent` throws on `persona` / `toolFilter`. Roles were rebuilt as five child
+> presets selected through `agent_preset` — see `preset/` and `adapters/dsh.md`. Static checks
+> pass (`scripts/check-team-preset.mjs`); **nothing here about role separation has been
+> re-measured on 0.2.1**, and the new preset has never been mounted by a live session.
+>
+> Same date, separate finding: `dsh` on `PATH` is 0.1.5-rc.2 while the desktop app is
+> 0.2.1-rc.2. Both read `~/.dsh`, so a CLI `--dump-config` does not describe the running GUI.
+
 Written 2026-09-17 by the session that created the skill. Every number below comes from a
 transcript on disk (`~/.dsh/sessions/<id>/session.v3.jsonl.zstd`) or from a file still present
 under `%TEMP%\agents-team-validation\`, not from memory.
