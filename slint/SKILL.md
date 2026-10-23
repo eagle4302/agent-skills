@@ -10,6 +10,10 @@ a declarative GUI toolkit for desktop, embedded, mobile, and web.
 
 ## Workflow
 
+Before step 1, once per session: check which official Slint tools are
+installed, and offer the missing ones to the user. Steps 2, 3, and 5 rely on
+them. See [official-tooling.md](official-tooling.md).
+
 1. Find the project's Slint version first (`Cargo.toml`/`Cargo.lock`,
    `package.json`, `pyproject.toml`, or the CMake `find_package`/`FetchContent`
    line). This skill targets Slint **≥ 1.17** and its prose assumes the latest
@@ -77,6 +81,7 @@ Skim the matching file *before* building in that area, not only when stuck.
 | [debugging-and-mcp.md](reference/debugging-and-mcp.md) | Runtime debugging, headless/CI rendering, screenshots, the MCP server. |
 | [web-embedding.md](reference/web-embedding.md) | Showing a live `.slint` preview in a web page, HTML report, or docs. |
 | [tools-install.md](tools-install.md) | Installing `slint-lsp` (language server) or `slint-viewer` (preview / screenshots). |
+| [official-tooling.md](official-tooling.md) | First Slint task of a session: check which official tools are missing and offer them. |
 
 ## `.slint` in 30 seconds
 

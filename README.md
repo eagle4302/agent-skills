@@ -209,14 +209,14 @@ because this box runs `core.autocrlf=true`, which `scripts/check-skill-updates.s
 
 ### UI frameworks: Slint, Qt/QML, WPF — added 2026-10-23
 
-Added for WPF (.NET 8+), QML, and Slint desktop work. All five are `verbatim`, and every skill directory was
-read in full before it was copied. The popular web-oriented UI skills (`anthropics/skills` `frontend-design`,
+Added for WPF (.NET 8+), QML, and Slint desktop work. Four are `verbatim` and `slint` carries one local
+addition. Every skill directory was read in full before it was copied. The popular web-oriented UI skills (`anthropics/skills` `frontend-design`,
 `ui-ux-pro-max`, `impeccable`, `taste-skill`) were looked at the same day and left out: they target HTML/CSS,
 and their descriptions fire on any "build a UI" request, so they would compete with `qt-ui-design`.
 
 | Skill | Upstream repo and path | License | Local state |
 |---|---|---|---|
-| `slint` | `slint-ui/slint` `ai-plugins/skills/slint` | Slint's triple license: GPL-3.0-only OR Slint Royalty-free 2.0 OR Slint Software 3.0 | verbatim |
+| `slint` | `slint-ui/slint` `ai-plugins/skills/slint` | Slint's triple license: GPL-3.0-only OR Slint Royalty-free 2.0 OR Slint Software 3.0 | modified — see below |
 | `qt-qml` | `TheQtCompanyRnD/agent-skills` `skills/qt-qml` | LicenseRef-Qt-Commercial OR BSD-3-Clause (`LICENSE.txt` in the skill) | verbatim |
 | `qt-ui-design` | `TheQtCompanyRnD/agent-skills` `skills/qt-ui-design` | LicenseRef-Qt-Commercial OR BSD-3-Clause (`LICENSE.txt` in the skill) | verbatim |
 | `wpf-design-system` | `AlstonChan/agent-skills` `skills/wpf-design-system` | MIT | verbatim |
@@ -229,6 +229,21 @@ the skill falls back to fetching `slint.dev/docs`, so nothing breaks. Runtime ch
 or `slint-lsp` on `PATH` (`tools-install.md`). The skill also asks the user, once the app runs, whether to
 star the Slint repo via `gh api` — it asks first, so it is left as upstream wrote it. The script clones
 the whole Slint monorepo the first time it checks this skill, so expect that first run to be slow.
+
+The local addition makes up for the missing plugin. `official-tooling.md` (new) tells the agent to check,
+once per session, for `slint-viewer`, `slint-lsp`, the `slint-docs` MCP server, and an editor extension, and
+then to offer the missing ones in a single message, with commands from official sources only. It never
+installs anything without a yes, and it does not repeat the offer after the user declines. It also names the
+full plugin (`/plugin marketplace add slint-ui/ai-plugins`, then `/plugin install slint@slint`) and warns that
+installing the plugin duplicates this skill. `SKILL.md` gains a three-line pointer above workflow step 1 and
+one row in its reference table; upstream text is unchanged.
+
+The skill is pinned to the monorepo's `master` (plugin `1.19.0`), which runs ahead of the latest release
+(`v1.18.1`). Slint's install guide publishes the plugin from
+[slint-ui/ai-plugins](https://github.com/slint-ui/ai-plugins), a generated mirror that tracks the release
+line. Its `SKILL.md` and `tools-install.md` differ slightly, and it has no `web-embedding.md`. Both sets of
+release-asset names in the two copies (`slint-viewer-windows-x86_64.zip` and
+`slint-viewer-x86_64-pc-windows-msvc.zip`) exist on `v1.18.1`.
 
 **`qt-qml`, `qt-ui-design`.** Both declare `disable-model-invocation: false` explicitly. `qt-qml` scans for
 a `run_qmlPreview` MCP tool on every use and, if one is connected, follows `references/qmlpreview.md`
@@ -269,6 +284,7 @@ These skills intentionally differ from upstream. Copying upstream over them lose
 | Skill | Edit | Why it matters |
 |---|---|---|
 | `show-me` | Removed `disable-model-invocation: true` from the frontmatter **and** did not copy upstream's `agents/openai.yaml` (`policy: allow_implicit_invocation: false`) | Both files say "user-invoked only". Their absence means `show-me` is eligible for automatic model selection here. Pi does support `disable-model-invocation` (see `pi-coding-agent/docs/skills.md`), so this is a deliberate difference, not a portability fix. |
+| `slint` | Added `official-tooling.md`, a three-line pointer to it above workflow step 1 in `SKILL.md`, and one row for it in `SKILL.md`'s reference-files table | Only the skill is installed, not Slint's plugin, so nothing else tells the agent to offer `slint-viewer`, `slint-lsp`, or the `slint-docs` MCP server. A sync that copies `SKILL.md` over drops the pointer and leaves the new file orphaned. Copy the rest of the tree, then re-add both `SKILL.md` lines. |
 | `defuddle` | The `description` was rewritten into a longer routing description (adds "use instead of WebFetch", and the "not for `.md` URLs" caveat) | Description text is what the model routes on. Do not let a sync revert it to upstream's one-liner. |
 | `code-review-and-quality` | Body rewritten and condensed relative to upstream (`SKILL.md` only; 362 lines locally vs 396 upstream, different frontmatter) | Upstream renamed/rewrote sections. Treat an upstream update as a source of ideas, not a patch to apply. The 2026-10-04 sync folded upstream's mutation-testing paragraph in at `1401c8b`. |
 | `grilling` | Added a "Closed questions: ask with the harness's ask tool" section and a harness→tool table (`ask_user_question`, `AskUserQuestion`, `question`, `vscode_askQuestions`, `request_user_input`, …) | Makes the interview deliver multiple-choice questions through each harness's native ask UI instead of plain text. |
