@@ -1,6 +1,6 @@
 # Skills
 
-This directory is the Pi user-level skills root (`~/.pi/agent/skills`). It holds 58 skills — most of
+This directory is the Pi user-level skills root (`~/.pi/agent/skills`). It holds 63 skills — most of
 them copied from public upstream repos, the rest authored here.
 
 It is also a git repository of its own:
@@ -51,7 +51,8 @@ with `opencode debug skill`, which lists every registered skill with its `locati
 
 ## Sources at a glance
 
-All five upstream repos last compared on **2026-10-18** by `scripts/check-skill-updates.sh`.
+The first five upstream repos were last compared on **2026-10-18** by `scripts/check-skill-updates.sh`;
+the four UI-framework repos below them were added and pinned on **2026-10-23**.
 
 | Upstream repo | Upstream layout | Skills installed | Pinned commit |
 |---|---|---|---|
@@ -60,6 +61,10 @@ All five upstream repos last compared on **2026-10-18** by `scripts/check-skill-
 | [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) | `skills/<name>/` | 6 | `3ccff533` (2026-09-15) |
 | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | `skills/<name>/` | 1 (divergent copy) | `aeac41d` (2026-10-13) |
 | [typesafe-ai/skills](https://github.com/typesafe-ai/skills) | `skills/<name>/` | 1 | `65a39f3` (2026-09-12) |
+| [slint-ui/slint](https://github.com/slint-ui/slint) | `ai-plugins/skills/<name>/` inside the Slint monorepo | 1 | `301a9b8` (2026-10-23) |
+| [TheQtCompanyRnD/agent-skills](https://github.com/TheQtCompanyRnD/agent-skills) | `skills/<name>/` | 2 | `6845f02` (2026-10-20) |
+| [AlstonChan/agent-skills](https://github.com/AlstonChan/agent-skills) | `skills/<name>/` | 1 | `d6a82cf` (2026-10-22) |
+| [wshaddix/dotnet-skills](https://github.com/wshaddix/dotnet-skills) | `skills/<name>/` | 1 | `09da68d` (2026-02-27) |
 | authored in this repo | — | 8 | — |
 
 `dirname`-style names match upstream for every skill, so a skill's upstream path is usually
@@ -201,6 +206,45 @@ Installing it would add two more optional pointers of the same kind: its own ove
 
 The repo holds one skill (Release v0.5.7). The local copy matches the pin; the working tree carries CRLF
 because this box runs `core.autocrlf=true`, which `scripts/check-skill-updates.sh` ignores.
+
+### UI frameworks: Slint, Qt/QML, WPF — added 2026-10-23
+
+Added for WPF (.NET 8+), QML, and Slint desktop work. All five are `verbatim`, and every skill directory was
+read in full before it was copied. The popular web-oriented UI skills (`anthropics/skills` `frontend-design`,
+`ui-ux-pro-max`, `impeccable`, `taste-skill`) were looked at the same day and left out: they target HTML/CSS,
+and their descriptions fire on any "build a UI" request, so they would compete with `qt-ui-design`.
+
+| Skill | Upstream repo and path | License | Local state |
+|---|---|---|---|
+| `slint` | `slint-ui/slint` `ai-plugins/skills/slint` | Slint's triple license: GPL-3.0-only OR Slint Royalty-free 2.0 OR Slint Software 3.0 | verbatim |
+| `qt-qml` | `TheQtCompanyRnD/agent-skills` `skills/qt-qml` | LicenseRef-Qt-Commercial OR BSD-3-Clause (`LICENSE.txt` in the skill) | verbatim |
+| `qt-ui-design` | `TheQtCompanyRnD/agent-skills` `skills/qt-ui-design` | LicenseRef-Qt-Commercial OR BSD-3-Clause (`LICENSE.txt` in the skill) | verbatim |
+| `wpf-design-system` | `AlstonChan/agent-skills` `skills/wpf-design-system` | MIT | verbatim |
+| `dotnet-wpf-modern` | `wshaddix/dotnet-skills` `skills/dotnet-wpf-modern` | MIT, per the README; the fork carries no `LICENSE` file | verbatim |
+
+**`slint`.** Only the skill directory came over. Slint's plugin also ships `hooks/` (a Codex-only
+post-edit `slint-viewer --check` on touched `.slint` files) and two MCP servers (`slint-docs`, `slint-preview`); none of them is installed.
+`SKILL.md` says the `slint-docs` server is "usually" available because the plugin declares it; without it
+the skill falls back to fetching `slint.dev/docs`, so nothing breaks. Runtime checks need `slint-viewer`
+or `slint-lsp` on `PATH` (`tools-install.md`). The skill also asks the user, once the app runs, whether to
+star the Slint repo via `gh api` — it asks first, so it is left as upstream wrote it. The script clones
+the whole Slint monorepo the first time it checks this skill, so expect that first run to be slow.
+
+**`qt-qml`, `qt-ui-design`.** Both declare `disable-model-invocation: false` explicitly. `qt-qml` scans for
+a `run_qmlPreview` MCP tool on every use and, if one is connected, follows `references/qmlpreview.md`
+(Qt 6.12+). `platforms/windsurf.md` is upstream's Windsurf rule file and is unused here. `qt-ui-design` is
+not QML-specific; section 4 (embedded/MCU, actuator confirmation, persistent alarms) also applies to
+WPF and Slint HMI screens. Not installed from this repo: `qt-qml-review`, `qt-qml-docs`, `qt-qml-test`,
+`qt-qml-test-run`, `qt-qml-profiler`, `qt-canvas2d`, `qt-cmake-project`, `qt-cpp-review`, `qt-cpp-docs`,
+`qt-figma-token-extraction`, `qt-figma-component-generation`.
+
+**`dotnet-wpf-modern`.** This is a fork of `Aaronontheweb/dotnet-skills`; the WPF skills exist only in the
+fork, which has had no commits since 2026-02-27. Its intro links six sibling skills that are not installed
+(`dotnet-wpf-migration`, `dotnet-ui-testing-core`, `dotnet-winui`, `dotnet-native-aot`, `dotnet-ui-chooser`,
+`dotnet-accessibility`). They are optional pointers: each one tells the agent where a neighbouring topic
+lives, and no step in the skill depends on it. **Known inaccuracy:** the Performance section says WPF on
+.NET 8+ renders through DirectX 11 by default. WPF still renders through DirectX 9 (milcore) on .NET 8 and 9.
+The rest of the skill does not depend on that claim, so the copy stays verbatim.
 
 ### Authored in this repo
 
