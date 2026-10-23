@@ -65,6 +65,11 @@ obsidian-cli	kepano/obsidian-skills	skills/obsidian-cli	3ccff5338ea700537839b219
 obsidian-markdown	kepano/obsidian-skills	skills/obsidian-markdown	3ccff5338ea700537839b21900aa5358a0402c98	verbatim	-
 code-review-and-quality	addyosmani/agent-skills	skills/code-review-and-quality	aeac41d4d005999432bb7312f7ff06383a91d59d	divergent	local variant; body rewritten, upstream mutation-testing paragraph folded in
 typesafe-ai	typesafe-ai/skills	skills/typesafe-ai	65a39f393687675ce170e6094757de20370365b9	verbatim	-
+slint	slint-ui/slint	ai-plugins/skills/slint	301a9b84ea806a834009e1fd03f1c4d6a6d744d9	verbatim	official; skill dir only, the plugin's hooks and MCP servers (slint-docs, slint-preview) are not installed
+qt-qml	TheQtCompanyRnD/agent-skills	skills/qt-qml	6845f02d41171a6df8b6e6fe225b7f5d1a6f4adf	verbatim	official Qt; probes for the optional QML Preview MCP server (Qt 6.12+)
+qt-ui-design	TheQtCompanyRnD/agent-skills	skills/qt-ui-design	6845f02d41171a6df8b6e6fe225b7f5d1a6f4adf	verbatim	official Qt; framework-neutral UX rules, section 4 covers embedded/HMI targets
+wpf-design-system	AlstonChan/agent-skills	skills/wpf-design-system	d6a82cf600663e8a3f38534a4b7223f4cd94bcf5	verbatim	-
+dotnet-wpf-modern	wshaddix/dotnet-skills	skills/dotnet-wpf-modern	09da68dc1f3c06f3bde05f49a6301c75478ab123	verbatim	.NET 8+ only; cross-references six sibling skills that are not installed
 agents-team	-	-	-	local-only	authored here; pi-subagents based
 ai-loop	-	-	-	local-only	authored here
 consult	-	-	-	local-only	authored here
