@@ -51,8 +51,10 @@ with `opencode debug skill`, which lists every registered skill with its `locati
 
 ## Sources at a glance
 
-The first five upstream repos were last compared on **2026-10-18** by `scripts/check-skill-updates.sh`;
-the four UI-framework repos below them were added and pinned on **2026-10-23**.
+All nine upstream repos were last compared on **2026-10-27** by `scripts/check-skill-updates.sh`; that
+run synced `typesafe-ai` and `slint`. The four UI-framework repos were added and pinned on **2026-10-23**.
+`chief-of-staff` was left at `49dd158` on purpose: upstream `5beb35b` only adds a wiki-memory section to an
+`in-progress` skill.
 
 | Upstream repo | Upstream layout | Skills installed | Pinned commit |
 |---|---|---|---|
@@ -60,8 +62,8 @@ the four UI-framework repos below them were added and pinned on **2026-10-23**.
 | [humanlayer/skills](https://github.com/humanlayer/skills) | `plugins/<plugin>/skills/<name>/` | 4 | `653b641` (2026-10-08) |
 | [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) | `skills/<name>/` | 6 | `3ccff533` (2026-09-15) |
 | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | `skills/<name>/` | 1 (divergent copy) | `aeac41d` (2026-10-13) |
-| [typesafe-ai/skills](https://github.com/typesafe-ai/skills) | `skills/<name>/` | 1 | `65a39f3` (2026-09-12) |
-| [slint-ui/slint](https://github.com/slint-ui/slint) | `ai-plugins/skills/<name>/` inside the Slint monorepo | 1 | `301a9b8` (2026-10-23) |
+| [typesafe-ai/skills](https://github.com/typesafe-ai/skills) | `skills/<name>/` | 1 | `302eea6` (2026-10-23) |
+| [slint-ui/slint](https://github.com/slint-ui/slint) | `ai-plugins/skills/<name>/` inside the Slint monorepo | 1 | `a853159` (2026-10-26) |
 | [TheQtCompanyRnD/agent-skills](https://github.com/TheQtCompanyRnD/agent-skills) | `skills/<name>/` | 2 | `6845f02` (2026-10-20) |
 | [AlstonChan/agent-skills](https://github.com/AlstonChan/agent-skills) | `skills/<name>/` | 1 | `d6a82cf` (2026-10-22) |
 | [wshaddix/dotnet-skills](https://github.com/wshaddix/dotnet-skills) | `skills/<name>/` | 1 | `09da68d` (2026-02-27) |
@@ -198,13 +200,15 @@ a Jev call — `optional_see_also` at confidence 1.00 against the `same_as_pr` s
 Installing it would add two more optional pointers of the same kind: its own overview names
 `test-driven-development` and `security-and-hardening`, also not installed.
 
-### typesafe-ai/skills — pinned `65a39f393687675ce170e6094757de20370365b9`
+### typesafe-ai/skills — pinned `302eea662c54bca6730873fe245bec1d69ebc23d`
 
 | Skill | Upstream path | Local state |
 |---|---|---|
 | `typesafe-ai` | `skills/typesafe-ai` | verbatim |
 
-The repo holds one skill (Release v0.5.7). The local copy matches the pin; the working tree carries CRLF
+The repo holds one skill (Release v0.6.2, synced 2026-10-27 from v0.5.7; `SKILL.md` was rewritten around
+"judgments from Jev, decisions in code"). The Claude Code `typesafe` plugin is a separate install and
+stays at its own version. The local copy matches the pin; the working tree carries CRLF
 because this box runs `core.autocrlf=true`, which `scripts/check-skill-updates.sh` ignores.
 
 ### UI frameworks: Slint, Qt/QML, WPF — added 2026-10-23
@@ -236,7 +240,9 @@ then to offer the missing ones in a single message, with commands from official 
 installs anything without a yes, and it does not repeat the offer after the user declines. It also names the
 full plugin (`/plugin marketplace add slint-ui/ai-plugins`, then `/plugin install slint@slint`) and warns that
 installing the plugin duplicates this skill. `SKILL.md` gains a three-line pointer above workflow step 1 and
-one row in its reference table; upstream text is unchanged.
+one row in its reference table; upstream text is unchanged. The 2026-10-27 sync (`301a9b8` → `a853159`)
+was a three-way merge: upstream added two preview lines to workflow step 3 and fixed the compile-argument
+notes in `reference/web-embedding.md`, and both local additions applied cleanly.
 
 The skill is pinned to the monorepo's `master` (plugin `1.19.0`), which runs ahead of the latest release
 (`v1.18.1`). Slint's install guide publishes the plugin from
