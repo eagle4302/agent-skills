@@ -70,6 +70,18 @@ qt-qml	TheQtCompanyRnD/agent-skills	skills/qt-qml	6845f02d41171a6df8b6e6fe225b7f
 qt-ui-design	TheQtCompanyRnD/agent-skills	skills/qt-ui-design	6845f02d41171a6df8b6e6fe225b7f5d1a6f4adf	verbatim	official Qt; framework-neutral UX rules, section 4 covers embedded/HMI targets
 wpf-design-system	AlstonChan/agent-skills	skills/wpf-design-system	d6a82cf600663e8a3f38534a4b7223f4cd94bcf5	verbatim	-
 dotnet-wpf-modern	wshaddix/dotnet-skills	skills/dotnet-wpf-modern	09da68dc1f3c06f3bde05f49a6301c75478ab123	verbatim	.NET 8+ only; cross-references six sibling skills that are not installed
+bambu-labs	earthtojake/text-to-cad	skills/bambu-labs	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
+cad	earthtojake/text-to-cad	skills/cad	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
+dfam-check	earthtojake/text-to-cad	skills/dfam-check	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
+dfm	earthtojake/text-to-cad	skills/dfm	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
+dxf	earthtojake/text-to-cad	skills/dxf	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
+engineering-drawing	earthtojake/text-to-cad	skills/engineering-drawing	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
+gcode	earthtojake/text-to-cad	skills/gcode	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
+sdf	earthtojake/text-to-cad	skills/sdf	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
+sendcutsend	earthtojake/text-to-cad	skills/sendcutsend	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
+srdf	earthtojake/text-to-cad	skills/srdf	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
+step-parts	earthtojake/text-to-cad	skills/step-parts	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
+urdf	earthtojake/text-to-cad	skills/urdf	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
 agents-team	-	-	-	local-only	authored here; pi-subagents based
 ai-loop	-	-	-	local-only	authored here
 consult	-	-	-	local-only	authored here

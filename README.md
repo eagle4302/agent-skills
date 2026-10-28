@@ -1,6 +1,6 @@
 # Skills
 
-This directory is the Pi user-level skills root (`~/.pi/agent/skills`). It holds 63 skills — most of
+This directory is the Pi user-level skills root (`~/.pi/agent/skills`). It holds 75 skills — most of
 them copied from public upstream repos, the rest authored here.
 
 It is also a git repository of its own:
@@ -51,8 +51,9 @@ with `opencode debug skill`, which lists every registered skill with its `locati
 
 ## Sources at a glance
 
-All nine upstream repos were last compared on **2026-10-27** by `scripts/check-skill-updates.sh`; that
-run synced `typesafe-ai` and `slint`. The four UI-framework repos were added and pinned on **2026-10-23**.
+All ten upstream repos were compared by `scripts/check-skill-updates.sh`: nine on **2026-10-27**, and that
+run synced `typesafe-ai` and `slint`. The tenth, `earthtojake/text-to-cad`, was added and pinned on
+**2026-10-28**. The four UI-framework repos were added and pinned on **2026-10-23**.
 `chief-of-staff` was left at `49dd158` on purpose: upstream `5beb35b` only adds a wiki-memory section to an
 `in-progress` skill.
 
@@ -67,6 +68,7 @@ run synced `typesafe-ai` and `slint`. The four UI-framework repos were added and
 | [TheQtCompanyRnD/agent-skills](https://github.com/TheQtCompanyRnD/agent-skills) | `skills/<name>/` | 2 | `6845f02` (2026-10-20) |
 | [AlstonChan/agent-skills](https://github.com/AlstonChan/agent-skills) | `skills/<name>/` | 1 | `d6a82cf` (2026-10-22) |
 | [wshaddix/dotnet-skills](https://github.com/wshaddix/dotnet-skills) | `skills/<name>/` | 1 | `09da68d` (2026-02-27) |
+| [earthtojake/text-to-cad](https://github.com/earthtojake/text-to-cad) | `skills/<name>/` | 12 | `4811290` (2026-10-27) |
 | authored in this repo | — | 8 | — |
 
 `dirname`-style names match upstream for every skill, so a skill's upstream path is usually
@@ -267,10 +269,36 @@ lives, and no step in the skill depends on it. **Known inaccuracy:** the Perform
 .NET 8+ renders through DirectX 11 by default. WPF still renders through DirectX 9 (milcore) on .NET 8 and 9.
 The rest of the skill does not depend on that claim, so the copy stays verbatim.
 
+### earthtojake/text-to-cad — pinned `4811290bcdf57f5218af9eed904d8673330c3234`
+
+Added and pinned on 2026-10-28. Twelve skills covering the part-making chain — parametric CAD and its
+exports (`cad`), 2D DXF drawings (`dxf`), shop drawings (`engineering-drawing`), manufacturability review
+(`dfm`, `dfam-check`), slicing and Bambu Lab printing (`gcode`, `bambu-labs`), SendCutSend ordering
+(`sendcutsend`), catalog part lookup (`step-parts`), and robot and simulator descriptions (`urdf`, `srdf`,
+`sdf`). All twelve are `verbatim`, and together they are every skill in the upstream `skills/` directory.
+Each directory ships its own MIT `LICENSE`, and `agents/openai.yaml` came over unchanged. Four skills carry
+Python helpers (`dfam-check`, `dfm`, `gcode`, `step-parts`), and `dfam-check` and `dfm` add a
+`requirements.txt` for their review tools.
+
+| Skill | Upstream path | Local state |
+|---|---|---|
+| `bambu-labs` | `skills/bambu-labs` | verbatim |
+| `cad` | `skills/cad` | verbatim |
+| `dfam-check` | `skills/dfam-check` | verbatim |
+| `dfm` | `skills/dfm` | verbatim |
+| `dxf` | `skills/dxf` | verbatim |
+| `engineering-drawing` | `skills/engineering-drawing` | verbatim |
+| `gcode` | `skills/gcode` | verbatim |
+| `sdf` | `skills/sdf` | verbatim |
+| `sendcutsend` | `skills/sendcutsend` | verbatim |
+| `srdf` | `skills/srdf` | verbatim |
+| `step-parts` | `skills/step-parts` | verbatim |
+| `urdf` | `skills/urdf` | verbatim |
+
 ### Authored in this repo
 
 No upstream found as of 2026-10-15 — checked by directory name and by the `name:` frontmatter field
-against all five repos above.
+against every upstream repo above.
 
 | Skill | Notes |
 |---|---|
