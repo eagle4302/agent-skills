@@ -1,2 +1,9 @@
 # Claude desktop app's skill-sync cache: machine-written, carries account IDs, and this repo is public.
 synced/
+
+# REA rewrites its own skill docs when it updates: a *.rea.backup lands next to every rewritten file.
+*.rea.backup
+
+# Bytecode from the Python helpers that ship with some skills.
+__pycache__/
+*.pyc
