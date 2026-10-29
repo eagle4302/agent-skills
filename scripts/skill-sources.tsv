@@ -12,6 +12,7 @@
 #                  modified   = local edits on top of upstream
 #                  divergent  = related to upstream but the body was rewritten here
 #                  local-only = no upstream declared
+#                  hold       = upstream may move, but this copy is deliberately pinned
 #   notes          short free-text note; do not use tabs. "-" means none.
 #
 # local_dir	source	upstream_path	pinned_sha	local_state	notes
@@ -52,18 +53,18 @@ setup-ts-deep-modules	mattpocock/skills	skills/in-progress/setup-ts-deep-modules
 writing-beats	mattpocock/skills	skills/in-progress/writing-beats	49dd158d1076134a641b33efb035946536778336	verbatim	-
 writing-fragments	mattpocock/skills	skills/in-progress/writing-fragments	49dd158d1076134a641b33efb035946536778336	modified	closed-option questions ask via the harness ask tool (see grilling)
 writing-shape	mattpocock/skills	skills/in-progress/writing-shape	49dd158d1076134a641b33efb035946536778336	modified	closed-option questions ask via the harness ask tool (see grilling)
-chief-of-staff	mattpocock/skills	skills/in-progress/chief-of-staff	49dd158d1076134a641b33efb035946536778336	verbatim	upstream marks it experimental (in-progress/); carries disable-model-invocation: true
-show-me	humanlayer/skills	plugins/show-me/skills/show-me	653b6411c1f70c275a18e37673b042ff99f67ceb	modified	removed the disable-model-invocation field
+chief-of-staff	mattpocock/skills	skills/in-progress/chief-of-staff	49dd158d1076134a641b33efb035946536778336	hold	deliberately held at 49dd158: upstream 5beb35b only adds a wiki-memory section to an in-progress skill; re-check before the next sync
+show-me	humanlayer/skills	plugins/show-me/skills/show-me	653b6411c1f70c275a18e37673b042ff99f67ceb	modified	removed upstream's disable-model-invocation; deleted plugin leftovers (.claude-plugin/, skills/show-me/); description rewritten for routing; per-OS opener instead of Bash(open)
 improve-claude-md	humanlayer/skills	plugins/improve-claude-md/skills/improve-claude-md	653b6411c1f70c275a18e37673b042ff99f67ceb	verbatim	-
-rpi	humanlayer/skills	plugins/rpi/skills/rpi	653b6411c1f70c275a18e37673b042ff99f67ceb	verbatim	user-invoked via its description; the plugin-level agents/ dir is not part of the skill
-visual-pr	humanlayer/skills	plugins/visual-pr/skills/visual-pr	653b6411c1f70c275a18e37673b042ff99f67ceb	verbatim	user-invoked via its description; plugin.json is not part of the skill
+rpi	humanlayer/skills	plugins/rpi/skills/rpi	653b6411c1f70c275a18e37673b042ff99f67ceb	modified	user-invoked here: local disable-model-invocation: true + agents/openai.yaml policy false (upstream only says it in prose)
+visual-pr	humanlayer/skills	plugins/visual-pr/skills/visual-pr	653b6411c1f70c275a18e37673b042ff99f67ceb	modified	user-invoked here: local disable-model-invocation: true + agents/openai.yaml policy false (upstream only says it in prose)
 defuddle	kepano/obsidian-skills	skills/defuddle	3ccff5338ea700537839b21900aa5358a0402c98	modified	description rewritten for routing
 json-canvas	kepano/obsidian-skills	skills/json-canvas	3ccff5338ea700537839b21900aa5358a0402c98	verbatim	-
 knap	kepano/obsidian-skills	skills/knap	3ccff5338ea700537839b21900aa5358a0402c98	verbatim	-
 obsidian-bases	kepano/obsidian-skills	skills/obsidian-bases	3ccff5338ea700537839b21900aa5358a0402c98	verbatim	-
 obsidian-cli	kepano/obsidian-skills	skills/obsidian-cli	3ccff5338ea700537839b21900aa5358a0402c98	verbatim	-
 obsidian-markdown	kepano/obsidian-skills	skills/obsidian-markdown	3ccff5338ea700537839b21900aa5358a0402c98	verbatim	-
-code-review-and-quality	addyosmani/agent-skills	skills/code-review-and-quality	aeac41d4d005999432bb7312f7ff06383a91d59d	divergent	local variant; body rewritten, upstream mutation-testing paragraph folded in
+code-review-and-quality	addyosmani/agent-skills	skills/code-review-and-quality	aeac41d4d005999432bb7312f7ff06383a91d59d	divergent	local variant; body rewritten, upstream mutation-testing paragraph folded in; two uninstalled child-skill pointers removed 2026-10-29
 typesafe-ai	typesafe-ai/skills	skills/typesafe-ai	302eea662c54bca6730873fe245bec1d69ebc23d	verbatim	-
 slint	slint-ui/slint	ai-plugins/skills/slint	a853159cd373d8d0cebd9cc37bf14e64d0f3f9a7	modified	official; skill dir only. Added official-tooling.md plus a pointer in SKILL.md: offer missing official tools (slint-viewer, slint-lsp, slint-docs MCP, plugin); synced 2026-10-27 by three-way merge
 qt-qml	TheQtCompanyRnD/agent-skills	skills/qt-qml	6845f02d41171a6df8b6e6fe225b7f5d1a6f4adf	verbatim	official Qt; probes for the optional QML Preview MCP server (Qt 6.12+)
@@ -91,4 +92,4 @@ field-office-checklist	-	-	-	local-only	authored here; MetalAutoUQDwpf-specific 
 field-handoff	-	-	-	local-only	authored here
 git-janitor	-	-	-	local-only	authored here
 freecad-cad	-	-	-	local-only	authored here; FreeCAD as the verification and post-processing back end around freecad-mcp
-reverse-engineer-anything	morluto/rea	.agents/skills/reverse-engineer-anything	160d821ac9a0310afcb8d1fc427862dd6508add5	modified	from the installed rea-agents 6.8.0 npm package; SKILL.md is the publish variant (+tool_count, npx pinned to 6.8.0), references/ verbatim
+reverse-engineer-anything	morluto/rea	.agents/skills/reverse-engineer-anything	160d821ac9a0310afcb8d1fc427862dd6508add5	modified	no local edits to re-apply; byte-identical to the rea-agents 6.8.0 package skill (publish variant: tool_count + @6.8.0 pins); a re-sync copies the package directory

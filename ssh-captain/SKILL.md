@@ -12,7 +12,8 @@ description: "Work on other PCs over SSH from this machine — the captain drive
 所有操作都走同一支腳本，不要自己拼 `ssh` 指令：
 
 ```bash
-CAP=~/.claude/skills/ssh-captain/scripts/cap.sh
+CAP="$HOME/.agents/skills/ssh-captain/scripts/cap.sh"
+[ -f "$CAP" ] || CAP="$HOME/.claude/skills/ssh-captain/scripts/cap.sh"   # junction installs
 ```
 
 ## 每次開工的三步，不要跳
@@ -38,10 +39,13 @@ bash $CAP list                                      # 名冊
 bash $CAP dossier <name>                            # 那台的守則（動手前必讀）
 bash $CAP doctor <name|all>                         # 體檢
 bash $CAP run   <name> [--timeout SEC] [--cd DIR] -- <cmd...>
+bash $CAP run   <name> [--cd DIR] --file ./x.sh      # 指令寫成檔案再送（含特殊字元必用）
 bash $CAP fleet [--timeout SEC] -- <cmd...>         # 同一條指令跑遍所有隊員
 bash $CAP push  <name> <本機路徑> <遠端路徑>         # 檔案送上去，兩邊比 sha256
 bash $CAP pull  <name> <遠端路徑> <本機路徑>
 bash $CAP bg    <name> <tag> [--cd DIR] -- <cmd...> # 長工作，丟背景
+bash $CAP bg    <name> <tag> [--cd DIR] --file ./x.sh
+bash $CAP script <name> ./x.sh                       # 送檔案並把輸出帶回來
 bash $CAP log   <name> <tag> [行數]                  # 看背景工作的輸出＋結束碼
 bash $CAP jobs  <name>                              # 哪些背景工作還在跑
 bash $CAP add   <name> <user@host> [--port N] [--key PATH] [--role TEXT]

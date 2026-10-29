@@ -1,0 +1,16 @@
+# Names referenced by installed skills that are not installed themselves.
+#
+# `node scripts/lint-skills.mjs` reports a skill-name reference only when it is neither an
+# installed skill nor listed here. Each row is debt: remove the reference (or install the skill),
+# then delete the row.
+#
+# Format: <name>  <reason>
+
+council-mode  consult: "ships with pi-subagents"; consult's dispatch rewrite is pending
+@plan-writing  ai-loop: related-skills; ai-loop's rewrite or retirement is pending
+@ask-questions-if-underspecified  ai-loop: related-skills; ai-loop's rewrite or retirement is pending
+pi-subagents  package name, not a skill (referenced by consult and the agents-team docs)
+security-review  agents-team github-copilot adapter: Copilot subagent type, not a skill
+dispatching-parallel-agents  agents-team/VALIDATION.md: historical note listing dangling refs; not an instruction
+slint-lsp  Slint tool, not a skill
+slint-docs  Slint MCP server, not a skill

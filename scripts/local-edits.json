@@ -1,0 +1,102 @@
+{
+  "$comment": "Sentinels for the local edits listed in README.md under 'Local edits that a re-sync would clobber'. node scripts/lint-skills.mjs fails when a sentinel goes missing after a sync. Re-applying the edit itself stays manual: README.md is the instruction.",
+  "skills": {
+    "grilling": {
+      "readme": "Closed questions: ask with the harness's ask-tool section",
+      "checks": [
+        { "file": "SKILL.md", "contains": "## Closed questions: ask with the harness's ask tool" }
+      ]
+    },
+    "improve-codebase-architecture": {
+      "readme": "one-line pointer to grilling's ask-tool rule",
+      "checks": [
+        { "file": "SKILL.md", "contains": "harness's ask tool" }
+      ]
+    },
+    "triage": {
+      "readme": "one-line pointer to grilling's ask-tool rule",
+      "checks": [
+        { "file": "SKILL.md", "contains": "harness's ask tool" }
+      ]
+    },
+    "wayfinder": {
+      "readme": "one-line pointer to grilling's ask-tool rule",
+      "checks": [
+        { "file": "SKILL.md", "contains": "harness's ask tool" }
+      ]
+    },
+    "to-questionnaire": {
+      "readme": "one-line pointer to grilling's ask-tool rule",
+      "checks": [
+        { "file": "SKILL.md", "contains": "harness's ask tool" }
+      ]
+    },
+    "loop-me": {
+      "readme": "one-line pointer to grilling's ask-tool rule",
+      "checks": [
+        { "file": "SKILL.md", "contains": "harness's ask tool" }
+      ]
+    },
+    "writing-fragments": {
+      "readme": "one-line pointer to grilling's ask-tool rule",
+      "checks": [
+        { "file": "SKILL.md", "contains": "harness's ask tool" }
+      ]
+    },
+    "writing-shape": {
+      "readme": "one-line pointer to grilling's ask-tool rule",
+      "checks": [
+        { "file": "SKILL.md", "contains": "harness's ask tool" }
+      ]
+    },
+    "show-me": {
+      "readme": "model-invoked on purpose; routing description; per-OS opener; plugin leftovers deleted",
+      "checks": [
+        { "file": "SKILL.md", "contains": "start <path>" },
+        { "file": "SKILL.md", "notContains": "disable-model-invocation" },
+        { "path": "skills/show-me/SKILL.md", "absent": true },
+        { "path": ".claude-plugin/plugin.json", "absent": true }
+      ]
+    },
+    "defuddle": {
+      "readme": "description rewritten for routing",
+      "checks": [
+        { "file": "SKILL.md", "contains": "Use instead of WebFetch when the user provides a URL" }
+      ]
+    },
+    "code-review-and-quality": {
+      "readme": "body rewritten; two uninstalled child-skill pointers removed",
+      "checks": [
+        { "file": "SKILL.md", "contains": "## The Five-Axis Review" },
+        { "file": "SKILL.md", "notContains": "requesting-code-review" }
+      ]
+    },
+    "slint": {
+      "readme": "official-tooling.md plus its pointers in SKILL.md",
+      "checks": [
+        { "file": "SKILL.md", "contains": "[official-tooling.md](official-tooling.md)" },
+        { "path": "official-tooling.md", "exists": true }
+      ]
+    },
+    "rpi": {
+      "readme": "made user-invoked here: disable-model-invocation plus the Codex policy",
+      "checks": [
+        { "file": "SKILL.md", "contains": "disable-model-invocation" },
+        { "path": "agents/openai.yaml", "exists": true },
+        { "file": "agents/openai.yaml", "contains": "allow_implicit_invocation: false" }
+      ]
+    },
+    "visual-pr": {
+      "readme": "made user-invoked here: disable-model-invocation plus the Codex policy",
+      "checks": [
+        { "file": "SKILL.md", "contains": "disable-model-invocation" },
+        { "path": "agents/openai.yaml", "exists": true },
+        { "file": "agents/openai.yaml", "contains": "allow_implicit_invocation: false" }
+      ]
+    },
+    "reverse-engineer-anything": {
+      "skip": true,
+      "reason": "byte-identical to the rea-agents 6.8.0 package skill; the package itself is the publish variant, so a re-sync copies the package directory and has no local edit to re-apply"
+    }
+  }
+}

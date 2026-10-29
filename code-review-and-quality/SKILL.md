@@ -1,6 +1,6 @@
 ---
 name: code-review-and-quality
-description: Use when a change needs a multi-axis quality judgment before it reaches the main branch — correctness, readability, architecture, security, performance — and when deciding whether to approve or request changes, whoever wrote the code.
+description: Use for a code review that judges quality before merge — correctness, readability, architecture, security, performance — and for deciding approve vs request changes, whoever wrote the code. For a diff pinned to a commit, branch, or merge-base, use code-review instead.
 risk: critical
 source: https://github.com/addyosmani/agent-skills/tree/main/skills/code-review-and-quality
 source_repo: addyosmani/agent-skills
@@ -28,8 +28,6 @@ Every change gets a quality judgment before merge — no exceptions. The judgmen
 ## When NOT to Use
 
 - **The task is "review the diff since commit/branch/tag/merge-base X."** That is the `code-review` skill: it pins the fixed point and runs Standards and Spec as parallel sub-agents, which is the right shape when a written spec or issue exists to compare against. Come back here for the quality judgment on a change already in hand.
-- **You are asking for review**, not giving it — use `requesting-code-review`.
-- **You are on the receiving end** of review feedback — use `receiving-code-review`.
 - **No change exists.** A pure explanation or read-only question gets an answer, not a review.
 
 ## The Five-Axis Review

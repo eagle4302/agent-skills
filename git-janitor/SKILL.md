@@ -26,7 +26,7 @@ Two bins act on their own (commit, ignore), one acts after a single confirmation
 
 A file is **delete**-safe only when a file of its kind could be rebuilt or was never meant to exist:
 
-- Regenerable build output (`node_modules/`, `dist/`, `build/`, `target/`, `.venv/`, `__pycache__/`) — **flag with its size, ask before removing**. Regenerating costs real time.
+- Build output, dependencies and caches (`node_modules/`, `dist/`, `build/`, `target/`, `.venv/`, `__pycache__/`) belong to the **Ignore** bin, never this one — deleting a cache buys a rebuild for nothing.
 - Zero-byte stray files with code-fragment names (`!ids.has(e.source)`, `.slice(0`) — safe to delete.
 - A file the user explicitly named as junk — safe to delete.
 
@@ -60,7 +60,7 @@ Walk the survey list and assign each entry exactly one bin from the table above.
 
 For each ignore entry, add the smallest matching pattern to `.gitignore` (create the file at the repo root if missing; use the package root's `.gitignore` in a monorepo). Preserve existing lines and structure.
 
-If the file is **already tracked**, `.gitignore` alone will not stop it — run `git rm --cached <path>` to untrack it while keeping it on disk, and say so in the report.
+If the file is **already tracked**, `.gitignore` alone will not stop it — run `git rm --cached <path>` to untrack it while keeping it on disk, and say so in the report. Untracking does not remove the blob from history: for a secret, say plainly that it is still in every past commit, that rotating the key is the real fix, and that rewriting history is the user's decision.
 
 **Done when** every ignore entry is covered by a pattern, and every previously-tracked one is untracked.
 

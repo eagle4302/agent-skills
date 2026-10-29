@@ -21,6 +21,7 @@
 #   unknown-pin     pinned_sha is not in the upstream clone                -> verify before trusting
 #   missing-local   manifest row with no directory on disk
 #   local-only      no upstream declared
+#   held            manifest says hold: upstream may move, this copy is deliberately pinned
 
 set -uo pipefail
 
@@ -136,7 +137,7 @@ record() { # status local_dir detail
     printf '%s\n' "$detail" | sed 's/^/               /'
   fi
   case "$status" in
-    up-to-date|local-only) counts_ok=$((counts_ok + 1)) ;;
+    up-to-date|local-only|held) counts_ok=$((counts_ok + 1)) ;;
     local-drift) counts_drift=$((counts_drift + 1)) ;;
     *) counts_attention=$((counts_attention + 1)); attention_lines="$attention_lines
   $status  $dir" ;;
@@ -154,6 +155,11 @@ while IFS=$'\t' read -r local_dir source upstream_path pinned local_state note; 
 
   if [ ! -d "$local_path" ]; then
     record "missing-local" "$local_dir" "manifest lists this skill, but $local_path does not exist"
+    continue
+  fi
+
+  if [ "$local_state" = "hold" ]; then
+    record "held" "$local_dir" "deliberately pinned at ${pinned:0:7}; upstream moves are not followed — ${note:-see README}"
     continue
   fi
 
@@ -232,7 +238,7 @@ if [ "$SHOW_SOURCES" -eq 1 ]; then
   done < "$MANIFEST"
 fi
 
-printf '\n%d skills checked: %d need no action (%d up-to-date or local-only, %d with local edits), %d need attention\n' \
+printf '\n%d skills checked: %d need no action (%d up-to-date, local-only or held, %d with local edits), %d need attention\n' \
   "$((counts_ok + counts_drift + counts_attention))" "$((counts_ok + counts_drift))" "$counts_ok" "$counts_drift" "$counts_attention"
 if [ -n "$attention_lines" ]; then
   printf 'Needs attention:%s\n' "$attention_lines"
@@ -240,7 +246,7 @@ fi
 if [ -n "$unlisted" ]; then
   printf 'Not in the manifest:%s\n' "$unlisted"
 fi
-printf '\nRe-apply the local edits listed in README.md ("Local edits that a re-sync would clobber") after any sync.\n'
+printf '\nRe-apply the local edits listed in README.md ("Local edits that a re-sync would clobber") after any sync; scripts/lint-skills.mjs checks the sentinels in scripts/local-edits.json.\n'
 
 if [ "$STRICT" -eq 1 ] && [ "$counts_attention" -gt 0 ]; then
   exit 1

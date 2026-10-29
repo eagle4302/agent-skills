@@ -1,7 +1,11 @@
 # Skills
 
-This directory is the Pi user-level skills root (`~/.pi/agent/skills`). It holds 77 skills — most of
-them copied from public upstream repos, the rest authored here.
+This directory is the shared user-level skills root (`~/.agents/skills`). It holds 77 skills — most of
+them copied from public upstream repos, the rest authored here. DSH reads it directly, Claude Code
+reaches it through the junction below, and OpenCode treats it as a global compatibility source.
+
+Pi's documented root is `~/.pi/agent/skills`. On this machine that path is a `.lnk` shortcut rather
+than a directory, so replace it with a junction before relying on Pi loading these skills.
 
 It is also a git repository of its own:
 
@@ -57,7 +61,8 @@ pinned on **2026-10-28**, and `morluto/rea` was added on **2026-10-29** from the
 6.8.0 package, pinned to the `rea-agents-6.8.0` tag. The four UI-framework repos were added and pinned on
 **2026-10-23**.
 `chief-of-staff` was left at `49dd158` on purpose: upstream `5beb35b` only adds a wiki-memory section to an
-`in-progress` skill.
+`in-progress` skill. Its manifest state is `hold`, so the update check reports it as held rather than
+upstream-ahead.
 
 | Upstream repo | Upstream layout | Skills installed | Pinned commit |
 |---|---|---|---|
@@ -72,7 +77,7 @@ pinned on **2026-10-28**, and `morluto/rea` was added on **2026-10-29** from the
 | [wshaddix/dotnet-skills](https://github.com/wshaddix/dotnet-skills) | `skills/<name>/` | 1 | `09da68d` (2026-02-27) |
 | [earthtojake/text-to-cad](https://github.com/earthtojake/text-to-cad) | `skills/<name>/` | 12 | `4811290` (2026-10-27) |
 | [morluto/rea](https://github.com/morluto/rea) | `.agents/skills/<name>/` inside the REA monorepo | 1 (publish variant) | `160d821` (2026-10-25) |
-| authored in this repo | — | 10 | — |
+| authored in this repo | — | 9 | — |
 
 `dirname`-style names match upstream for every skill, so a skill's upstream path is usually
 `<layout prefix>/<skill dir name>/`.
@@ -154,9 +159,10 @@ Every skill in this repo is now installed.
 The repo moved from `ca7c8088` to `653b641` (2026-10-08), which added `rpi`; `show-me`'s own tree did
 not change, so the pin moved without a copy.
 
-`rpi` and `visual-pr` declare "only use when the user explicitly invokes this skill by name" in their
-`description` rather than with `disable-model-invocation`. Copied verbatim, so both keep upstream's
-wording. For each of the three newer skills only the skill directory came over: the plugin-level
+`rpi` and `visual-pr` said "only use when the user explicitly invokes this skill by name" in their
+`description` only. On 2026-10-29 each gained the real `disable-model-invocation: true` plus an
+`agents/openai.yaml` policy, so no harness auto-invokes them. For each of the three newer skills only the
+skill directory came over: the plugin-level
 `agents/` (rpi's five subagent definitions) and `.claude-plugin/plugin.json` belong to the Claude Code
 plugin, not to the skill, and `rpi` resolves its subagents from its own `references/subagents/`.
 
@@ -306,12 +312,13 @@ pin is the `rea-agents-6.8.0` tag (published 2026-10-25).
 
 | Skill | Upstream path | Local state |
 |---|---|---|
-| `reverse-engineer-anything` | `.agents/skills/reverse-engineer-anything` | modified (publish variant) |
+| `reverse-engineer-anything` | `.agents/skills/reverse-engineer-anything` | modified (publish variant; no hand edits to re-apply) |
 
 All seven `references/*.md` files are byte-identical to the tag. `SKILL.md` is the publish variant: it adds
 `tool_count: 229` to the frontmatter and pins the fallback commands to `npx -y rea-agents@6.8.0` where the
-repo says `@latest` — five lines added, six removed, no prose rewritten. A re-sync should copy from the npm
-package, not from the repo file, or the version pin reverts.
+repo says `@latest` — five lines added, six removed, no prose rewritten. There is no local edit to re-apply:
+`modified` records that this copy differs from the repo at the pin, not that a human changed it. A re-sync
+copies from the npm package, not from the repo file, or the version pin reverts.
 
 REA rewrites these docs when it updates and leaves a `*.rea.backup` beside each rewritten file; the pattern
 is in `.gitignore`. The backups on disk are the pre-rewrite copies — do not commit them.
@@ -336,13 +343,17 @@ every upstream repo above, and by a filesystem search for a second copy of each 
 ## Local edits that a re-sync would clobber
 
 These skills intentionally differ from upstream. Copying upstream over them loses the edit; merge instead.
+Each edit also has a sentinel in `scripts/local-edits.json`, and `scripts/lint-skills.mjs` fails when one
+goes missing. Re-apply stays manual: this table is the instruction.
 
 | Skill | Edit | Why it matters |
 |---|---|---|
-| `show-me` | Removed `disable-model-invocation: true` from the frontmatter **and** did not copy upstream's `agents/openai.yaml` (`policy: allow_implicit_invocation: false`) | Both files say "user-invoked only". Their absence means `show-me` is eligible for automatic model selection here. Pi does support `disable-model-invocation` (see `pi-coding-agent/docs/skills.md`), so this is a deliberate difference, not a portability fix. |
+| `show-me` | Removed upstream's `disable-model-invocation: true` and did not copy its `agents/openai.yaml` (`policy: allow_implicit_invocation: false`); deleted the upstream plugin leftovers (`.claude-plugin/`, `skills/show-me/`); rewrote the description with trigger branches; replaced `Bash(open …)` with a per-OS opener | The skill is model-invoked here on purpose. Its description is the only trigger, and `Bash(open …)` is Claude Code notation for a macOS command that fails on this Windows box. |
+| `rpi` | Added `disable-model-invocation: true` and `agents/openai.yaml` with `policy.allow_implicit_invocation: false` | Upstream only says "only use when the user explicitly invokes this skill by name" in prose, so every harness would still auto-invoke it. |
+| `visual-pr` | Same edit as `rpi` | Same reason. |
 | `slint` | Added `official-tooling.md`, a three-line pointer to it above workflow step 1 in `SKILL.md`, and one row for it in `SKILL.md`'s reference-files table | Only the skill is installed, not Slint's plugin, so nothing else tells the agent to offer `slint-viewer`, `slint-lsp`, or the `slint-docs` MCP server. A sync that copies `SKILL.md` over drops the pointer and leaves the new file orphaned. Copy the rest of the tree, then re-add both `SKILL.md` lines. |
 | `defuddle` | The `description` was rewritten into a longer routing description (adds "use instead of WebFetch", and the "not for `.md` URLs" caveat) | Description text is what the model routes on. Do not let a sync revert it to upstream's one-liner. |
-| `code-review-and-quality` | Body rewritten and condensed relative to upstream (`SKILL.md` only; 362 lines locally vs 396 upstream, different frontmatter) | Upstream renamed/rewrote sections. Treat an upstream update as a source of ideas, not a patch to apply. The 2026-10-04 sync folded upstream's mutation-testing paragraph in at `1401c8b`. |
+| `code-review-and-quality` | Body rewritten and condensed relative to upstream (`SKILL.md` only; 362 lines locally vs 396 upstream, different frontmatter) | Upstream renamed/rewrote sections. Treat an upstream update as a source of ideas, not a patch to apply. The 2026-10-04 sync folded upstream's mutation-testing paragraph in at `1401c8b`. On 2026-10-29 two pointers to uninstalled skills were removed and the description now names the code-review branch. |
 | `grilling` | Added a "Closed questions: ask with the harness's ask tool" section and a harness→tool table (`ask_user_question`, `AskUserQuestion`, `question`, `vscode_askQuestions`, `request_user_input`, …) | Makes the interview deliver multiple-choice questions through each harness's native ask UI instead of plain text. |
 | `improve-codebase-architecture`, `triage`, `wayfinder`, `to-questionnaire`, `loop-me`, `writing-fragments`, `writing-shape` | One-line pointers to `/grilling`'s ask-tool rule, at the spot each asks the human a closed question | The rule lives once, in `grilling`. `grill-me` and `grill-with-docs` are **not** edited: they are one-line delegators to `/grilling` and inherit it. |
 
@@ -363,9 +374,10 @@ catches added, changed, and deleted files.
 
 **It compares trees, so it cannot see a skill referenced by name but absent.** That is the shape of the
 `pr` gap: `ask-matt` handed the PR body to `/pr` while `pr` was uninstalled. `--sources` lists upstream
-skills that are not installed, but nothing connects that list to the skills that mention them. To
-re-check by hand, grep the installed skills for each uninstalled upstream name; as of 2026-10-18 the
-only hit is the optional pointer recorded under addyosmani/agent-skills.
+skills that are not installed, but nothing connects that list to the skills that mention them.
+`node scripts/lint-skills.mjs` checks the installed skills for references to names that are not
+installed; known debt lives in `scripts/known-absent-refs.txt`. As of 2026-10-29 that file records
+`council-mode` in `consult` and `@plan-writing` / `@ask-questions-if-underspecified` in `ai-loop`.
 
 **Line endings are ignored.** Upstream trees are exported as LF and the comparison ignores trailing CR, so
 a Windows checkout (`core.autocrlf=true`) does not read every file as a local edit. The earlier "37 copies
@@ -382,6 +394,20 @@ Verdicts, and what to do:
 | `unknown-pin` | `pinned_sha` is not in the upstream clone, or the path is gone | verify by hand; the upstream may have been renamed, moved, or force-pushed |
 | `missing-local` | a manifest row has no directory | fix the manifest or restore the skill |
 | `local-only` | no upstream declared | none |
+| `held` | manifest `local_state` is `hold`: upstream may move, this copy is deliberately pinned | none |
+
+## Linting
+
+```bash
+node scripts/lint-skills.mjs           # errors fail the run; warnings are reported
+node scripts/lint-skills.mjs --strict  # warnings fail too (use in CI or before a sync)
+```
+
+Checks: frontmatter parses and `name` matches the directory; the description is present and at most
+1024 characters; no nested `SKILL.md`; `disable-model-invocation` agrees with `agents/openai.yaml`;
+the manifest and the skill directories agree; the README's counts agree with the tree; every local edit
+in `scripts/local-edits.json` is still applied; and no skill names a name that is neither installed nor
+allowlisted in `scripts/known-absent-refs.txt`.
 
 ## Syncing a skill
 
@@ -397,11 +423,11 @@ Verdicts, and what to do:
    ```
 
    Or, for a repo whose skills are all `verbatim`, `cp -r` straight from the cached clone.
-3. Re-apply any edit listed under "Local edits that a re-sync would clobber".
+3. Re-apply any edit listed under "Local edits that a re-sync would clobber". The sentinels in `scripts/local-edits.json` tell you whether it survived; run the linter afterwards.
 4. Update `scripts/skill-sources.tsv`: set the skill's `pinned_sha` to the commit you just synced, and
    refresh its `local_state` and `notes`.
 5. Refresh the tables in this README to match, and note the new "last compared" date.
-6. Commit to `eagle4302/agent-skills`.
+6. Run `node scripts/lint-skills.mjs --strict`, then commit to `eagle4302/agent-skills`.
 
 Tell the agent to do these steps in one go — for example: *"run `scripts/check-skill-updates.sh`, and if
 anything is `upstream-ahead`, sync it and follow README.md's sync procedure."*
@@ -415,13 +441,14 @@ same facts for humans. When they disagree, fix the README, not the TSV. Columns:
 local_dir  source  upstream_path  pinned_sha  local_state  notes
 ```
 
-`local_state` is one of `verbatim`, `modified`, `divergent`, `local-only`.
+`local_state` is one of `verbatim`, `modified`, `divergent`, `local-only`, `hold`. `hold` marks a copy pinned on purpose: the update check reports it as held instead of upstream-ahead.
 
 ## Pi frontmatter notes
 
 - Pi accepts the Agent Skills fields `name`, `description`, `license`, `compatibility`, `metadata`,
-  `allowed-tools`, and `disable-model-invocation`. 22 of the skills here carry
-  `disable-model-invocation: true` straight from upstream — keep it.
+  `allowed-tools`, and `disable-model-invocation`. 25 of the skills here carry
+  `disable-model-invocation: true` — 23 straight from upstream, plus `rpi` and `visual-pr`, which
+  were made user-invoked here. Keep it.
 - `argument-hint` (used by `claude-handoff`, `handoff`, `loop-me`, `teach`) is a Claude Code field that
   Pi does not read. It is harmless in Pi, used by Claude Code (see "Using these skills from Claude Code"),
   and left in place to stay close to upstream.
