@@ -16,43 +16,43 @@
 #   notes          short free-text note; do not use tabs. "-" means none.
 #
 # local_dir	source	upstream_path	pinned_sha	local_state	notes
-ask-matt	mattpocock/skills	skills/engineering/ask-matt	49dd158d1076134a641b33efb035946536778336	verbatim	-
-code-review	mattpocock/skills	skills/engineering/code-review	49dd158d1076134a641b33efb035946536778336	verbatim	-
-codebase-design	mattpocock/skills	skills/engineering/codebase-design	49dd158d1076134a641b33efb035946536778336	verbatim	-
-diagnosing-bugs	mattpocock/skills	skills/engineering/diagnosing-bugs	49dd158d1076134a641b33efb035946536778336	verbatim	-
-domain-modeling	mattpocock/skills	skills/engineering/domain-modeling	49dd158d1076134a641b33efb035946536778336	verbatim	-
-grill-with-docs	mattpocock/skills	skills/engineering/grill-with-docs	49dd158d1076134a641b33efb035946536778336	verbatim	-
-implement	mattpocock/skills	skills/engineering/implement	49dd158d1076134a641b33efb035946536778336	verbatim	-
-improve-codebase-architecture	mattpocock/skills	skills/engineering/improve-codebase-architecture	49dd158d1076134a641b33efb035946536778336	modified	closed-option questions ask via the harness ask tool (see grilling)
-pr	mattpocock/skills	skills/engineering/pr	49dd158d1076134a641b33efb035946536778336	verbatim	model-invoked PR body; ask-matt routes to it
-prototype	mattpocock/skills	skills/engineering/prototype	49dd158d1076134a641b33efb035946536778336	verbatim	-
-research	mattpocock/skills	skills/engineering/research	49dd158d1076134a641b33efb035946536778336	verbatim	-
-setup-matt-pocock-skills	mattpocock/skills	skills/engineering/setup-matt-pocock-skills	49dd158d1076134a641b33efb035946536778336	verbatim	-
-tdd	mattpocock/skills	skills/engineering/tdd	49dd158d1076134a641b33efb035946536778336	verbatim	-
-to-spec	mattpocock/skills	skills/engineering/to-spec	49dd158d1076134a641b33efb035946536778336	verbatim	-
-to-tickets	mattpocock/skills	skills/engineering/to-tickets	49dd158d1076134a641b33efb035946536778336	verbatim	-
-triage	mattpocock/skills	skills/engineering/triage	49dd158d1076134a641b33efb035946536778336	modified	closed-option questions ask via the harness ask tool (see grilling)
-wayfinder	mattpocock/skills	skills/engineering/wayfinder	49dd158d1076134a641b33efb035946536778336	modified	closed-option questions ask via the harness ask tool (see grilling)
-wizard	mattpocock/skills	skills/engineering/wizard	49dd158d1076134a641b33efb035946536778336	verbatim	-
-grill-me	mattpocock/skills	skills/productivity/grill-me	49dd158d1076134a641b33efb035946536778336	verbatim	-
-grilling	mattpocock/skills	skills/productivity/grilling	49dd158d1076134a641b33efb035946536778336	modified	closed-option questions ask via the harness ask tool (see grilling)
-handoff	mattpocock/skills	skills/productivity/handoff	49dd158d1076134a641b33efb035946536778336	verbatim	-
-teach	mattpocock/skills	skills/productivity/teach	49dd158d1076134a641b33efb035946536778336	verbatim	-
-to-questionnaire	mattpocock/skills	skills/productivity/to-questionnaire	49dd158d1076134a641b33efb035946536778336	modified	closed-option questions ask via the harness ask tool (see grilling)
-wait-what	mattpocock/skills	skills/productivity/wait-what	49dd158d1076134a641b33efb035946536778336	verbatim	-
-writing-for-agents	mattpocock/skills	skills/productivity/writing-for-agents	49dd158d1076134a641b33efb035946536778336	verbatim	-
-git-guardrails-claude-code	mattpocock/skills	skills/misc/git-guardrails-claude-code	49dd158d1076134a641b33efb035946536778336	verbatim	-
-migrate-to-shoehorn	mattpocock/skills	skills/misc/migrate-to-shoehorn	49dd158d1076134a641b33efb035946536778336	verbatim	-
-scaffold-exercises	mattpocock/skills	skills/misc/scaffold-exercises	49dd158d1076134a641b33efb035946536778336	verbatim	-
-setup-pre-commit	mattpocock/skills	skills/misc/setup-pre-commit	49dd158d1076134a641b33efb035946536778336	verbatim	-
-claude-handoff	mattpocock/skills	skills/in-progress/claude-handoff	49dd158d1076134a641b33efb035946536778336	verbatim	-
-implement-spec	mattpocock/skills	skills/engineering/implement-spec	49dd158d1076134a641b33efb035946536778336	verbatim	graduated to engineering upstream; synced 2026-10-04
-loop-me	mattpocock/skills	skills/in-progress/loop-me	49dd158d1076134a641b33efb035946536778336	modified	closed-option questions ask via the harness ask tool (see grilling)
-retro	mattpocock/skills	skills/engineering/retro	49dd158d1076134a641b33efb035946536778336	verbatim	graduated to engineering upstream; synced 2026-10-04
-setup-ts-deep-modules	mattpocock/skills	skills/in-progress/setup-ts-deep-modules	49dd158d1076134a641b33efb035946536778336	verbatim	-
-writing-beats	mattpocock/skills	skills/in-progress/writing-beats	49dd158d1076134a641b33efb035946536778336	verbatim	-
-writing-fragments	mattpocock/skills	skills/in-progress/writing-fragments	49dd158d1076134a641b33efb035946536778336	modified	closed-option questions ask via the harness ask tool (see grilling)
-writing-shape	mattpocock/skills	skills/in-progress/writing-shape	49dd158d1076134a641b33efb035946536778336	modified	closed-option questions ask via the harness ask tool (see grilling)
+ask-matt	mattpocock/skills	skills/engineering/ask-matt	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	modified	local router additions 2026-10-29: routes claude-handoff, the writing trio, loop-me, chief-of-staff, setup-ts-deep-modules
+code-review	mattpocock/skills	skills/engineering/code-review	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+codebase-design	mattpocock/skills	skills/engineering/codebase-design	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+diagnosing-bugs	mattpocock/skills	skills/engineering/diagnosing-bugs	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+domain-modeling	mattpocock/skills	skills/engineering/domain-modeling	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+grill-with-docs	mattpocock/skills	skills/engineering/grill-with-docs	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+implement	mattpocock/skills	skills/engineering/implement	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+improve-codebase-architecture	mattpocock/skills	skills/engineering/improve-codebase-architecture	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	modified	closed-option questions ask via the harness ask tool (see grilling)
+pr	mattpocock/skills	skills/engineering/pr	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	model-invoked PR body; ask-matt routes to it
+prototype	mattpocock/skills	skills/engineering/prototype	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+research	mattpocock/skills	skills/engineering/research	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+setup-matt-pocock-skills	mattpocock/skills	skills/engineering/setup-matt-pocock-skills	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+tdd	mattpocock/skills	skills/engineering/tdd	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+to-spec	mattpocock/skills	skills/engineering/to-spec	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+to-tickets	mattpocock/skills	skills/engineering/to-tickets	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+triage	mattpocock/skills	skills/engineering/triage	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	modified	closed-option questions ask via the harness ask tool (see grilling)
+wayfinder	mattpocock/skills	skills/engineering/wayfinder	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	modified	closed-option questions ask via the harness ask tool (see grilling)
+wizard	mattpocock/skills	skills/engineering/wizard	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+grill-me	mattpocock/skills	skills/productivity/grill-me	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+grilling	mattpocock/skills	skills/productivity/grilling	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	modified	closed-option questions ask via the harness ask tool (see grilling)
+handoff	mattpocock/skills	skills/productivity/handoff	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+teach	mattpocock/skills	skills/productivity/teach	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+to-questionnaire	mattpocock/skills	skills/productivity/to-questionnaire	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	modified	closed-option questions ask via the harness ask tool (see grilling)
+wait-what	mattpocock/skills	skills/productivity/wait-what	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+writing-for-agents	mattpocock/skills	skills/productivity/writing-for-agents	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+git-guardrails-claude-code	mattpocock/skills	skills/misc/git-guardrails-claude-code	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+migrate-to-shoehorn	mattpocock/skills	skills/misc/migrate-to-shoehorn	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+scaffold-exercises	mattpocock/skills	skills/misc/scaffold-exercises	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+setup-pre-commit	mattpocock/skills	skills/misc/setup-pre-commit	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+claude-handoff	mattpocock/skills	skills/in-progress/claude-handoff	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+implement-spec	mattpocock/skills	skills/engineering/implement-spec	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	graduated to engineering upstream; synced 2026-10-04
+loop-me	mattpocock/skills	skills/in-progress/loop-me	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	modified	closed-option questions ask via the harness ask tool (see grilling)
+retro	mattpocock/skills	skills/engineering/retro	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	graduated to engineering upstream; synced 2026-10-04
+setup-ts-deep-modules	mattpocock/skills	skills/in-progress/setup-ts-deep-modules	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+writing-beats	mattpocock/skills	skills/in-progress/writing-beats	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	verbatim	-
+writing-fragments	mattpocock/skills	skills/in-progress/writing-fragments	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	modified	closed-option questions ask via the harness ask tool (see grilling)
+writing-shape	mattpocock/skills	skills/in-progress/writing-shape	a496f5513d4a4cf889bc48e189e579f4b0bdf6aa	modified	closed-option questions ask via the harness ask tool (see grilling)
 chief-of-staff	mattpocock/skills	skills/in-progress/chief-of-staff	49dd158d1076134a641b33efb035946536778336	hold	deliberately held at 49dd158: upstream 5beb35b only adds a wiki-memory section to an in-progress skill; re-check before the next sync
 show-me	humanlayer/skills	plugins/show-me/skills/show-me	653b6411c1f70c275a18e37673b042ff99f67ceb	modified	removed upstream's disable-model-invocation; deleted plugin leftovers (.claude-plugin/, skills/show-me/); description rewritten for routing; per-OS opener instead of Bash(open)
 improve-claude-md	humanlayer/skills	plugins/improve-claude-md/skills/improve-claude-md	653b6411c1f70c275a18e37673b042ff99f67ceb	verbatim	-
@@ -66,23 +66,23 @@ obsidian-cli	kepano/obsidian-skills	skills/obsidian-cli	3ccff5338ea700537839b219
 obsidian-markdown	kepano/obsidian-skills	skills/obsidian-markdown	3ccff5338ea700537839b21900aa5358a0402c98	verbatim	-
 code-review-and-quality	addyosmani/agent-skills	skills/code-review-and-quality	aeac41d4d005999432bb7312f7ff06383a91d59d	divergent	local variant; body rewritten, upstream mutation-testing paragraph folded in; two uninstalled child-skill pointers removed 2026-10-29
 typesafe-ai	typesafe-ai/skills	skills/typesafe-ai	302eea662c54bca6730873fe245bec1d69ebc23d	verbatim	-
-slint	slint-ui/slint	ai-plugins/skills/slint	a853159cd373d8d0cebd9cc37bf14e64d0f3f9a7	modified	official; skill dir only. Added official-tooling.md plus a pointer in SKILL.md: offer missing official tools (slint-viewer, slint-lsp, slint-docs MCP, plugin); synced 2026-10-27 by three-way merge
+slint	slint-ui/slint	ai-plugins/skills/slint	dca61c9a3de96a72ec3c96c8301d4ed33b968916	modified	official; skill dir only. Added official-tooling.md plus a pointer in SKILL.md: offer missing official tools (slint-viewer, slint-lsp, slint-docs MCP, plugin); synced 2026-10-27 by three-way merge
 qt-qml	TheQtCompanyRnD/agent-skills	skills/qt-qml	6845f02d41171a6df8b6e6fe225b7f5d1a6f4adf	verbatim	official Qt; probes for the optional QML Preview MCP server (Qt 6.12+)
 qt-ui-design	TheQtCompanyRnD/agent-skills	skills/qt-ui-design	6845f02d41171a6df8b6e6fe225b7f5d1a6f4adf	verbatim	official Qt; framework-neutral UX rules, section 4 covers embedded/HMI targets
 wpf-design-system	AlstonChan/agent-skills	skills/wpf-design-system	d6a82cf600663e8a3f38534a4b7223f4cd94bcf5	verbatim	-
 dotnet-wpf-modern	wshaddix/dotnet-skills	skills/dotnet-wpf-modern	09da68dc1f3c06f3bde05f49a6301c75478ab123	verbatim	.NET 8+ only; cross-references six sibling skills that are not installed
-bambu-labs	earthtojake/text-to-cad	skills/bambu-labs	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
-cad	earthtojake/text-to-cad	skills/cad	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
-dfam-check	earthtojake/text-to-cad	skills/dfam-check	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
-dfm	earthtojake/text-to-cad	skills/dfm	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
-dxf	earthtojake/text-to-cad	skills/dxf	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
-engineering-drawing	earthtojake/text-to-cad	skills/engineering-drawing	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
-gcode	earthtojake/text-to-cad	skills/gcode	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
-sdf	earthtojake/text-to-cad	skills/sdf	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
-sendcutsend	earthtojake/text-to-cad	skills/sendcutsend	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
-srdf	earthtojake/text-to-cad	skills/srdf	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
-step-parts	earthtojake/text-to-cad	skills/step-parts	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
-urdf	earthtojake/text-to-cad	skills/urdf	4811290bcdf57f5218af9eed904d8673330c3234	verbatim	-
+bambu-labs	earthtojake/text-to-cad	skills/bambu-labs	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
+cad	earthtojake/text-to-cad	skills/cad	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
+dfam-check	earthtojake/text-to-cad	skills/dfam-check	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
+dfm	earthtojake/text-to-cad	skills/dfm	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
+dxf	earthtojake/text-to-cad	skills/dxf	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
+engineering-drawing	earthtojake/text-to-cad	skills/engineering-drawing	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
+gcode	earthtojake/text-to-cad	skills/gcode	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
+sdf	earthtojake/text-to-cad	skills/sdf	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
+sendcutsend	earthtojake/text-to-cad	skills/sendcutsend	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
+srdf	earthtojake/text-to-cad	skills/srdf	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
+step-parts	earthtojake/text-to-cad	skills/step-parts	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
+urdf	earthtojake/text-to-cad	skills/urdf	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
 agents-team	-	-	-	local-only	authored here; pi-subagents based
 ai-loop	-	-	-	local-only	authored here
 consult	-	-	-	local-only	authored here
@@ -92,4 +92,4 @@ field-office-checklist	-	-	-	local-only	authored here; MetalAutoUQDwpf-specific 
 field-handoff	-	-	-	local-only	authored here
 git-janitor	-	-	-	local-only	authored here
 freecad-cad	-	-	-	local-only	authored here; FreeCAD as the verification and post-processing back end around freecad-mcp
-reverse-engineer-anything	morluto/rea	.agents/skills/reverse-engineer-anything	160d821ac9a0310afcb8d1fc427862dd6508add5	modified	no local edits to re-apply; byte-identical to the rea-agents 6.8.0 package skill (publish variant: tool_count + @6.8.0 pins); a re-sync copies the package directory
+reverse-engineer-anything	morluto/rea	.agents/skills/reverse-engineer-anything	160d821ac9a0310afcb8d1fc427862dd6508add5	hold	deliberately pinned to the installed rea-agents 6.8.0 package (publish variant, byte-identical to it); the repo moved to 1ef5918 but a re-sync installs a newer package and copies its skill directory, then bumps this pin

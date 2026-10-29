@@ -61,27 +61,29 @@ global rules file.
 
 ## Sources at a glance
 
-Nine of the eleven upstream repos were compared by `scripts/check-skill-updates.sh` on **2026-10-27**, and
-that run synced `typesafe-ai` and `slint`. On top of those nine, `earthtojake/text-to-cad` was added and
-pinned on **2026-10-28**, and `morluto/rea` was added on **2026-10-29** from the installed `rea-agents`
-6.8.0 package, pinned to the `rea-agents-6.8.0` tag. The four UI-framework repos were added and pinned on
-**2026-10-23**.
-`chief-of-staff` was left at `49dd158` on purpose: upstream `5beb35b` only adds a wiki-memory section to an
-`in-progress` skill. Its manifest state is `hold`, so the update check reports it as held rather than
-upstream-ahead.
+The last full comparison by `scripts/check-skill-updates.sh` ran on **2026-10-29**. It synced every
+`upstream-ahead` skill — 5 from `mattpocock/skills` (`code-review`, `codebase-design`, `research`,
+`setup-matt-pocock-skills`, `implement-spec`) and 8 from `earthtojake/text-to-cad` (`cad`, `dxf`,
+`engineering-drawing`, `gcode`, `sdf`, `srdf`, `step-parts`, `urdf`) — and merged the 4 conflicts:
+`grilling`, `wayfinder` and `improve-codebase-architecture` each only gained an upstream "with a fresh
+context window" line, and `slint` changed one reference file; local edits were kept. On top of those,
+`earthtojake/text-to-cad` was added and pinned on **2026-10-28**, `morluto/rea` on **2026-10-29** from the
+installed `rea-agents` 6.8.0 package, and the four UI-framework repos on **2026-10-23**.
+`chief-of-staff` remains `hold`: upstream `5beb35b` only adds a wiki-memory section to an `in-progress`
+skill, so the update check reports it as held, not upstream-ahead.
 
 | Upstream repo | Upstream layout | Skills installed | Pinned commit |
 |---|---|---|---|
-| [mattpocock/skills](https://github.com/mattpocock/skills) | `skills/<category>/<name>/` for `engineering`, `productivity`, `misc`, `in-progress` | 38 | `49dd158` (2026-10-09) |
+| [mattpocock/skills](https://github.com/mattpocock/skills) | `skills/<category>/<name>/` for `engineering`, `productivity`, `misc`, `in-progress` | 38 | `a496f55` (2026-10-29) |
 | [humanlayer/skills](https://github.com/humanlayer/skills) | `plugins/<plugin>/skills/<name>/` | 4 | `653b641` (2026-10-08) |
 | [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) | `skills/<name>/` | 6 | `3ccff533` (2026-09-15) |
 | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | `skills/<name>/` | 1 (divergent copy) | `aeac41d` (2026-10-13) |
 | [typesafe-ai/skills](https://github.com/typesafe-ai/skills) | `skills/<name>/` | 1 | `302eea6` (2026-10-23) |
-| [slint-ui/slint](https://github.com/slint-ui/slint) | `ai-plugins/skills/<name>/` inside the Slint monorepo | 1 | `a853159` (2026-10-26) |
+| [slint-ui/slint](https://github.com/slint-ui/slint) | `ai-plugins/skills/<name>/` inside the Slint monorepo | 1 | `dca61c9` (2026-10-29) |
 | [TheQtCompanyRnD/agent-skills](https://github.com/TheQtCompanyRnD/agent-skills) | `skills/<name>/` | 2 | `6845f02` (2026-10-20) |
 | [AlstonChan/agent-skills](https://github.com/AlstonChan/agent-skills) | `skills/<name>/` | 1 | `d6a82cf` (2026-10-22) |
 | [wshaddix/dotnet-skills](https://github.com/wshaddix/dotnet-skills) | `skills/<name>/` | 1 | `09da68d` (2026-02-27) |
-| [earthtojake/text-to-cad](https://github.com/earthtojake/text-to-cad) | `skills/<name>/` | 12 | `4811290` (2026-10-27) |
+| [earthtojake/text-to-cad](https://github.com/earthtojake/text-to-cad) | `skills/<name>/` | 12 | `a7cf2c4` (2026-10-29) |
 | [morluto/rea](https://github.com/morluto/rea) | `.agents/skills/<name>/` inside the REA monorepo | 1 (publish variant) | `160d821` (2026-10-25) |
 | authored in this repo | — | 9 | — |
 
@@ -90,10 +92,11 @@ upstream-ahead.
 
 ## Provenance by skill
 
-### mattpocock/skills — pinned `49dd158d1076134a641b33efb035946536778336`
+### mattpocock/skills — pinned `a496f5513d4a4cf889bc48e189e579f4b0bdf6aa`
 
-Most of the 38 copies are byte-identical to upstream (`verbatim`); eight carry a local edit (the
-grilling family and its callers — see "Local edits that a re-sync would clobber").
+Most of the 38 copies are byte-identical to upstream (`verbatim`); nine carry a local edit (the
+grilling family and its callers, plus `ask-matt`'s 2026-10-29 router additions — see "Local edits that a
+re-sync would clobber").
 `resolving-merge-conflicts` was removed upstream in v1.3 (commit `daa01d8`), so its local copy was
 deleted; `implement-spec` and `retro` graduated from `in-progress/` to `engineering/`.
 
@@ -102,6 +105,13 @@ The 2026-10-18 sync moved the pin from `d81f3a1` to `49dd158` and refreshed 13 s
 `setup-matt-pocock-skills`, `tdd`, `to-tickets`, `wizard`, `handoff`, `teach`, `claude-handoff`) plus
 `grilling` and `wayfinder`, which carry a local edit and were merged by hand. Everything else in this
 repo was already identical to `49dd158`.
+
+The 2026-10-29 sync moved the pin to `a496f55`. It copied the five `upstream-ahead` skills verbatim
+(`code-review`, `codebase-design`, `research`, `setup-matt-pocock-skills`, `implement-spec`) and
+hand-merged the three conflicts: `grilling`, `wayfinder` and `improve-codebase-architecture` each only
+gained "with a fresh context window" in one sentence upstream, and every local ask-tool pointer was
+kept. `ask-matt` was edited here the same day to route the seven user-invoked skills it had missed, so
+its manifest state moved from `verbatim` to `modified`.
 
 The same day, `chief-of-staff` was added — the one skill upstream gained between `d81f3a1` and
 `49dd158`. It is `verbatim`, and keeps upstream's `disable-model-invocation: true`, so it is invoked by
@@ -259,7 +269,9 @@ full plugin (`/plugin marketplace add slint-ui/ai-plugins`, then `/plugin instal
 installing the plugin duplicates this skill. `SKILL.md` gains a three-line pointer above workflow step 1 and
 one row in its reference table; upstream text is unchanged. The 2026-10-27 sync (`301a9b8` → `a853159`)
 was a three-way merge: upstream added two preview lines to workflow step 3 and fixed the compile-argument
-notes in `reference/web-embedding.md`, and both local additions applied cleanly.
+notes in `reference/web-embedding.md`, and both local additions applied cleanly. The 2026-10-29 sync
+(`a853159` → `dca61c9`) changed only `reference/web-embedding.md`; the merge was clean and the local
+tooling pointer stayed.
 
 The skill is pinned to the monorepo's `master` (plugin `1.19.0`), which runs ahead of the latest release
 (`v1.18.1`). Slint's install guide publishes the plugin from
@@ -284,7 +296,7 @@ lives, and no step in the skill depends on it. **Known inaccuracy:** the Perform
 .NET 8+ renders through DirectX 11 by default. WPF still renders through DirectX 9 (milcore) on .NET 8 and 9.
 The rest of the skill does not depend on that claim, so the copy stays verbatim.
 
-### earthtojake/text-to-cad — pinned `4811290bcdf57f5218af9eed904d8673330c3234`
+### earthtojake/text-to-cad — pinned `a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a`
 
 Added and pinned on 2026-10-28. Twelve skills covering the part-making chain — parametric CAD and its
 exports (`cad`), 2D DXF drawings (`dxf`), shop drawings (`engineering-drawing`), manufacturability review
@@ -294,6 +306,10 @@ exports (`cad`), 2D DXF drawings (`dxf`), shop drawings (`engineering-drawing`),
 Each directory ships its own MIT `LICENSE`, and `agents/openai.yaml` came over unchanged. Four skills carry
 Python helpers (`dfam-check`, `dfm`, `gcode`, `step-parts`), and `dfam-check` and `dfm` add a
 `requirements.txt` for their review tools.
+
+The 2026-10-29 sync moved the pin to `a7cf2c4`: eight skills had upstream changes (CAD snapshot review,
+DXF / drawing / SDF / SRDF / URDF skill text, step-parts, and the Orca preset helper). All were copied
+verbatim.
 
 | Skill | Upstream path | Local state |
 |---|---|---|
@@ -318,13 +334,14 @@ pin is the `rea-agents-6.8.0` tag (published 2026-10-25).
 
 | Skill | Upstream path | Local state |
 |---|---|---|
-| `reverse-engineer-anything` | `.agents/skills/reverse-engineer-anything` | modified (publish variant; no hand edits to re-apply) |
+| `reverse-engineer-anything` | `.agents/skills/reverse-engineer-anything` | hold (installed package 6.8.0; repo moved to `1ef5918`, not followed) |
 
 All seven `references/*.md` files are byte-identical to the tag. `SKILL.md` is the publish variant: it adds
 `tool_count: 229` to the frontmatter and pins the fallback commands to `npx -y rea-agents@6.8.0` where the
-repo says `@latest` — five lines added, six removed, no prose rewritten. There is no local edit to re-apply:
-`modified` records that this copy differs from the repo at the pin, not that a human changed it. A re-sync
-copies from the npm package, not from the repo file, or the version pin reverts.
+repo says `@latest` — five lines added, six removed, no prose rewritten. The manifest state is `hold`, not
+`modified`: a re-sync installs a newer `rea-agents` package and copies its skill directory, then bumps this
+pin. Do not merge from the repo tree — the repo moved to `1ef5918`, but the installed package stays 6.8.0
+until it is updated on purpose.
 
 REA rewrites these docs when it updates and leaves a `*.rea.backup` beside each rewritten file; the pattern
 is in `.gitignore`. The backups on disk are the pre-rewrite copies — do not commit them.
