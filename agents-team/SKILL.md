@@ -100,8 +100,9 @@ Each step ends when its completion criterion holds.
    merge two small tasks, split an oversized one, re-assign, interrupt a teammate whose errand
    turned out trivial, retire a member with nothing left. When the remaining tasks become a
    chain, drop to one builder that carries on from ticket to ticket, and have the next ticket's
-   known-answer cases drafted while the current one is built. Read the settlement notices, ask for
-   `status` when it is unclear who is running, `steer` to redirect, and `stop` a teammate that
+   known-answer cases drafted while the current one is built. Read the settlement notices (on DSH a notice carries the report but not the teammate's name —
+   match it to the task you sent), ask for `status` when it is unclear who is running, `steer` to
+   redirect, and `stop` a teammate that
    is looping, drifting, or outside its territory — then decide explicitly whether to re-brief
    it or finish the work yourself. Where `steer` or `stop` is absent, `protocol.md` says what
    replaces it.

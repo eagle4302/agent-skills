@@ -648,3 +648,28 @@ pi, so following it would have wasted a session. What is actually owed:
    `worker` with it and ask the child whether it can see anything of the parent conversation.
    The profile defaults were read from the installed package, never observed in a run.
 
+## Round 12 — Agent Teams smoke run on DSH (2026-10-29)
+
+First live run of the built-in Agent Teams route (`adapters/dsh.md`), DSH 0.2.1-rc.3. Two teammates
+spawned **in one assistant message** with `context: "fresh"`, both on a read-only task: read
+`scripts/lint-skills.mjs`, list the `err`/`warn` check ids with first-occurrence line numbers, and
+report the file's line count.
+
+| Step | Result |
+| --- | --- |
+| `spawn_teammate` x2 in one message | both started; `member.target` was `smoke-builder` / `smoke-prober` |
+| `list_agents` | lead + both teammates with target, status, description, model; `inactive` after the turn ended |
+| `send_message` to the running builder | accepted; the added requirement (report the shebang line) was in the final report |
+| `send_message` to the inactive prober | woke it; it verified the list in the next turn |
+| `wait_agent` | returned on teammate state/report changes; `noProgress` once both were inactive |
+| `team_task_create` / `set_dependencies` / `list` | the blocked task was `ready:false` while its blocker was open and `ready:true` after it completed |
+| Reports | arrived as "Background subagent <session-id> finished" settlement notices; the closing message carries the report but not the teammate name |
+| Read-only respected | `git status` clean afterwards |
+
+Verified output: the builder listed 8 check ids (`frontmatter` 96, `layout` 116, `invocation` 131,
+`manifest` 146, `readme` 197, `local-edits` 211, `patches` 277, `references` 343), total 382 lines,
+and the shebang line correctly. The prober returned PASS for every item, and the Lead re-ran the
+same check before accepting.
+
+Not probed here: `interrupt_agent`, a teammate's mid-turn peer message, `context: "fork"`,
+teammate-spawned helpers, and whether project-level `AGENTS.md` reaches a teammate.

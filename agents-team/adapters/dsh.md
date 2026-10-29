@@ -4,9 +4,9 @@ DSH 0.2.1-rc.3 (desktop app). Two dispatch surfaces exist; this adapter treats t
 Agent Teams** toolset as canonical and the plain `subagent` family as the off-team fallback.
 The repo's preset compositions (`../preset/`) are the legacy path — optional, never mounted live.
 
-Verified on 2026-10-29 against this session's own tool schemas plus one plain-subagent probe. Rows
-that are inferred rather than read are marked `(assumed)` or `(inferred)` here and listed under
-"Verified / not verified".
+Verified on 2026-10-29 against this session's tool schemas, one plain-subagent probe, and one
+two-teammate smoke run. Rows that are inferred rather than read are marked `(assumed)` or
+`(inferred)` here and listed under "Verified / not verified".
 
 ## Capabilities
 
@@ -14,12 +14,12 @@ that are inferred rather than read are marked `(assumed)` or `(inferred)` here a
 | --- | --- |
 | `spawn` | `spawn_teammate({ name, description, prompt, context })` — Lead only |
 | `identity` | the teammate `name` is its address; `list_agents` lists every target |
-| `parallel-spawn` | several `spawn_teammate` calls in one assistant message `(assumed: not measured, but the subagent family documents the one-message pattern)` |
+| `parallel-spawn` | several `spawn_teammate` calls in one assistant message — two started together in the 2026-10-29 smoke run |
 | `status` | `list_agents` — `inactive` means no turn is executing, **not** that the task is done; `wait_agent` waits for the next status, message, or shared-task change |
 | `steer` | `send_message` — lands at the target's nearest step boundary and starts an inactive target |
 | `stop` | `interrupt_agent` — ends the current turn, keeps the pending inbox; Lead only |
 | `gate` | **absent.** No host-run command decides acceptance |
-| `raise` | `send_message` from a teammate to `lead`; the Lead sees the sender's name first `(assumed)` |
+| `raise` | `send_message` to `lead`; a peer message carries the sender's name `(assumed — not exercised: the smoke-test reports came as settlement notices, see Edges)` |
 | `fresh-context` | `context: "fresh"` (default) or `"fork"` (inherits the Lead's completed turns) |
 | `fan-out` | `workflow` — only when the human explicitly asks for a workflow or a large fan-out |
 | `isolate` | **absent.** Teammates share the working tree; disjointness is the brief plus `write_scopes` on the shared board |
@@ -72,6 +72,7 @@ which checks the Lead ran and that none were harness-enforced.
 | A plain `subagent` child is expected to be absent from `list_agents` `(inferred: the description lists only the Lead and durable teammates; not measured)`. | Use `spawn_teammate` when the Lead needs an addressable, durable member. |
 | `workflow` is for fan-out, not for teammates. Harness guidance: only when the human asks for a workflow or a large orchestration. | Do not wrap a two-teammate team in a workflow script. |
 | A teammate runs on the session's model; `spawn_teammate` has no model field. | Per-run model routing exists only inside `workflow` (`agent(..., { provider, model })`). |
+| A teammate's final report arrives as a **settlement notice** ("Background subagent <session-id> finished") with the closing message, and does not name the teammate. | Match a notice to the task you sent, or confirm with `list_agents`; do not treat the session id as the teammate target. |
 | A plain `subagent` child received the global `~/.dsh/AGENTS.md` in a 2026-10-29 probe. `(measured for subagent; assumed for teammates)` | Assume workspace rules may reach a teammate; still quote the project rules it needs into the brief. |
 
 ## Verified / not verified
@@ -93,11 +94,25 @@ Assumed, not measured:
 - project-level `AGENTS.md` / `CLAUDE.md` files reach a teammate the same way the global one
   reaches a `subagent`.
 
+Verified by the 2026-10-29 two-teammate smoke run (read-only task, `git status` clean afterwards):
+
+- two `spawn_teammate` calls in one message started both teammates; `member.target` was the
+  teammate name;
+- `list_agents` listed lead plus both teammates with target, status, description and model;
+  `inactive` meant the turn had ended;
+- `send_message` reached a running teammate (its added requirement appeared in the report) and
+  woke an inactive one for its next turn;
+- `wait_agent` returned on teammate changes and `noProgress` once none was active;
+- `team_task_create` + `blocked_by` behaved: the blocked task stayed `ready:false` until its
+  blocker completed, then became `ready:true`;
+- a teammate report arrived as a settlement notice carrying a session id, not the teammate name.
+
 Not verified:
 
-- no live Agent Teams run has used this adapter yet (no teammate was spawned for it), so the whole
-  path is designed, not proven;
-- whether a teammate can spawn its own helpers; assume delegation depth 1, as with `subagent`.
+- `interrupt_agent` (stop) and a teammate's mid-turn `send_message` to the Lead;
+- `context: "fork"` for `spawn_teammate`;
+- whether a teammate can spawn its own helpers; assume delegation depth 1, as with `subagent`;
+- whether project-level `AGENTS.md` / `CLAUDE.md` reaches a teammate.
 
 ## Legacy: preset compositions (rc.2)
 
