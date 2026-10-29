@@ -80,3 +80,36 @@ index 0000000..adcf1e0
 +it gives the user a second copy of this skill, so tell them to pick one: keep
 +the plugin and remove this copy, or keep this copy and add only the
 +components from the table above.
+diff --git a/slint/tools-install.md b/slint/tools-install.md
+index fe40062..8ea2ab5 100644
+--- a/slint/tools-install.md
++++ b/slint/tools-install.md
+@@ -27,6 +27,28 @@ install slint-viewer/slint-viewer ~/.local/bin/
+ 
+ The prebuilt `slint-viewer` includes the `mcp` feature.
+ 
++### Windows
++
++PowerShell, one archive per tool (swap `latest` for `v<version>` to pin):
++
++```powershell
++$dst = "$env:LOCALAPPDATA\slint"
++New-Item -ItemType Directory -Force $dst | Out-Null
++foreach ($tool in 'lsp', 'viewer') {
++  $zip = Join-Path $env:TEMP "slint-$tool-x86_64-pc-windows-msvc.zip"
++  Invoke-WebRequest "https://github.com/slint-ui/slint/releases/latest/download/slint-$tool-x86_64-pc-windows-msvc.zip" -OutFile $zip
++  Expand-Archive $zip -DestinationPath $dst -Force
++}
++$userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
++if (($userPath -split ';') -notcontains $dst) {
++  [Environment]::SetEnvironmentVariable('Path', "$userPath;$dst", 'User')
++}
++$env:Path = "$dst;$env:Path"
++```
++
++Restart the shell afterwards; `slint-lsp --version` and `slint-viewer --version` should print. The
++archive puts the `.exe` at the top level; arm64 machines use `aarch64-pc-windows-msvc.zip`.
++
+ On Debian/Ubuntu, install the runtime dependencies:
+ 
+ ```sh

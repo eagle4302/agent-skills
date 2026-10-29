@@ -27,6 +27,28 @@ install slint-viewer/slint-viewer ~/.local/bin/
 
 The prebuilt `slint-viewer` includes the `mcp` feature.
 
+### Windows
+
+PowerShell, one archive per tool (swap `latest` for `v<version>` to pin):
+
+```powershell
+$dst = "$env:LOCALAPPDATA\slint"
+New-Item -ItemType Directory -Force $dst | Out-Null
+foreach ($tool in 'lsp', 'viewer') {
+  $zip = Join-Path $env:TEMP "slint-$tool-x86_64-pc-windows-msvc.zip"
+  Invoke-WebRequest "https://github.com/slint-ui/slint/releases/latest/download/slint-$tool-x86_64-pc-windows-msvc.zip" -OutFile $zip
+  Expand-Archive $zip -DestinationPath $dst -Force
+}
+$userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+if (($userPath -split ';') -notcontains $dst) {
+  [Environment]::SetEnvironmentVariable('Path', "$userPath;$dst", 'User')
+}
+$env:Path = "$dst;$env:Path"
+```
+
+Restart the shell afterwards; `slint-lsp --version` and `slint-viewer --version` should print. The
+archive puts the `.exe` at the top level; arm64 machines use `aarch64-pc-windows-msvc.zip`.
+
 On Debian/Ubuntu, install the runtime dependencies:
 
 ```sh

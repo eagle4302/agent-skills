@@ -53,6 +53,12 @@ catalogs are optional, via its `skills` array. The skill ID is the path-derived,
 name (`typesafe-ai`), and as in Pi a skill with no `description` is not advertised to the model. Verify
 with `opencode debug skill`, which lists every registered skill with its `location`.
 
+## Prompts
+
+Reusable instruction blocks that are not skills live in `prompts/`: the architecture-block installer
+and the CodeGraph/Jev/Recap block. `prompts/README.md` says what each one writes into a harness's
+global rules file.
+
 ## Sources at a glance
 
 Nine of the eleven upstream repos were compared by `scripts/check-skill-updates.sh` on **2026-10-27**, and

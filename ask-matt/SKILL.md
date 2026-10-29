@@ -72,7 +72,7 @@ A **phase** is a chunk of work inside a session: the grilling, the implementatio
 
 - **Continue**: stay put. Costs nothing, loses nothing.
 - **`/clear`**: empty the window, when nothing here matters to what's next.
-- **`/handoff`** writes a portable markdown file. Narrow: only for a **new harness**, a **new directory**, a **colleague**, or forking a side task **mid-phase**. What it buys is portability.
+- **`/handoff`** writes a portable markdown file. Narrow: only for a **new harness**, a **new directory**, a **colleague**, or forking a side task **mid-phase**. What it buys is portability. **`/claude-handoff`** is the same idea for Claude Code: it hands the work to a background agent instead of a file.
 - **Subagent**: send a tightly-scoped task to its own window and get a report back.
 - **`/compact`** compresses this context and seeds a fresh session with it. The **default**, at the bottom of the tree rather than the first reach.
 
@@ -92,6 +92,12 @@ Off the main flow entirely.
 - **`/teach`**: learn a concept over multiple sessions, using the current directory as a stateful workspace.
 - **`/writing-for-agents`** is the reference for writing documents agents consume: skills, AGENTS.md, pointed-at docs.
 
+- **`/writing-fragments`**, **`/writing-beats`**, **`/writing-shape`**: the writing family, in that order — mine raw fragments, assemble them into beats, shape them into an article. Use when the deliverable is prose, not code; each runs in its own context window by default.
+- **`/loop-me`**: turn a workflow you keep re-explaining into a written workflow spec.
+- **`/chief-of-staff`**: pursue a long-running goal in a single session by co-ordinating subagents. Use when the goal outlives one context window and the work is mostly delegation.
+
 ## Precondition
 
 **`/setup-matt-pocock-skills`**: run before your first engineering flow to configure the issue tracker, triage labels, and doc layout the other skills assume. Custom issue trackers also work.
+
+**`/setup-ts-deep-modules`**: once per TypeScript repo, install the deep-module constraints (dependency-cruiser rules and the docs) that `/codebase-design` and `/tdd` speak.

@@ -39,7 +39,7 @@ For a yes/no question use `noul`; it carries no separate confidence, only the re
 {"state":{"ticket":"..."},"model":"jev-latest","questions":{"meets":{"type":"noul","instructions":"Does this ticket meet its stated acceptance list?"}}}
 ```
 
-- Design the questions with the `typesafe-ai` skill when it is available (`typesafe:typesafe-ai` in Claude Code); the schema above is enough when it is not. Write `{state, model:"jev-latest", questions:{...}}` to a temp file, then send it: if the machine has a `~/.claude/hooks/jev.sh` hook, run `bash ~/.claude/hooks/jev.sh <file>`; otherwise POST it directly. On Windows — and in DeepSeek Harness, which does not inherit the key — run `~/.dsh/hooks/jev-dsh.ps1 -Request '<JSON>'` instead (inline beats a temp file; pass `-Path <file>` when the JSON contains single quotes or gets long): same `{state, model, questions}` contract, but it reads `TYPESAFE_API_KEY` from the Windows user scope when the process environment has none, and exits 2 (no key), 3 (bad request), 4 (HTTP/transport failure). There is no MCP tool. `type`, `instructions` and `criteria` sit **directly under the question**; do not wrap them in a `choice` object (that shape returns 422). A `choice`'s `criteria` is an object (a list returns 422); a `score`'s `criteria` is an array of level descriptions.
+- Runner and exit codes: `AGENTS.md` → Jev 優先. The schema bits that actually bite: `type`, `instructions` and `criteria` sit **directly under the question** — wrapping them in a `choice` object returns 422; a `choice`'s `criteria` is an object (a list returns 422), a `score`'s is an array of level descriptions. Design the questions with the `typesafe-ai` skill when it is available.
 
   ```bash
   curl -sS -X POST https://api.typesafe.ai/v1/systemone \
@@ -55,11 +55,11 @@ For a yes/no question use `noul`; it carries no separate confidence, only the re
     --data-binary "@request.json"
   ```
 
-- Report the pick and its `confidence`, and gate on that field: `confidence` ≥ 0.6 → use the pick; below it, or a failed call → decide yourself, say so, and ask the user when the choice matters.
+- Gate at 0.6 as `AGENTS.md` says. Read the field correctly first:
   - `confidence` is **not** the top probability. TypeSafe rescales the peak by the number of options — all the probability on one option is 1, an even split is 0 (Choice: `(p_max − 1/n) / (1 − 1/n)`). So 0.6 means different top probabilities at different option counts: ≈ 0.8 with two options, ≈ 0.68 with five. Threshold on the same field everywhere; read `probabilities` when the number itself matters.
   - A **`noul` answer carries no `confidence`**. Gate on the probability it returns: near 0.5 means it is genuinely unsure, not "medium".
   - A **`score` answer** returns `score` as a 0–1 position across the levels plus a `legend` mapping index → level text. Report the level, not the fraction.
-- Keep these for yourself and the user: code design, debugging, multi-step reasoning, and any safety, risk, destructive-action, deploy, or go-live call.
+- The exclusion list (design, debugging, multi-step reasoning, safety/risk/destructive/deploy calls) lives in `AGENTS.md` → Jev 優先; when a call lands on it, decide yourself and say so.
 
 ### Batch classification
 

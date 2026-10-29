@@ -61,7 +61,7 @@ Done when：四段都看過；基準 commit 有值（沒有就記下來，輸出
 3. 最新的 `.scratch/handoff-*-office-end.md` 或 `HANDOFF-*-field-to-office.md`：辦公室出貨了什麼、拍板了什麼、剩什麼。
 4. `git log` 上最近幾筆 vault commit（`開發進度`、`驗證紀錄`）：常寫著「真機都還沒驗」的新改動。
 
-先把 `DONE-NEW` 歸到它所屬功能的驗收票（同一個資料夾裡標題有「驗收／field／acceptance」的那張），歸不進去的才當成獨立一格。歸完之後，`FIELD`＋`FIELD?`＋歸不進去的 `DONE-NEW` 加起來多於 10 張，就派唯讀 `Explore` agent 分頭讀，每個 agent 約 15 張、最多 3 個。下一步要等它們的結果，所以用**前景**（Claude Code：`run_in_background: false`；OpenCode：`background: false`），不要開背景再自己等。給它們的 prompt 骨架：
+先把 `DONE-NEW` 歸到它所屬功能的驗收票（同一個資料夾裡標題有「驗收／field／acceptance」的那張），歸不進去的才當成獨立一格。歸完之後，`FIELD`＋`FIELD?`＋歸不進去的 `DONE-NEW` 加起來多於 10 張，就派唯讀 `Explore` agent 分頭讀，每個 agent 約 15 張、最多 3 個。下一步要等它們的結果，所以用**前景**等：DSH 用一個 `workflow` 呼叫跑這些唯讀 lane，或逐個 `subagent` 送出去後收通知／用 `job_output` 等；Claude Code 用 `run_in_background: false`；OpenCode 用 `background: false`。不要開背景再自己等。給它們的 prompt 骨架：
 
 ```text
 唯讀。逐張讀下面這些票的 Status、「剩什麼／現場要做的／驗收」段，每張回一行：
