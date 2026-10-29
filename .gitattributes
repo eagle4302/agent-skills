@@ -2,3 +2,6 @@
 # core.autocrlf=true (this box) would otherwise hand bash a CRLF script.
 *.sh text eol=lf
 scripts/skill-sources.tsv text eol=lf
+
+# Local-edit patches are generated with LF and must stay LF for `git apply`.
+patches/*.patch text eol=lf

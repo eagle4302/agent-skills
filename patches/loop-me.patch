@@ -1,0 +1,13 @@
+diff --git a/loop-me/SKILL.md b/loop-me/SKILL.md
+index e58a474..7e3f06a 100644
+--- a/loop-me/SKILL.md
++++ b/loop-me/SKILL.md
+@@ -7,6 +7,8 @@ argument-hint: "A workflow to design, or nothing to go find one"
+ 
+ Run a stateful `/grilling` session whose only output is **workflow** specs. Use the grilling discipline (relentless, a round of questions at a time, a recommended answer attached to each) aimed at the vocabulary and goal below. Create, edit, and delete specs as the grilling resolves things.
+ 
++When a question has a closed set of answers, ask it with the harness's ask tool, as `/grilling` prescribes; open questions stay in the markdown round.
++
+ ## The loop lens
+ 
+ A **loop** is a recurring pattern in the user's life: their career, their week, their morning, a single repeated activity. Picturing a life as loops within loops reveals how predictable its activities really are, which is what makes them worth **delegating**. Use the lens to find loops worth specifying, and propose ones the user hasn't noticed.

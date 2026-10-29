@@ -343,8 +343,9 @@ every upstream repo above, and by a filesystem search for a second copy of each 
 ## Local edits that a re-sync would clobber
 
 These skills intentionally differ from upstream. Copying upstream over them loses the edit; merge instead.
-Each edit also has a sentinel in `scripts/local-edits.json`, and `scripts/lint-skills.mjs` fails when one
-goes missing. Re-apply stays manual: this table is the instruction.
+Each edit has a sentinel in `scripts/local-edits.json` and, for `modified` skills, a diff to re-apply in
+`patches/<skill>.patch`; `scripts/lint-skills.mjs` fails when either goes stale. Re-apply stays explicit:
+this table is the instruction and `patches/README.md` has the commands.
 
 | Skill | Edit | Why it matters |
 |---|---|---|
@@ -406,8 +407,8 @@ node scripts/lint-skills.mjs --strict  # warnings fail too (use in CI or before 
 Checks: frontmatter parses and `name` matches the directory; the description is present and at most
 1024 characters; no nested `SKILL.md`; `disable-model-invocation` agrees with `agents/openai.yaml`;
 the manifest and the skill directories agree; the README's counts agree with the tree; every local edit
-in `scripts/local-edits.json` is still applied; and no skill names a name that is neither installed nor
-allowlisted in `scripts/known-absent-refs.txt`.
+in `scripts/local-edits.json` is still applied; every `patches/*.patch` still reverse-applies; and no
+skill names a name that is neither installed nor allowlisted in `scripts/known-absent-refs.txt`.
 
 ## Syncing a skill
 
@@ -423,7 +424,9 @@ allowlisted in `scripts/known-absent-refs.txt`.
    ```
 
    Or, for a repo whose skills are all `verbatim`, `cp -r` straight from the cached clone.
-3. Re-apply any edit listed under "Local edits that a re-sync would clobber". The sentinels in `scripts/local-edits.json` tell you whether it survived; run the linter afterwards.
+3. Re-apply any edit listed under "Local edits that a re-sync would clobber": `git apply patches/<skill>.patch`
+   for a `modified` skill, by hand for a `divergent` one. The sentinels in `scripts/local-edits.json` tell
+   you whether it survived; run the linter afterwards.
 4. Update `scripts/skill-sources.tsv`: set the skill's `pinned_sha` to the commit you just synced, and
    refresh its `local_state` and `notes`.
 5. Refresh the tables in this README to match, and note the new "last compared" date.

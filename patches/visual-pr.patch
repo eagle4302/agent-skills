@@ -1,0 +1,23 @@
+diff --git a/visual-pr/SKILL.md b/visual-pr/SKILL.md
+index 28fc332..069c722 100644
+--- a/visual-pr/SKILL.md
++++ b/visual-pr/SKILL.md
+@@ -1,6 +1,7 @@
+ ---
+ name: visual-pr
+ description: Only use when the user explicitly invokes this skill by name.
++disable-model-invocation: true
+ ---
+ 
+ # Describe a Pull Request
+diff --git b/visual-pr/agents/openai.yaml b/visual-pr/agents/openai.yaml
+new file mode 100644
+index 0000000..ddebc75
+--- /dev/null
++++ b/visual-pr/agents/openai.yaml
+@@ -0,0 +1,5 @@
++interface:
++  display_name: "Visual PR"
++  short_description: "Write the PR description by name"
++policy:
++  allow_implicit_invocation: false

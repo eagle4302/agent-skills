@@ -7,6 +7,7 @@
 //
 // Exit codes: 0 clean, 1 problems, 2 usage error.
 
+import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -258,6 +259,36 @@ for (const dir of needsSentinel) {
 for (const key of Object.keys(editSkills)) {
   if (!needsSentinel.includes(key)) {
     err('local-edits', `${key}: stale entry (manifest does not mark it modified/divergent)`);
+  }
+}
+
+// ---------------------------------------------------------------- patches
+
+const patchesDir = join(ROOT, 'patches');
+const skippedEdits = new Set(
+  Object.entries(editSkills)
+    .filter(([, entry]) => entry.skip)
+    .map(([name]) => name),
+);
+const expectedPatches = manifestRows
+  .filter((row) => row.state === 'modified' && !skippedEdits.has(row.dir))
+  .map((row) => `${row.dir}.patch`);
+if (expectedPatches.length > 0 && !existsSync(patchesDir)) {
+  err('patches', 'patches/ is missing; run node scripts/make-patches.mjs');
+} else if (existsSync(patchesDir)) {
+  for (const name of expectedPatches) {
+    const patchPath = join(patchesDir, name);
+    if (!existsSync(patchPath)) {
+      err('patches', `missing patches/${name} (run node scripts/make-patches.mjs)`);
+      continue;
+    }
+    const check = spawnSync('git', ['apply', '-R', '--check', patchPath], { cwd: ROOT, encoding: 'utf8' });
+    if (check.status !== 0) {
+      err('patches', `patches/${name} does not match the tree (regenerate with node scripts/make-patches.mjs)`);
+    }
+  }
+  for (const name of readdirSync(patchesDir).filter((file) => file.endsWith('.patch'))) {
+    if (!expectedPatches.includes(name)) warn('patches', `patches/${name} has no matching modified skill`);
   }
 }
 
