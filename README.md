@@ -1,6 +1,6 @@
 # Skills
 
-This directory is the Pi user-level skills root (`~/.pi/agent/skills`). It holds 75 skills — most of
+This directory is the Pi user-level skills root (`~/.pi/agent/skills`). It holds 77 skills — most of
 them copied from public upstream repos, the rest authored here.
 
 It is also a git repository of its own:
@@ -51,9 +51,11 @@ with `opencode debug skill`, which lists every registered skill with its `locati
 
 ## Sources at a glance
 
-All ten upstream repos were compared by `scripts/check-skill-updates.sh`: nine on **2026-10-27**, and that
-run synced `typesafe-ai` and `slint`. The tenth, `earthtojake/text-to-cad`, was added and pinned on
-**2026-10-28**. The four UI-framework repos were added and pinned on **2026-10-23**.
+Nine of the eleven upstream repos were compared by `scripts/check-skill-updates.sh` on **2026-10-27**, and
+that run synced `typesafe-ai` and `slint`. On top of those nine, `earthtojake/text-to-cad` was added and
+pinned on **2026-10-28**, and `morluto/rea` was added on **2026-10-29** from the installed `rea-agents`
+6.8.0 package, pinned to the `rea-agents-6.8.0` tag. The four UI-framework repos were added and pinned on
+**2026-10-23**.
 `chief-of-staff` was left at `49dd158` on purpose: upstream `5beb35b` only adds a wiki-memory section to an
 `in-progress` skill.
 
@@ -69,7 +71,8 @@ run synced `typesafe-ai` and `slint`. The tenth, `earthtojake/text-to-cad`, was 
 | [AlstonChan/agent-skills](https://github.com/AlstonChan/agent-skills) | `skills/<name>/` | 1 | `d6a82cf` (2026-10-22) |
 | [wshaddix/dotnet-skills](https://github.com/wshaddix/dotnet-skills) | `skills/<name>/` | 1 | `09da68d` (2026-02-27) |
 | [earthtojake/text-to-cad](https://github.com/earthtojake/text-to-cad) | `skills/<name>/` | 12 | `4811290` (2026-10-27) |
-| authored in this repo | — | 8 | — |
+| [morluto/rea](https://github.com/morluto/rea) | `.agents/skills/<name>/` inside the REA monorepo | 1 (publish variant) | `160d821` (2026-10-25) |
+| authored in this repo | — | 10 | — |
 
 `dirname`-style names match upstream for every skill, so a skill's upstream path is usually
 `<layout prefix>/<skill dir name>/`.
@@ -295,10 +298,28 @@ Python helpers (`dfam-check`, `dfm`, `gcode`, `step-parts`), and `dfam-check` an
 | `step-parts` | `skills/step-parts` | verbatim |
 | `urdf` | `skills/urdf` | verbatim |
 
+### morluto/rea — pinned `160d821ac9a0310afcb8d1fc427862dd6508add5`
+
+Added on 2026-10-29 from the `rea-agents` 6.8.0 npm package that supplies the REA MCP server. The package
+ships `skills/reverse-engineer-anything/`; the same directory lives at `.agents/skills/` in the repo, and the
+pin is the `rea-agents-6.8.0` tag (published 2026-10-25).
+
+| Skill | Upstream path | Local state |
+|---|---|---|
+| `reverse-engineer-anything` | `.agents/skills/reverse-engineer-anything` | modified (publish variant) |
+
+All seven `references/*.md` files are byte-identical to the tag. `SKILL.md` is the publish variant: it adds
+`tool_count: 229` to the frontmatter and pins the fallback commands to `npx -y rea-agents@6.8.0` where the
+repo says `@latest` — five lines added, six removed, no prose rewritten. A re-sync should copy from the npm
+package, not from the repo file, or the version pin reverts.
+
+REA rewrites these docs when it updates and leaves a `*.rea.backup` beside each rewritten file; the pattern
+is in `.gitignore`. The backups on disk are the pre-rewrite copies — do not commit them.
+
 ### Authored in this repo
 
-No upstream found as of 2026-10-15 — checked by directory name and by the `name:` frontmatter field
-against every upstream repo above.
+No upstream found as of 2026-10-29 — checked by directory name and by the `name:` frontmatter field against
+every upstream repo above, and by a filesystem search for a second copy of each skill.
 
 | Skill | Notes |
 |---|---|
@@ -308,6 +329,7 @@ against every upstream repo above.
 | `context-first` | lookup order for dev work: CodeGraph → TypeSafe Jev (narrow and batch classification) → Obsidian vault → plan and edit |
 | `field-handoff` | office ↔ field handoff file (and paste-ready field-agent prompt) between the office and the real machine |
 | `field-office-checklist` | MetalAutoUQDwpf only: list what still needs the real machine vs the office, field items layered by who can verify them |
+| `freecad-cad` | FreeCAD as the verification and post-processing back end around `freecad-mcp`: OCCT part building, invalid-solid debugging, STEP round-trips, FEM and drawings, plus a bridge to text-to-cad models |
 | `git-janitor` | sweep a messy working tree: commit, push, .gitignore, or delete each stray entry |
 | `ssh-captain` | drive remote dev/build/test boxes over SSH |
 

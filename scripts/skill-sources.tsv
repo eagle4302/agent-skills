@@ -90,3 +90,5 @@ ssh-captain	-	-	-	local-only	authored here
 field-office-checklist	-	-	-	local-only	authored here; MetalAutoUQDwpf-specific field/office checklist
 field-handoff	-	-	-	local-only	authored here
 git-janitor	-	-	-	local-only	authored here
+freecad-cad	-	-	-	local-only	authored here; FreeCAD as the verification and post-processing back end around freecad-mcp
+reverse-engineer-anything	morluto/rea	.agents/skills/reverse-engineer-anything	160d821ac9a0310afcb8d1fc427862dd6508add5	modified	from the installed rea-agents 6.8.0 npm package; SKILL.md is the publish variant (+tool_count, npx pinned to 6.8.0), references/ verbatim
