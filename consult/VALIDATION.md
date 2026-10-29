@@ -31,3 +31,24 @@ it"; headless, so wait for the advisor before continuing.
 - `context: "fresh"`, the `resume` follow-up on a conflict, and a `rethink` / `blocked`
   verdict — none occurred in this scenario.
 - A stronger advisor than the executor: both ran on `deepseek-flash`.
+
+## DSH dispatch run — 2026-10-29
+
+First end-to-end check of the rewritten dispatch: DSH 0.2.1-rc.3, one `approach` consult, fresh
+context, packet from `references/packet.md`, reply contract with the `QUESTION:` line.
+
+| Signal | Observed |
+| --- | --- |
+| Dispatch | `subagent({ description, prompt })` returned a child id immediately |
+| Reply contract | first line `VERDICT: adjust`; then `## Answer` (3 bullets) and `## Also noticed` (3 items) |
+| `QUESTION:` line | not used; nothing needed escalating |
+| Second probe | a minimal prompt returned `VERDICT: proceed` / `QUESTION: none` verbatim, confirming the reply shape |
+| Read-only | no file outside the session's existing edit set changed (`git status --short`) |
+| Value | caught three real gaps: fork should not be the `approach`/`pivot` default on DSH; the "not through your reasoning" wording described a fork DSH does not have; a depth-capped executor needs a named fallback |
+
+Fixed as a result: fresh is now the default at every checkpoint; a fork is only for judging a
+completed trajectory, with the evidence restated; the depth-capped row is in `routing.md`; the DSH
+follow-up in `reconcile.md` is `send_message`.
+
+Still unverified on DSH: the fork path (`subagent_fork`) and the `send_message` follow-up have not
+been exercised end to end.

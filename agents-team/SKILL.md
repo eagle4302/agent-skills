@@ -9,11 +9,11 @@ A team is three things and nothing else: **disjoint territories**, **one indepen
 per deliverable**, and **one voice to the human** — you, the lead. Everything below serves
 those three.
 
-A teammate is a subagent: it gets a self-contained brief, it runs on its own, and it hands back
-a result. It does not see this conversation unless you ask for that, it does not read
-`CLAUDE.md` or `AGENTS.md` on its way in, it cannot address the other teammates, and it cannot
-reach the human. Everything it needs is in the brief, and everything it says comes back through
-you.
+A teammate is a delegated child: it gets a self-contained brief, it runs on its own, and it
+hands back a result. It does not see this conversation unless you ask for a fork, and it cannot
+reach the human. What it loads from the workspace depends on the harness — a DSH `subagent`
+child was measured on 2026-10-29 to receive the global `AGENTS.md` — so quote the project rules a
+teammate needs into the brief instead of assuming it inherits none.
 
 **The tool names are not in this skill.** They live in `adapters/`, one file per harness, and
 step 0 is reading yours.
@@ -67,8 +67,9 @@ Each step ends when its completion criterion holds.
    Run the verify commands **now, on the untouched tree**, and record what you find in
    `baseline.verifiedClean` + `knownFailures` — a build that was already red before the team
    existed must never be scored as the team's. Quote the project's own rules into `houseRules`
-   (build flags, line endings, formatting): a spawn child never reads `CLAUDE.md` or `AGENTS.md`,
-   so whatever is not in the brief does not reach it.
+   (build flags, line endings, formatting): workspace instruction files are harness-dependent (a
+   DSH child got the global `AGENTS.md`; project files may not reach it), so whatever is not in
+   the brief may not reach it.
    Then fill in the tasks — acceptance lines (for work that computes something, concrete
    known-answer cases, not just "every item of ticket #N" — `staffing.md` → "Known-answer cases
    before the build"), a paste-ready `verify` command where one exists,
@@ -84,13 +85,14 @@ Each step ends when its completion criterion holds.
    and every task has an owner or is deliberately `backlog`.
 
 3. **Staff** — spawn independent teammates **in one message** so they run in parallel, each with
-   a self-contained brief from `staffing.md`. Pick the agent profile that matches the role from
-   your adapter's dispatch table, set the context mode explicitly rather than inheriting a
-   default you have not checked, and put the task's `verify` command in the `gate` so the
+   a self-contained brief from `staffing.md`. Dispatch the role the way your adapter says (a
+   role-prefixed brief where the harness has no presets, a preset where it does), set the context
+   mode explicitly rather than inheriting a default you have not checked, and put the task's
+   `verify` command in the `gate` so the
    harness, not a model's word, decides whether the result is accepted. Where there is no
    `gate`, that check does not vanish — it becomes yours at step 5. Delegate what a teammate can finish without you and hand back as evidence; keep
    the judgement calls, the integration and anything smaller than the brief it would take.
-   Record the returned child id as that member's `agentId`.
+   Record the returned identity (child id or teammate name) as that member's `agentId`.
    *Done when:* every live member has an `agentId`, and `board.md` shows who owns what.
 
 4. **Run** — you are a working lead: you hold the smallest tasks, the integration, and every

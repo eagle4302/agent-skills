@@ -37,17 +37,15 @@ When the advice contradicts something you have observed:
 1. **Do not switch silently and do not ignore silently.** Either one hides a decision.
 2. **Follow up once**, on the same advisor, with the conflict stated plainly:
 
-   ```ts
-   subagent({
-     action: "resume",
-     id: "<advisor run id>",
-     message: "You recommended X because Y. I observed Z (<file:line / output>). Does Z change your recommendation? First line: VERDICT: ..."
-   })
-   ```
-
-   Check `subagent({ action: "children.list" })` first; resume only a run it lists as
-   `resumable`. If none is, send a fresh consult with the first reply and the conflict in the
-   packet, and label it a fallback in the ledger.
+   - **DSH**: `send_message({ target: "<child id>", message: "<conflict> ..." })`, closing with
+     "Does Z change your recommendation? First line: VERDICT: ...". If the child is no longer
+     addressable, send a fresh consult carrying the first reply and the conflict in the packet,
+     and label it a fallback in the ledger.
+   - **pi + `pi-subagents`**: `subagent({ action: "resume", id: "<advisor run id>", message: ...
+     })`; check `subagent({ action: "children.list" })` first and resume only a run it lists as
+     `resumable`.
+   - **Any other harness**: a second call with the first reply and the conflict; label the
+     fallback.
 3. **After the follow-up**, settle it by kind:
    - a question of **fact** → evidence wins; run the command that decides it;
    - a question of **judgement** (tradeoff, scope, product intent) → the human decides; bring

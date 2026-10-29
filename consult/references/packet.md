@@ -1,6 +1,6 @@
 # The consultation packet
 
-The packet is the `task` you hand the advisor. A forked advisor can read the whole session,
+The packet is the `prompt`/`task` string you hand the advisor. A forked advisor can read the whole session,
 but a long session buries the one thing you need judged; the packet points at it. A `fresh`
 advisor sees nothing else, so the packet must carry everything.
 
@@ -32,7 +32,7 @@ Reply contract:
   verify yourself as (unverified).
 - Answer the Question first; anything beyond it goes under "Also noticed", at most 3 items.
 - Omit "Suggested execution prompt" unless the Question asks for one.
-- Do not edit files. If you need a decision from me, ask with contact_supervisor.
+- Do not edit files. If you need a decision from me, end your reply with QUESTION: <one line>.
 ```
 
 The `(unverified)` mark tells you which claims to check before acting (see `reconcile.md`).

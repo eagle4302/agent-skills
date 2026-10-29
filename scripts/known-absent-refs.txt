@@ -6,10 +6,8 @@
 #
 # Format: <name>  <reason>
 
-council-mode  consult: "ships with pi-subagents"; consult's dispatch rewrite is pending
 @plan-writing  ai-loop: related-skills; ai-loop's rewrite or retirement is pending
 @ask-questions-if-underspecified  ai-loop: related-skills; ai-loop's rewrite or retirement is pending
-pi-subagents  package name, not a skill (referenced by consult and the agents-team docs)
 security-review  agents-team github-copilot adapter: Copilot subagent type, not a skill
 dispatching-parallel-agents  agents-team/VALIDATION.md: historical note listing dangling refs; not an instruction
 slint-lsp  Slint tool, not a skill

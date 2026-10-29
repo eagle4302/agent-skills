@@ -1,5 +1,11 @@
 # team preset — role-scoped delegation for DSH 0.2.1-rc.2
 
+> **Legacy path.** The canonical DSH route is now the built-in Agent Teams toolset; see
+> `../adapters/dsh.md`. This preset was verified against 0.2.1-rc.2 and has never been mounted by a
+> live session; `agent_preset` is absent from the current rc.3 `subagent` schema. Use it only when
+> you deliberately want composition-enforced read-only roles.
+
+
 `team.patch.yml` registers six presets as a profile patch layer:
 
 | Preset id | Display name | What it is |

@@ -1,18 +1,23 @@
 ---
 name: consult
-description: Consult a read-only advisor model, chosen by the user, at decision checkpoints — before committing to an approach on non-trivial work, when stuck (same failure twice, hypotheses exhausted), before a pivot or an irreversible move, and before declaring a multi-step task done — then reconcile its advice against your evidence. Also use when the user asks for an advisor, a second opinion, or to check with a smarter model. Routine diff review belongs to a reviewer; a multi-advisor debate belongs to council-mode.
+description: Consult a read-only advisor at decision checkpoints — before committing to an approach on non-trivial work, when stuck (same failure twice, hypotheses exhausted), before a pivot or an irreversible move, and before declaring a multi-step task done — then reconcile its advice against your evidence. Also use when the user asks for an advisor, a second opinion, or to check with a smarter model. The advisor runs in a fresh context; where the harness lets you pick its model, the human picks it. Routine diff review belongs to a reviewer.
 ---
 
 # Consult
 
 You are the **executor**: you hold the tools, the evidence and the decisions. The **advisor**
-is a model the human picks, called at a few checkpoints to look at your trajectory with fresh
-eyes. It reads, it does not write; it advises, it does not decide. Its value comes from three
-things — a stronger model, deeper thinking, and a perspective not worn down by your own
-context — and every rule below protects them.
+is a separate model call at a few checkpoints, looking at your trajectory with fresh eyes. It
+reads, it does not write; it advises, it does not decide. Its value comes from a stronger model
+or thinking level where the harness allows one, and from a perspective not worn down by your own
+context. A fresh context alone still earns the call when a wrong premise is expensive — every
+rule below protects that.
 
 Loading this skill is the operator's standing authorization for **read-only advisor runs at
 the checkpoints below**. It authorizes nothing else: no worker, no writer, no fan-out.
+
+**Dispatch is harness-specific.** Read `references/routing.md` once per session and use the row
+for the tools this session actually has; the loop, the packet and the reconcile rules do not
+change.
 
 ## When to consult
 
@@ -51,37 +56,37 @@ Each step ends when its completion criterion holds.
    *Done when:* the packet names **one** decision, carries its evidence inline, and a stranger
    could tell what a useful answer looks like.
 
-3. **Ask the human for the model** — the advisor's model is the human's choice, never
-   yours. Before the first consult of the session, list `subagent({ action: "models" })` and
-   ask with `ask_user_question`: which model, and which thinking level. The first option is
-   always `deepseek/deepseek-flash` marked as the default. Reuse the answer for the rest of the
-   session; ask again only when the human wants to change it. When no one can answer (a
-   non-interactive run, where `ask_user_question` is absent), use `deepseek/deepseek-flash`
-   and say so in the ledger. The exact question is in `references/routing.md`.
-   *Done when:* the human picked a model and a thinking level, or the non-interactive default
-   is recorded.
+3. **Pick the advisor's model — only where the harness offers one.** Where a per-call model
+   choice exists (pi + `pi-subagents`), the human picks it once per session; ask with the
+   harness's ask tool. Where it does not (DSH), the advisor runs on the session's model: say so
+   in one line, offer to run the consult in a session on another model when the human wants a
+   stronger one, and record `model: session` in the ledger. Never silently claim a stronger
+   model.
+   *Done when:* the model and thinking level are recorded, or "not selectable on this harness"
+   is written down.
 
-4. **Dispatch** — call the advisor on the chosen model:
+4. **Dispatch** — use the row in `references/routing.md` for the tools this session has. The
+   default is a **fresh** context at every checkpoint: a fork inherits the reasoning that produced
+   the move you are asking it to judge, which is the bias, not the evidence. Use a fork only when
+   the completed trajectory itself is what must be judged (a `done` check on a long task), and
+   restate this turn's evidence anyway. On DSH:
 
-   ```ts
-   subagent({
-     agent: "oracle",                // alias: "advisor"; read-only, thinking high
-     context: "fork",                // inherits this session; use "fresh" when your trajectory is the suspect
-     model: "<chosen provider/id>:<level>",
-     task: "<the packet>"
-   })
+   ```js
+   subagent({ description: "consult: <checkpoint>", prompt: "<the packet>" })        // fresh (default)
+   subagent_fork({ description: "consult: <checkpoint>", prompt: "<the packet>" })   // fork
    ```
 
-   It runs in the background. Keep doing work the answer does not touch — more reading, a
-   test run — but do not start the step the question is about. If it asks you something
-   through `contact_supervisor`, answer from facts you hold; a question that is really the
-   human's goes to the human, not answered by guess.
-   *Done when:* you hold the advisor's full reply and its run id.
+   DSH has no per-call model and no read-only advisor profile: the packet's first line says
+   "read-only: do not edit files", and step 6 checks `git status --short` for violations. Keep
+   the packet self-contained either way. It runs in the background; keep doing work the answer
+   does not touch, but do not start the step the question is about.
+   *Done when:* you hold the advisor's full reply and its child id.
 
 5. **Reconcile** — read the verdict line first, then weigh each recommendation against your
    evidence: accept, adapt, or reject, with a one-line reason each. A conflict with your
-   evidence earns **one** follow-up to the same advisor (`subagent({ action: "resume", id,
-   message })`); after that, evidence settles facts and the human settles judgement calls.
+   evidence earns **one** follow-up to the same advisor (`send_message` to the child id on DSH;
+   `subagent({ action: "resume", id, message })` on pi); after that, evidence settles facts and
+   the human settles judgement calls.
    Full rules in `references/reconcile.md`.
    *Done when:* every recommendation has a disposition and a reason, and a `rethink` or
    `blocked` verdict has changed your plan or reached the human.
@@ -113,8 +118,10 @@ A reply with no verdict line is read as `adjust`, and the missing line is noted 
 2. **The human outranks the advisor.** Advice that contradicts the human's instructions, the
    project's `AGENTS.md`/`CLAUDE.md`, or an approved scope is surfaced to the human, never
    followed silently.
-3. **The advisor stays read-only.** If the working tree changed during a consult and you did
-   not change it, stop and find out why before continuing.
+3. **The advisor stays read-only.** Where the harness has a read-only profile (pi's `oracle`),
+   that is enforcement; on DSH the packet's first line is the only guard, and the `git status`
+   check is the detection. If the working tree changed during a consult and you did not change
+   it, stop and find out why before continuing.
 4. **You are the only voice to the human.** Relay the advisor's view as "the advisor
    recommends X because Y", attributed, and only where it bears on a decision the human owns.
 5. **Advice is not verification.** "The advisor agreed" never closes a task — a test, a
@@ -142,7 +149,6 @@ A reply with no verdict line is read as `adjust`, and the missing line is noted 
 | `references/reconcile.md` | Weighing advice, handling conflict with your evidence, the follow-up, escalation |
 | `references/routing.md` | Choosing the advisor's model and context, persistent settings, other harnesses |
 
-Related skills: `council-mode` (ships with `pi-subagents`) when a decision is material enough
-to want 2–3 advisors cross-examined; `agents-team` when the work itself needs teammates —
-there the lead still uses this skill for its own decisions; `code-review-and-quality` for a
-routine quality judgment on a diff, which is a reviewer's job, not an advisor's.
+Related skills: `agents-team` when the work itself needs teammates — there the lead still uses
+this skill for its own decisions; `code-review-and-quality` for a routine quality judgment on a
+diff, which is a reviewer's job, not an advisor's.

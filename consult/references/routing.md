@@ -2,110 +2,82 @@
 
 An advisor is only an advisor if it brings something you lack. In order of value:
 
-1. **A stronger model** than the one you are running on.
-2. **Deeper thinking** — the same model at `max` or `xhigh` where yours runs lower.
-3. **A clean perspective** — `fresh` context, or a fork that has not been through your last
-   hour of reasoning.
+1. **A stronger model** — where the harness allows a per-call model.
+2. **Deeper thinking** — the same model at its highest reasoning level.
+3. **A clean perspective** — a fresh context, or a fork of a completed trajectory when the record
+   itself is the evidence; a fork still inherits your completed turns and misses only the in-flight
+   one.
 
-The same model, at the same thinking level, reading the same context, is a mirror. Say so in
-the ledger if that is all you had.
+The same model, at the same thinking level, reading the same context, is a mirror. Say so in the
+ledger if that is all the harness offers.
 
-## Ask the human for the model
+## Dispatch by harness
 
-The model is the human's call, every session. You never pick it, and you never pin it where
-it would skip the question.
+Look at the tools this session actually has; never guess from the machine.
 
-1. List what is available: `subagent({ action: "models" })`. Copy exact `provider/id`
-   strings; bare ids resolve only when unique.
-2. Ask once, before the first consult of the session, with `ask_user_question` — two
-   questions in one dialog:
+| Harness | Fresh (default) | Fork | Follow-up |
+| --- | --- | --- | --- |
+| DSH | `subagent({ description, prompt })` | `subagent_fork({ description, prompt })` | `send_message` to the child id |
+| pi + `pi-subagents` | `subagent({ agent: "oracle", context: "fresh", task })` | same with `context: "fork"` | `subagent({ action: "resume", id, message })` |
+| generic subagent tool | the tool's fresh variant, strongest available model | the tool's fork variant, when it has one | a second call carrying the transcript |
+| no subagent, or delegation is depth-capped (a delegated child cannot spawn) | — | — | answer the packet yourself as a hostile reviewer; the ledger says **self-review** |
 
-   ```ts
-   ask_user_question({
-     questions: [
-       {
-         header: "Advisor",
-         question: "Which model should the advisor run on?",
-         multiSelect: false,
-         options: [
-           { label: "deepseek-flash (default)", description: "deepseek/deepseek-flash — cheapest; a clean second look rather than a stronger mind" },
-           { label: "deepseek-v4-pro", description: "deepseek/deepseek-v4-pro — stronger reasoning, about 3–4x the price of flash" },
-           { label: "Same as this session", description: "The model you are talking to now — only the fresh perspective is new" }
-         ]
-       },
-       {
-         header: "Thinking",
-         question: "How hard should the advisor think?",
-         multiSelect: false,
-         options: [
-           { label: "high (default)", description: "oracle's own default" },
-           { label: "max", description: "Deepest reasoning; slowest and most expensive" }
-         ]
-       }
-     ]
-   })
-   ```
-
-   Build the model options from the `models` list: `deepseek/deepseek-flash` always first
-   and marked default, then up to two others worth offering (the strongest, and the
-   session's own). The dialog adds a free-text row, so any other listed model stays
-   reachable. Drop an option whose model is not in the list.
-3. Turn the answer into the model string: `provider/id:level`, e.g.
-   `deepseek/deepseek-flash:high`. A model only accepts the levels its provider maps — if
-   one is rejected, check `thinkingLevelMap` in the model entry and ask the human again
-   rather than picking a level yourself.
-4. Reuse the choice for every consult in this session. Ask again only when the human says to
-   change it, or when the chosen model fails to run (see below).
-5. No answer possible — a non-interactive run, where `ask_user_question` is not in your
-   tools: use `deepseek/deepseek-flash`, oracle's default thinking, and write "model:
-   default (non-interactive)" in the ledger.
-
-If a `subagents.maxThinking` ceiling rejects the level, use the highest level it allows and
-note it in the ledger. Do not edit the ceiling.
+The packet (`packet.md`) is the `prompt`/`task` string in every row, and nothing else crosses the
+boundary. A harness may list a subagent tool and still refuse the call at depth 0: treat a refusal
+as the last row, not as a reason to guess.
 
 ## Pick the context
 
 | Context | Use when | The packet must |
 | --- | --- | --- |
-| `fork` (default for `oracle`) | `approach`, `pivot`, `irreversible` — the history is the evidence | Point at the decision; history supplies the rest |
-| `fresh` | `stuck` for the second time, a long session with drift, or a `done` check you want unanchored by your reasoning | Carry everything: the goal quoted, the evidence, the decisions — the advisor sees nothing else |
+| fresh (default) | every checkpoint — `approach`, `stuck`, `pivot`, `irreversible`, `done`, `asked` | Carry everything: goal quoted, evidence, decisions |
+| fork | the completed trajectory itself is what must be judged — a `done` check or audit of a long task where a short packet would lose the decisive detail | Restate this turn's evidence anyway: a fork does not see the in-flight turn |
 
-An explicit `context: "fork"` fails when the session is not persisted yet. Fall back to
-`fresh` with a self-contained packet, and note it.
+A fork inherits the reasoning that produced the move you are asking it to judge, so on `approach`,
+`pivot` and `irreversible` the history is the bias, not the evidence. The fork buys fidelity, not
+independence; a fresh consult with a tight packet is usually sharper.
 
-## Persistent settings
+## Pick the model
 
-Do not pin `oracle` to a model in `settings.json` (`subagents.agentOverrides.oracle.model`):
-the per-run `model` wins anyway, and a pin invites skipping the question.
-`/subagents-models oracle` shows what pi has loaded right now.
+- **DSH**: no per-call model and no read-only advisor profile. The advisor runs on the session's
+  model with a fresh (or forked) context. That still earns the call when a wrong premise is
+  expensive; record `model: session` in the ledger. If the human wants a stronger model, run the
+  consult in a session on that model — do not pretend to switch.
+- **pi + `pi-subagents`**: the human picks the model and thinking level once per session. List the
+  available models with the harness's own model list and ask with its ask tool; keep the question
+  to two fields (model, thinking level) and the first option the cheapest default. Build the run
+  string as `provider/id:level`. Never pin the model in settings: a per-run choice wins, and a pin
+  invites skipping the question.
+- **Generic harness**: use the strongest model the tool exposes, and record it.
+
+## Ask the human
+
+Ask only when the answer changes the dispatch: the model on pi, or whether to fork when the
+evidence is already in the session. One question, once per session, through the harness's ask
+tool. Field names are harness-specific — DSH's `ask_user_question` requires an `id` per question
+and uses `multi_select`; the wrong names return a schema error, not an answer.
 
 ## Cost and time
 
-- An advisor run on a pro model at `max` thinking is the most expensive call in a typical
-  task. The three-consult budget in `SKILL.md` is what keeps it worth it.
-- Do not set a hard `toolBudget` on the advisor; bound it with the packet and the reply
-  contract. A `timeoutMs` of 10–15 minutes is a sane ceiling for one consult.
-- A forked advisor re-reads your whole session. On a very long session a `fresh` consult with
-  a tight packet is often both cheaper and sharper.
+- A strong model at maximum thinking is the most expensive call in a typical task. The
+  three-consult budget in `SKILL.md` keeps it worth it.
+- Bound the advisor with the packet and the reply contract, not a hard tool budget.
+- A forked advisor re-reads your whole session; prefer fresh on a long session.
 
 ## When the advisor fails to run
 
-Provider errors, rate limits and quota failures come back from that one model; nothing falls
-back automatically.
+Provider errors, rate limits and quota failures come back from that one call; nothing falls back
+automatically.
 
-- Ask the human which model to use instead (same dialog, the failed model removed); in a
-  non-interactive run, fall back to `deepseek/deepseek-flash` once, and note it.
-- If no advisor can run, **say so** — in the ledger and to the human if the checkpoint was
-  `irreversible` or `done`. Continue on your own judgement only for checkpoints where a wrong
-  turn is cheap to undo.
+- **pi**: ask the human which model to use instead (same dialog, failed model removed); in a
+  non-interactive run, fall back to the cheapest available once and note it.
+- **DSH**: retry once with the same packet; if it fails again, say so in the ledger and continue on
+  your own judgement only where a wrong turn is cheap to undo.
+- If no advisor can run, label the packet **self-review**, answer it yourself in a separate pass as
+  a hostile reviewer, and never report it as an advisor.
 
-## Other harnesses
+## The advisor's report
 
-The loop, the packet and the reconcile rules are harness-neutral. Only the dispatch changes:
-
-| Harness | Dispatch |
-| --- | --- |
-| pi + `pi-subagents` | `subagent({ agent: "oracle", context, model, task })` as in `SKILL.md` |
-| A harness with a native advisor tool | Call that tool at the same checkpoints; write the packet as your last message before the call so the advisor reads it first |
-| A harness with a generic subagent tool (e.g. Claude Code's `Agent`) | Launch it with the strongest `model` option, the packet as the prompt, and "read-only: do not edit files" as the packet's first line; it starts fresh, so the packet must be self-contained |
-| No subagent at all | Write the packet anyway, then answer it yourself in a separate pass as a hostile reviewer. Label it **self-review** in the ledger — it is not an advisor and must not be reported as one |
+The advisor opens with `VERDICT: proceed | adjust | rethink | blocked`, then at most three short
+sections. If it needs a decision from the executor, it ends the reply with `QUESTION: <one line>`;
+the reply is the only channel, so do not ask it to use a tool that may not exist.

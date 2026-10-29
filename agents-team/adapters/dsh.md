@@ -1,113 +1,108 @@
 # Adapter: DSH
 
-Dispatch is a family of `subagent*` tools; messaging, status and interruption are separate
-tools. Roles are not separate tools: the lead's `subagent` takes an optional `agent_preset`
-naming a preset that this repo ships.
+DSH 0.2.1-rc.3 (desktop app). Two dispatch surfaces exist; this adapter treats the **built-in
+Agent Teams** toolset as canonical and the plain `subagent` family as the off-team fallback.
+The repo's preset compositions (`../preset/`) are the legacy path — optional, never mounted live.
 
-Verified against **DSH 0.2.1-rc.2**, the desktop app (`resources/app.asar/dsh`), on 2026-10-18.
-The `dsh` executable on `PATH` is a **different, older install (0.1.5-rc.2)** that shares
-`~/.dsh`; its `--dump-config` composes the 0.1.5 packages and cannot be used to check this
-adapter. See "Two installs" under the edges.
+Verified on 2026-10-29 against this session's own tool schemas plus one plain-subagent probe. Rows
+that are inferred rather than read are marked `(assumed)` or `(inferred)` here and listed under
+"Verified / not verified".
 
 ## Capabilities
 
 | Capability | Call |
 | --- | --- |
-| `spawn` | `subagent` (fresh context), `subagent_fork` (copies this conversation) |
-| `identity` | the returned child id; store it in `members[].agentId` |
-| `parallel-spawn` | several dispatch calls in one assistant message; each returns immediately |
-| `status` | `list_agents` — `children` for the team, `descendants` for the whole tree |
-| `steer` | `send_message` to a direct continuable child |
-| `stop` | `interrupt_agent` — a brake, not a kill switch; see the edges |
-| `gate` | **absent.** No host-run command decides whether a teammate's result is accepted |
-| `raise` | `send_message` upward from a resident continuable child |
-| `fresh-context` | the default; `subagent_fork` is the opt-in that copies the conversation |
-| `fan-out` | `workflow` — one call runs `agent()` lanes through `pipeline` / `parallel` with a composite result |
-| `isolate` | **absent.** A teammate shares the working tree; disjointness is the brief plus the lead's diff |
+| `spawn` | `spawn_teammate({ name, description, prompt, context })` — Lead only |
+| `identity` | the teammate `name` is its address; `list_agents` lists every target |
+| `parallel-spawn` | several `spawn_teammate` calls in one assistant message `(assumed: not measured, but the subagent family documents the one-message pattern)` |
+| `status` | `list_agents` — `inactive` means no turn is executing, **not** that the task is done; `wait_agent` waits for the next status, message, or shared-task change |
+| `steer` | `send_message` — lands at the target's nearest step boundary and starts an inactive target |
+| `stop` | `interrupt_agent` — ends the current turn, keeps the pending inbox; Lead only |
+| `gate` | **absent.** No host-run command decides acceptance |
+| `raise` | `send_message` from a teammate to `lead`; the Lead sees the sender's name first `(assumed)` |
+| `fresh-context` | `context: "fresh"` (default) or `"fork"` (inherits the Lead's completed turns) |
+| `fan-out` | `workflow` — only when the human explicitly asks for a workflow or a large fan-out |
+| `isolate` | **absent.** Teammates share the working tree; disjointness is the brief plus `write_scopes` on the shared board |
 
 ## Role dispatch
 
-Round 2 of `VALIDATION.md` used three role-named tools (`subagent_scout`, …) mounted from a
-user preset directory. **That mechanism is gone in 0.2.1**: the preset declaration is a plugin
-row, and the subagent tool rejects `persona` / `toolFilter` with a migration error. Roles now
-come from the child's **preset**, selected through the lead tool's `agent_preset` field.
+Agent Teams has **no role presets**. A role is a name plus a brief prefix, and nothing enforces it:
+a teammate receives the session's tools. Treat the prefix as instruction and let the Lead's own
+`verify` run and diff review be the backstop.
 
 | Role | Dispatch | Enforced by | Still only the brief |
 | --- | --- | --- | --- |
-| scout | `agent_preset: team-scout` | the composition mounts `dsh-tool-fs` with `write: false, edit: false` | the shell is still mounted, so "read-only" is a file-tool fact, not a sandbox |
-| builder | `agent_preset: team-builder` | full file and shell tools; no delegation rows | its territory |
-| prober | `agent_preset: team-prober` | no `write` / `edit`; keeps the shell to run acceptance commands | that it is not the author |
-| critic | `agent_preset: team-critic` | no shell and no `write` / `edit`: it cannot change a byte or run a command | a dynamic claim it makes is unverified by construction |
-| scribe | `agent_preset: team-scribe` | file tools only, no shell | it writes what the lead hands it |
+| scout | `spawn_teammate` with `name: "<team>-scout"`, prompt opening `ROLE: scout — read-only reconnaissance. Do not write or edit files.` | nothing at the harness level | what counts as in-scope |
+| builder | `name: "<team>-builder"`, prompt opening `ROLE: builder — one territory.` | its `write_scopes` on the shared board, and the Lead's diff review | its territory |
+| prober | `name: "<team>-prober"`, prompt opening `ROLE: prober — do not edit. Re-run the task's verify command and report raw output.` | nothing; the Lead re-runs `verify` too | that it did not write the code |
+| critic | `name: "<team>-critic"`, prompt opening `ROLE: critic — read-only. Report findings only.` | nothing | a dynamic claim it makes is unverified by construction |
+| scribe | `name: "<team>-scribe"`, prompt opening `ROLE: scribe — write only the files the Lead names.` | the Lead's file list | what it writes |
 
-A role preset carries **no delegation rows**, and the lead's `subagent` sets `maxDepth: 1`, so a
-teammate cannot recruit its own helpers. A plain `subagent` call with no `agent_preset`
-inherits the lead's own composition, which is the right default for a one-off errand.
+Two consequences:
 
-`fork` rejects preset selection (`agentPreset` / `allowedAgentPresets`) — forked children always
-inherit the parent's composition.
-
-## Preset install
-
-`preset/team.patch.yml` in this repo is a profile patch layer. It registers five role presets
-and one lead preset; the lead is the shipped `standard` composition plus an `agent_preset`
-allowlist on the `subagent` row.
-
-```powershell
-# append the patch's `- insert:` block to the profile's user patch, then restart the app
-# the desktop app boots `desktop`; `web` belongs to the dsh CLI and never sees it
-notepad "$env:USERPROFILE\.dsh\profiles\desktop\cordis.patch.yml"
-```
-
-The preset list is read when a session is created, and the composition is fixed for that
-session's life. A new preset therefore needs **a new top-level session**, not a new turn; after
-editing the profile patch, restart the app. A preset that cannot mount is listed with its
-reason rather than hidden, so a broken row shows up in the picker instead of failing silently.
+- **Verification independence is procedural.** The prober must be a different member from the
+  builder, and the Lead re-runs every acceptance command before a batch lands (see Gate). Do not
+  present a teammate's report as host-enforced evidence.
+- **The shared board can carry the plan.** `team_task_create` / `team_task_list` /
+  `team_task_update` take `blocked_by` edges and `write_scopes`; it is durable and the human can
+  see it. Readiness never starts an owner — the Lead still sends the next turn. Keep `team.json`
+  and `board.md` as the skill's own state because `team.mjs` validates them, and mirror into the
+  built-in board when the human or a teammate needs to watch progress.
 
 ## Gate
 
-The harness has no gate. A read-only composition proves a prober *could not edit*; it does not
-prove the acceptance command ran or what it printed.
-
-So: the prober re-runs the acceptance commands and reports raw output, and **the lead re-runs
-the task's `verify` commands itself** before the batch lands. Say in the human report which
-checks the lead ran and that none was harness-enforced.
+The harness has no gate. A brief that says "read-only" is not enforcement: a teammate gets the
+session's tools. So the prober re-runs the acceptance commands and reports raw output, and **the
+Lead re-runs the task's `verify` commands itself** before the batch lands. Say in the human report
+which checks the Lead ran and that none were harness-enforced.
 
 ## Edges that shape how a team is run
 
 | Fact | Consequence |
 | --- | --- |
-| **Two installs.** The desktop app is 0.2.1-rc.2; `dsh` on `PATH` is 0.1.5-rc.2. Both read `~/.dsh`. | Edit the profile patch both would see, but judge the result in the app. `dsh --dump-config` reflects the 0.1.5 packages, not the running GUI. |
-| `send_message` reaches a direct continuable child from its parent, and a direct parent from a resident child. Siblings and deeper descendants are not targets. | Hub-and-spoke; the lead is the only message bus and relays everything. |
-| `send_message` returns acceptance, never a reply. | One-way traffic. A teammate answers in its own next turn or not at all. Never block waiting for an ack. |
-| A working target receives the message at its nearest step boundary; an idle target starts a turn. | Steering works while they work; you do not have to stop them to redirect. |
-| `interrupt_agent` stops only the current turn. Queued messages stay parked, descendants keep running, the child stays available. | After interrupting, decide explicitly whether to re-send the parked message. |
-| `list_agents` states: `running` = working, `idle` = resident between turns, `ready` = storage only. | A `ready` teammate is **not** a finished one. |
-| `backgroundMode: continuable` on both spawn and fork rows. | A settled child can take more work through `send_message`; the lead can reuse a builder instead of respawning one per ticket. |
-| A background child's settlement notice is the main report channel; its transcript is the detail. | Read the notice, then the artifact. Do not ask for a summary you already have. |
-| Delegation depth defaults to 1 below the lead, and the team preset sets `maxDepth: 1` explicitly. | A teammate cannot spawn; keep nesting at ≤2 in briefs. |
-| The human can open any teammate from the session header and stop it independently. | You are not the only brake; say so when the work is long or risky. |
-
-## Model
-
-A teammate runs on the model the human specified for it, and on the lead's model when the human
-specified none. The resolution order is the harness's own; the lead does not route on its own
-initiative. Per-call `provider` / `model` / reasoning effort on `subagent` is the human's
-channel, and it exists only because the lead preset sets `modelSelectionSettings: true`; use it
-when the human named a route for this run, and quote them in `inbox.log`. Record what a member
-actually ran on, and where the route came from, in `members[].model` — audit, not routing.
+| `spawn_teammate` and `interrupt_agent` are Lead-only (stated on the tools); `team_task_*` and `wait_agent` are the Lead's orchestration tools in this session's guidance `(assumed: teammate access not measured)`. | Teammates that need another pair of eyes or a decision ask the Lead; the Lead decides. |
+| `send_message` reaches the Lead from a teammate and a teammate from the Lead; siblings are not targets. `(assumed)` | Hub-and-spoke: the Lead is the only message bus. |
+| `send_message` returns delivery confirmation, never a reply. | One-way traffic; the teammate answers in its own next turn. Never block on an ack. |
+| `wait_agent` observes only changes after the call starts; it never wakes an inactive member and returns `noProgress` when no other member is running. | Re-list after a wakeup or timeout instead of polling. |
+| `list_agents` `inactive` means no turn is executing. | Read the settlement notice or the artifact, not the state. |
+| `context: "fork"` copies the Lead's completed turns, not the in-flight one. | A fork is for context-rich analysis, not a substitute for a self-contained brief. |
+| Teammates are durable. | A settled teammate can take more work; reuse a builder instead of respawning one per ticket. |
+| There is no worktree isolation. | One writer per territory; overlapping edits are a Lead bug. |
+| The human can open and stop any teammate from the session header. | The Lead is not the only brake; say so when the work is long or risky. |
+| A plain `subagent` child is expected to be absent from `list_agents` `(inferred: the description lists only the Lead and durable teammates; not measured)`. | Use `spawn_teammate` when the Lead needs an addressable, durable member. |
+| `workflow` is for fan-out, not for teammates. Harness guidance: only when the human asks for a workflow or a large orchestration. | Do not wrap a two-teammate team in a workflow script. |
+| A teammate runs on the session's model; `spawn_teammate` has no model field. | Per-run model routing exists only inside `workflow` (`agent(..., { provider, model })`). |
+| A plain `subagent` child received the global `~/.dsh/AGENTS.md` in a 2026-10-29 probe. `(measured for subagent; assumed for teammates)` | Assume workspace rules may reach a teammate; still quote the project rules it needs into the brief. |
 
 ## Verified / not verified
 
-Verified on 0.2.1-rc.2 on 2026-10-18, by reading the shipped package sources and docs inside
-`app.asar`:
+Verified on 0.2.1-rc.3 on 2026-10-29 from this session's tool schemas:
 
-- the `agent_preset` / `allowedAgentPresets` contract, and that `persona` / `toolFilter` throw;
-- `dsh-tool-fs` switches `read` / `readImage` / `write` / `edit`, so a read-only role is a
-  composition fact;
-- the preset registry takes plugin rows, not directories, and failed definitions stay visible;
-- the 0.2.1 `standard` composition this repo's lead is built from, row by row (32 rows).
+- the tool names and argument shapes for `spawn_teammate`, `send_message`, `list_agents`,
+  `wait_agent`, `interrupt_agent`, `team_task_create` / `get` / `list` / `update`, and `workflow`;
+- the Lead-only restriction stated on `spawn_teammate`, `interrupt_agent` and `team_task_*`;
+- `spawn_teammate` `context: "fresh" | "fork"`, and that a fork inherits completed Lead turns;
+- a plain `subagent` child receives the global `~/.dsh/AGENTS.md` (one probe, reported 2026-10-29)
+  and is expected to be absent from `list_agents` (inferred, not measured);
+- the installed app version: 0.2.1-rc.3 (uninstall registry).
 
-**Not verified:** the team preset has never been mounted by a live 0.2.1 session. The first
-real check is a new session on 團隊模式（Agents Team） with `subagent` showing `agent_preset` in
-its schema. Until that is seen, treat role separation as designed, not proven.
+Assumed, not measured:
+
+- several `spawn_teammate` calls in one assistant message run in parallel;
+- a teammate can message the Lead, and sibling messaging is not a target;
+- project-level `AGENTS.md` / `CLAUDE.md` files reach a teammate the same way the global one
+  reaches a `subagent`.
+
+Not verified:
+
+- no live Agent Teams run has used this adapter yet (no teammate was spawned for it), so the whole
+  path is designed, not proven;
+- whether a teammate can spawn its own helpers; assume delegation depth 1, as with `subagent`.
+
+## Legacy: preset compositions (rc.2)
+
+`../preset/` documents the earlier route: five role presets selected through
+`subagent(agent_preset: …)`, with composition-enforced read-only roles. It was verified against
+0.2.1-rc.2 and never mounted by a live session; in this rc.3 session the `subagent` schema has no
+`agent_preset` field, and the reference composition was not re-extracted for rc.3. Treat it as an
+optional strict-role path, not the DSH default; read `../preset/README.md` before installing it.
