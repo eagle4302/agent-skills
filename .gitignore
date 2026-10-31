@@ -7,3 +7,6 @@ synced/
 # Bytecode from the Python helpers that ship with some skills.
 __pycache__/
 *.pyc
+
+# graphify installer backup when the installed skill differs from the packaged one.
+SKILL.md.bak

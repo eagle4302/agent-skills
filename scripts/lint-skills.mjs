@@ -188,7 +188,7 @@ const readme = read(join(ROOT, 'README.md'));
 const localOnly = stateCounts['local-only'] ?? 0;
 const readmeClaims = [
   ['holds (\\d+) skills', skillDirs.length, 'skill count'],
-  ['authored in this repo \\| — \\| (\\d+)', localOnly, 'authored-in-this-repo count'],
+  ['local-only skills[^|]*\\| — \\| (\\d+)', localOnly, 'local-only count'],
   ['(\\d+) of the skills here carry', userInvoked, 'disable-model-invocation count'],
 ];
 for (const [pattern, actual, label] of readmeClaims) {

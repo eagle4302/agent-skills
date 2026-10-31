@@ -58,3 +58,4 @@
 - `~/.dsh/AGENTS.md`、`~/.config/opencode/AGENTS.md` 都已寫入 graphify 的用法與界線。
 - 兩條 junction（`~/.claude/skills`、`~/.config/opencode/skills`）都指向 `~/.agents/skills`。
 - 本機沒有任何工具會自動建 `graphify-out/`；那是使用者的決定（`/graphify` 跑出來才有）。
+- graphify skill 用 `graphify install --platform windows` 安裝（Windows 變體經 `~/.claude/skills` junction 寫入）；不要用 `--platform agents`，那會換成 bash 變體。

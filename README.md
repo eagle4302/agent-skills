@@ -1,6 +1,6 @@
 # Skills
 
-This directory is the shared user-level skills root (`~/.agents/skills`). It holds 76 skills — most of
+This directory is the shared user-level skills root (`~/.agents/skills`). It holds 77 skills — most of
 them copied from public upstream repos, the rest authored here. DSH reads it directly, Claude Code
 reaches it through the junction below, and OpenCode treats it as a global compatibility source.
 
@@ -85,7 +85,7 @@ skill, so the update check reports it as held, not upstream-ahead.
 | [wshaddix/dotnet-skills](https://github.com/wshaddix/dotnet-skills) | `skills/<name>/` | 1 | `09da68d` (2026-02-27) |
 | [earthtojake/text-to-cad](https://github.com/earthtojake/text-to-cad) | `skills/<name>/` | 12 | `a7cf2c4` (2026-10-29) |
 | [morluto/rea](https://github.com/morluto/rea) | `.agents/skills/<name>/` inside the REA monorepo | 1 (publish variant) | `160d821` (2026-10-25) |
-| authored in this repo | — | 8 | — |
+| local-only skills (authored here or tool-shipped) | — | 9 | — |
 
 `dirname`-style names match upstream for every skill, so a skill's upstream path is usually
 `<layout prefix>/<skill dir name>/`.
@@ -346,10 +346,11 @@ until it is updated on purpose.
 REA rewrites these docs when it updates and leaves a `*.rea.backup` beside each rewritten file; the pattern
 is in `.gitignore`. The backups on disk are the pre-rewrite copies — do not commit them.
 
-### Authored in this repo
+### Local-only skills
 
 No upstream found as of 2026-10-29 — checked by directory name and by the `name:` frontmatter field against
-every upstream repo above, and by a filesystem search for a second copy of each skill.
+every upstream repo above, and by a filesystem search for a second copy of each skill. Most are authored
+here; `graphify` is shipped by the graphify CLI and has no skill repo to track.
 
 | Skill | Notes |
 |---|---|
@@ -360,6 +361,7 @@ every upstream repo above, and by a filesystem search for a second copy of each 
 | `field-office-checklist` | MetalAutoUQDwpf only: list what still needs the real machine vs the office, field items layered by who can verify them |
 | `freecad-cad` | FreeCAD as the verification and post-processing back end around `freecad-mcp`: OCCT part building, invalid-solid debugging, STEP round-trips, FEM and drawings, plus a bridge to text-to-cad models |
 | `git-janitor` | sweep a messy working tree: commit, push, .gitignore, or delete each stray entry |
+| `graphify` | graphify CLI 0.9.99's skill: turn code/docs/papers into a graph.json, then query/path/explain; Windows variant installed through the Claude junction, not authored here |
 | `ssh-captain` | drive remote dev/build/test boxes over SSH |
 
 ## Local edits that a re-sync would clobber

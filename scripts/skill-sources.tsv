@@ -87,6 +87,7 @@ agents-team	-	-	-	local-only	authored here; pi-subagents based
 consult	-	-	-	local-only	authored here
 context-first	-	-	-	local-only	authored here; lookup order for dev work: CodeGraph, then narrow judgments to Jev, then the Obsidian vault, then plan and edit
 ssh-captain	-	-	-	local-only	authored here
+graphify	-	-	-	local-only	shipped by graphify 0.9.99 (uv tool graphifyy); install with `graphify install --platform windows` so the Windows skill variant lands through the ~/.claude/skills junction; no upstream skill repo
 field-office-checklist	-	-	-	local-only	authored here; MetalAutoUQDwpf-specific field/office checklist
 field-handoff	-	-	-	local-only	authored here
 git-janitor	-	-	-	local-only	authored here
