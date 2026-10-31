@@ -1,6 +1,6 @@
 ---
 name: context-first
-description: Context-first order for any dev task — CodeGraph for code structure, TypeSafe Jev for narrow typed judgments, the Obsidian vault for recorded decisions, then plan and edit. Use at the start of a coding task, when locating or understanding code, when a pick-one / yes-no / score call comes up, or when a past decision or gotcha may already be written down.
+description: Context-first order for any dev task — CodeGraph for code structure, TypeSafe Jev for narrow typed judgments, the Obsidian vault for recorded decisions, graphify for cross-source links between manuals/notes and code when the repo has graphify-out/, then plan and edit. Use at the start of a coding task, when locating or understanding code, when a pick-one / yes-no / score call comes up, when a past decision or gotcha may already be written down, or when a question crosses sources (manual page ↔ code field, ticket ↔ code path).
 ---
 
 # Context first
@@ -13,7 +13,8 @@ Look things up before reasoning them out. Each lookup has one tool; reach for it
    - Fall back to Read / Grep / Glob for: non-code files, a repo with no `.codegraph/` index, text CodeGraph does not index (log strings, config values), or a symbol it returned nothing for.
 2. **Narrow judgments → Jev.** A choice with a fixed answer set goes to Jev — see the next section. Done when every fixed-answer choice in this turn has a Jev answer, or a stated reason it does not qualify.
 3. **Recorded knowledge → Obsidian.** When the repo has a vault (the project's `AGENTS.md` may carry the path → vault mapping), search it before explaining a design, a past decision, or a known trap: `obsidian vault="<name>" search query="<terms>" limit=10` (Obsidian must be running; `vault=` is a parameter; `search:context` adds matching lines). On Windows run CJK queries through PowerShell — Git Bash mangles them into an empty result. Read the hits and build on them. Done when you can say which note covers it, or that none does.
-4. **Plan and change code.** Only now design, decide, and edit, citing what steps 1–3 returned.
+4. **Cross-source → graphify.** Only when the repo has `graphify-out/` **and** the question crosses sources: which manual page or parameter corresponds to a code constant, which ticket/ADR a code path implements, or an architecture roll-up (god nodes, communities). Run `graphify query "<question>"`, `graphify path "A" "B"`, or `graphify explain "<node>"` — nodes carry `src=` plus page/line, so cite the hit and read the source. It is CLI only (no MCP) and it is **not** a code navigator — step 1 owns that. Done when you can name both ends (manual page/note ↔ code symbol), or say the graph has no node for it.
+5. **Plan and change code.** Only now design, decide, and edit, citing what steps 1–4 returned.
 
 Skip a step that has nothing to look up; the order still holds for the steps you take.
 
