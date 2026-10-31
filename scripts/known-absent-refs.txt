@@ -6,8 +6,6 @@
 #
 # Format: <name>  <reason>
 
-@plan-writing  ai-loop: related-skills; ai-loop's rewrite or retirement is pending
-@ask-questions-if-underspecified  ai-loop: related-skills; ai-loop's rewrite or retirement is pending
 security-review  agents-team github-copilot adapter: Copilot subagent type, not a skill
 dispatching-parallel-agents  agents-team/VALIDATION.md: historical note listing dangling refs; not an instruction
 slint-lsp  Slint tool, not a skill

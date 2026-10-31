@@ -1,6 +1,6 @@
 # Skills
 
-This directory is the shared user-level skills root (`~/.agents/skills`). It holds 77 skills — most of
+This directory is the shared user-level skills root (`~/.agents/skills`). It holds 76 skills — most of
 them copied from public upstream repos, the rest authored here. DSH reads it directly, Claude Code
 reaches it through the junction below, and OpenCode treats it as a global compatibility source.
 
@@ -85,7 +85,7 @@ skill, so the update check reports it as held, not upstream-ahead.
 | [wshaddix/dotnet-skills](https://github.com/wshaddix/dotnet-skills) | `skills/<name>/` | 1 | `09da68d` (2026-02-27) |
 | [earthtojake/text-to-cad](https://github.com/earthtojake/text-to-cad) | `skills/<name>/` | 12 | `a7cf2c4` (2026-10-29) |
 | [morluto/rea](https://github.com/morluto/rea) | `.agents/skills/<name>/` inside the REA monorepo | 1 (publish variant) | `160d821` (2026-10-25) |
-| authored in this repo | — | 9 | — |
+| authored in this repo | — | 8 | — |
 
 `dirname`-style names match upstream for every skill, so a skill's upstream path is usually
 `<layout prefix>/<skill dir name>/`.
@@ -354,7 +354,6 @@ every upstream repo above, and by a filesystem search for a second copy of each 
 | Skill | Notes |
 |---|---|
 | `agents-team` | team/lead-plus-specialists workflow, built on `pi-subagents` |
-| `ai-loop` | bounded spec-build-review loop |
 | `consult` | read-only advisor model at decision checkpoints |
 | `context-first` | lookup order for dev work: CodeGraph → TypeSafe Jev (narrow and batch classification) → Obsidian vault → plan and edit |
 | `field-handoff` | office ↔ field handoff file (and paste-ready field-agent prompt) between the office and the real machine |
@@ -400,8 +399,8 @@ catches added, changed, and deleted files.
 `pr` gap: `ask-matt` handed the PR body to `/pr` while `pr` was uninstalled. `--sources` lists upstream
 skills that are not installed, but nothing connects that list to the skills that mention them.
 `node scripts/lint-skills.mjs` checks the installed skills for references to names that are not
-installed; known debt lives in `scripts/known-absent-refs.txt`. As of 2026-10-29 that file records
-`council-mode` in `consult` and `@plan-writing` / `@ask-questions-if-underspecified` in `ai-loop`.
+installed; known debt lives in `scripts/known-absent-refs.txt`. As of 2026-10-31 that file holds only
+names that are not skills: the Slint tools, a Copilot role, and one historical note.
 
 **Line endings are ignored.** Upstream trees are exported as LF and the comparison ignores trailing CR, so
 a Windows checkout (`core.autocrlf=true`) does not read every file as a local edit. The earlier "37 copies

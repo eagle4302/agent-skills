@@ -84,7 +84,6 @@ srdf	earthtojake/text-to-cad	skills/srdf	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2
 step-parts	earthtojake/text-to-cad	skills/step-parts	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
 urdf	earthtojake/text-to-cad	skills/urdf	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
 agents-team	-	-	-	local-only	authored here; pi-subagents based
-ai-loop	-	-	-	local-only	authored here
 consult	-	-	-	local-only	authored here
 context-first	-	-	-	local-only	authored here; lookup order for dev work: CodeGraph, then narrow judgments to Jev, then the Obsidian vault, then plan and edit
 ssh-captain	-	-	-	local-only	authored here
