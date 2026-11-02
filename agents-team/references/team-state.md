@@ -32,7 +32,7 @@ dependency: if it is missing, hand-edit the JSON and keep going.
 | `init <slug>` | creates `.agent-teams/<slug>/` from the templates |
 | `baseline <team-dir>` | records the git sha, branch and already-dirty paths into `team.json` |
 | `validate <team-dir> [--strict]` | checks the whole board; exit 0 means it is staffable |
-| `status <team-dir>` | prints the task table plus each commit batch's state |
+| `status <team-dir>` | the task table, person-facing waiting first, plus each commit batch's state |
 | `batch <team-dir> [group]` | per batch: ready/blocked/landed, and the paste-ready `git add` |
 | `log <team-dir> <from> <to> <kind> <summary>` | appends one `inbox.log` line |
 
@@ -51,7 +51,7 @@ under `adapters/` names the calls.
 | `baseline.knownFailures[]` | `command`, `symptom`, `why` |
 | `commitPolicy` | `mode`, `authorized`, `authorizedAt`, `messagePrefix` |
 | `members[]` | `name`, `role`, `agentId`, `status`, `territory[]`, `model` |
-| `tasks[]` | `id`, `kind`, `subject`, `status`, `assignee`, `dependencies[]`, `attempt`, `objective`, `acceptance[]`, `verify[]`, `inScope[]`, `outOfScope[]`, `commitGroup`, `commitSha`, `evidence`, `reviewedTaskId`, `verdict` |
+| `tasks[]` | `id`, `kind`, `subject`, `status`, `waitingOn`, `assignee`, `dependencies[]`, `attempt`, `objective`, `acceptance[]`, `verify[]`, `prepare`, `preparedAt`, `prepareExit`, `inScope[]`, `outOfScope[]`, `commitGroup`, `commitSha`, `evidence`, `reviewedTaskId`, `verdict` |
 
 Schema 1 boards (no `baseline`, no `commitPolicy`) still validate; the script skips the batch
 checks on them and says so once. Do not retrofit an archived board — leave it at 1.
@@ -65,9 +65,10 @@ Enumerations — keep them exact, the script validates them:
 | `mode` | `quick`, `standard`, `thorough` |
 | `baseline.verifiedClean` | `unknown`, `clean`, `known-failures` |
 | `members[].role` | `lead`, `scout`, `builder`, `prober`, `critic`, `scribe`, `ops` |
-| `members[].status` | `running`, `idle`, `ready`, `retired` |
+| `members[].status` | `running`, `holding`, `idle`, `ready`, `retired` |
 | `tasks[].kind` | `recon`, `implementation`, `verification`, `review`, `docs` |
 | `tasks[].status` | `backlog`, `todo`, `in_progress`, `in_review`, `done`, `blocked`, `canceled` |
+| `tasks[].waitingOn` | `person`, `teammate`, `slot`, `none` |
 | `tasks[].verdict` | `null`, `pass`, `needs_revision`, `reject` |
 
 Field notes:
@@ -84,6 +85,11 @@ Field notes:
   does not route; see `staffing.md`, "Model".
 - `territory` (on a member) and `inScope` (on a task) are path globs. Two teammates writing
   the same glob is a lead bug, not a teammate bug.
+- `holding` is a member status, not a task status: the teammate's turn ended, but jobs or
+  subagents it started are still running. It is neither `idle` (nothing in flight) nor done
+  (nothing left). DSH reports only that no turn is executing, which is the gap this field
+  closes — check `status` before counting a `holding` teammate as finished, and never retire
+  one without stopping its jobs first.
 - `verify` holds commands that a prober can paste and run unchanged. If you cannot write one,
   the task is not ready to be staffed.
 - `baseline` is written once by `team.mjs baseline`, before the tasks are filled in. Without it
@@ -113,6 +119,18 @@ Field notes:
 - `evidence` points at `reports/<task-id>-<role>.md`. A `done` task without evidence is a lie
   in JSON form.
 - `attempt` counts verification failures, not edits. `2` is the escalation trigger.
+- `waitingOn` answers the board's first question: what does this task need before it can move?
+  `person` (a decision or a gate only the human can give), `teammate` (a verdict, a review, or a
+  dependency another member owns), `slot` (queued behind the concurrency cap), `none` (being
+  worked, or not started). Status and field must agree: `in_review` with `waitingOn: "none"` is
+  a task nobody is checking. `status` lists `person` first for that reason, and an `in_review`
+  task with no verification or review task pointing at it is an error — no verdict can arrive.
+- `prepare` is the one command that runs before the task's first assignment, normally
+  `git worktree add ../<slug>-<task> <baseline.sha>`: it gives the task the private tree that
+  `isolate` would have given it on another harness. The lead runs it, then records
+  `preparedAt` and `prepareExit`; a non-zero exit is an error, not a warning, and the batch
+  stays blocked (`<task-id>:prepare`) until it exits 0. Work that started in the shared tree
+  because nobody ran it is the failure the field exists to catch.
 - The seven task states are deliberately ordinary, so a board can be mirrored onto whatever
   tracker the project already uses without translation. This skill writes only its own files.
 
@@ -146,7 +164,8 @@ The cycle, once per batch:
 is an error, a ready batch that has not landed is a warning, and closing with an uncommitted
 batch is a warning naming how many. A batch only reaches `ready` when a verification task
 **someone else owns** returned `pass` — a task verified by its own author counts as unverified,
-and `validate` reports the self-verification as an error.
+and `validate` reports the self-verification as an error — and when every task carrying a
+`prepare` ran it to exit 0.
 
 If `inScope` holds prose rather than pathspecs (`Core/Config/* (recipe section only)`),
 `batch` flags it instead of emitting a wrong `git add` — fix the glob, or add that one by hand.
@@ -161,12 +180,16 @@ One table, newest state, plus a short header. Keep it skimmable by a human who h
 
 phase: running · updated: 2026-09-17T04:30Z
 
-| id | task | owner | status | deps | batch | evidence |
-| --- | --- | --- | --- | --- | --- | --- |
-| t1 | implement slugify | builder-a | done | — | builder-a `a1b2c3d` | reports/t1-builder-a.md |
-| t2 | implement truncate | builder-b | in_review | — | builder-b | reports/t2-builder-b.md |
-| t3 | verify t1+t2 against acceptance | prober-a | in_progress | t1,t2 | — | — |
+| id | task | owner | status | waits | deps | batch | evidence |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| t2 | implement truncate | builder-b | in_review | teammate | — | builder-b | reports/t2-builder-b.md |
+| t1 | implement slugify | builder-a | done | none | — | builder-a `a1b2c3d` | reports/t1-builder-a.md |
+| t3 | verify t1+t2 against acceptance | prober-a | in_progress | none | t1,t2 | — | — |
 ```
+
+Order the table the way `team.mjs status` does: `waitingOn: "person"` first, then `teammate`,
+then the rest. A human reading the board should learn in one line what is waiting on them, not
+scan every row to find out that nothing is.
 
 Keep the batch table under it in step with `team.mjs status`: which groups landed, which are
 ready, which are blocked and on what.
@@ -188,8 +211,10 @@ worse than no board, because it is believed.
 2. Ask the harness for `status` and for its list of finished teammates, and match the ids
    against `members[].agentId`.
 3. Re-attach with `steer` to whoever is still running; a settled teammate may be resumable
-   where the harness says so per row. Re-spawn anyone whose id no longer resolves, or who is not
-   resumable, with a brief rebuilt from the reports, and label it a fallback.
+   where the harness says so per row. A member marked `holding` was mid-work when the context
+   went: read its latest report and check for its jobs before retiring or re-briefing it.
+   Re-spawn anyone whose id no longer resolves, or who is not resumable, with a brief rebuilt
+   from the reports, and label it a fallback.
 4. Continue from the first task that is not `done`, and say plainly in the human report which
    part of the run predates the context loss.
 

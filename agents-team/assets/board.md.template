@@ -4,9 +4,12 @@ phase: chartering · updated: {{ISO}} · team: .agent-teams/{{SLUG}}/team.json
 
 ## Board
 
-| id | task | owner | status | deps | batch | evidence |
-| --- | --- | --- | --- | --- | --- | --- |
-| t1 | REPLACE: task subject | lead | todo | — | — | — |
+| id | task | owner | status | waits | deps | batch | evidence |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| t1 | REPLACE: task subject | lead | todo | none | — | — | — |
+
+Ordered person-first: a task with `waitingOn: person` goes on top, because it is the thing
+the human has to unblock. `team.mjs status` prints the same order.
 
 ## Commit batches
 

@@ -23,7 +23,11 @@ const ASSETS = join(HERE, '..', 'assets');
 
 const PHASES = ['chartering', 'staffing', 'running', 'verifying', 'integrating', 'closed'];
 const ROLES = ['lead', 'scout', 'builder', 'prober', 'critic', 'scribe', 'ops'];
-const MEMBER_STATUS = ['running', 'idle', 'ready', 'retired'];
+// `holding`: the turn ended but jobs or subagents it started are still running. Not idle, and
+// not done — the distinction the harness does not make for us (references/team-state.md).
+const MEMBER_STATUS = ['running', 'holding', 'idle', 'ready', 'retired'];
+// What a live task is waiting for. The board and `status` order by it, person first.
+const WAITING_ON = ['person', 'teammate', 'slot', 'none'];
 const KINDS = ['recon', 'implementation', 'verification', 'review', 'docs'];
 const TASK_STATUS = ['backlog', 'todo', 'in_progress', 'in_review', 'done', 'blocked', 'canceled'];
 const VERDICTS = [null, 'pass', 'needs_revision', 'reject'];
@@ -135,7 +139,8 @@ function cmdInit(args) {
 
   console.log(`created ${relative(process.cwd(), dir) || dir}`);
   console.log(`next: team.mjs baseline ${relative(process.cwd(), dir) || dir}`);
-  console.log('then: objective, tasks (acceptance + verify + inScope + commitGroup), the human\'s');
+  console.log('then: objective, tasks (acceptance + verify + inScope + commitGroup + waitingOn + prepare),');
+  console.log('      the human\'s');
   console.log('      one-time commit authorization in commitPolicy, validate, then staff the team');
 }
 
@@ -226,10 +231,16 @@ function globOverlap(a, b) {
   return segsOverlap(globSegments(a), globSegments(b));
 }
 
+/** Ran, exited 0, and recorded: the tree the task works in exists and is usable. */
+const prepareOk = (t) => String(t.preparedAt ?? '').trim() !== '' && t.prepareExit === 0;
+/** A task that promised itself a private tree, and has not got one yet. */
+const needsPrepare = (t) => String(t.prepare ?? '').trim() !== '';
+
 /**
  * Group tasks by `commitGroup` and judge each batch. A batch is `ready` when every task in
- * it is settled and every implementation task in it has a verification task with a `pass`
- * verdict — that is the moment it may land as one commit.
+ * it is settled, every implementation task in it has a verification task with a `pass`
+ * verdict, and every task that promised a private tree ran its `prepare` to exit 0 — that is
+ * the moment it may land as one commit.
  */
 function commitGroups(doc) {
   const tasks = Array.isArray(doc.tasks) ? doc.tasks : [];
@@ -261,6 +272,9 @@ function commitGroups(doc) {
       else if (t.kind === 'implementation' && t.status === 'done' && !verifiedOk(t)) {
         b.blockers.push(`${t.id}:unverified`);
       }
+      // Otherwise the isolation was a sentence in the brief and the task wrote into the
+      // shared tree everyone else is using.
+      if (needsPrepare(t) && !prepareOk(t)) b.blockers.push(`${t.id}:prepare`);
     }
     b.state = b.shas.size ? 'committed' : b.blockers.length ? 'blocked' : 'ready';
   }
@@ -385,6 +399,52 @@ function cmdValidate(args) {
     }
     if (t.kind === 'implementation' && (!Array.isArray(t.inScope) || t.inScope.length === 0)) {
       err(at('implementation task needs "inScope" path globs'));
+    }
+    // What a task waits for is the board's first question and the lead's next move. A status
+    // that says "in_review" with nothing waiting on it is two facts that disagree.
+    if (t.waitingOn !== undefined) {
+      if (!WAITING_ON.includes(t.waitingOn)) {
+        err(at(`"waitingOn" must be one of ${WAITING_ON.join('|')}, got ${JSON.stringify(t.waitingOn)}`));
+      } else if (t.status === 'in_review' && !['person', 'teammate'].includes(t.waitingOn)) {
+        err(at(`is in_review but "waitingOn" is "${t.waitingOn}" — a verdict comes from a person or a teammate`));
+      } else if (t.status === 'blocked' && t.waitingOn === 'none') {
+        err(at('is blocked but "waitingOn" is "none" — say what it is blocked on'));
+      } else if (t.status === 'in_progress' && !['none', 'slot'].includes(t.waitingOn)) {
+        err(at(`is in_progress, so "waitingOn" must be none|slot, got "${t.waitingOn}"`));
+      } else if (['backlog', 'todo', 'done', 'canceled'].includes(t.status) && t.waitingOn !== 'none') {
+        err(at(`status "${t.status}" cannot be waiting on "${t.waitingOn}" — only live work waits`));
+      }
+    } else if (v2 && !['chartering', 'closed'].includes(doc.phase)) {
+      warn(at('no "waitingOn" — the board cannot say who it waits on, so nobody knows whether to act'));
+    }
+    // `in_review` without a verifier is a task that will never receive a verdict: the batch
+    // above it stays blocked and the lead reads a board that claims work is being checked.
+    // Only implementation work owes one — a verification task is the verifier, not the judged.
+    if (t.status === 'in_review' && t.kind === 'implementation') {
+      const verifier = tasks.some(
+        (v) => ['verification', 'review'].includes(v.kind)
+          && (v.reviewedTaskId === t.id || (v.dependencies ?? []).includes(t.id)),
+      );
+      if (!verifier) {
+        err(at('is "in_review" but no verification or review task points at it — nothing will ever return a verdict'));
+      }
+    }
+    // A private tree the task promised itself. Only the lead records it, and only after the
+    // command exited 0: a failed prepare is a failed task, not a warning.
+    if (t.prepare !== undefined && typeof t.prepare !== 'string') {
+      err(at('"prepare" must be a string command ("" when the task needs no private tree)'));
+    }
+    if (needsPrepare(t)) {
+      const preparedAt = String(t.preparedAt ?? '').trim();
+      if (!preparedAt && ['in_progress', 'in_review', 'done'].includes(t.status)) {
+        err(at(`started (status "${t.status}") before "prepare" ran — record "preparedAt" only after it exits 0`));
+      }
+      if (preparedAt && t.prepareExit !== 0) {
+        err(at(`"prepare" did not exit 0 (prepareExit ${JSON.stringify(t.prepareExit ?? null)}) — a failed tree is not a worktree`));
+      }
+    }
+    if (t.prepareExit !== undefined && t.prepareExit !== null && !Number.isInteger(t.prepareExit)) {
+      err(at('"prepareExit" must be null or an integer'));
     }
     // Hard rule: the prober is never the builder. This is the one invariant the board can
     // actually check, and a self-verified task would otherwise be reported ready to land.
@@ -603,7 +663,7 @@ function cmdValidate(args) {
 
   // Every role that can write, not just the builders: a scribe or the lead sitting on a
   // builder's path is the same defect with a different job title.
-  const writers = members.filter((m) => WRITER_ROLES.includes(m.role) && ['running', 'idle'].includes(m.status));
+  const writers = members.filter((m) => WRITER_ROLES.includes(m.role) && ['running', 'holding', 'idle'].includes(m.status));
   for (let i = 0; i < writers.length; i += 1) {
     for (let j = i + 1; j < writers.length; j += 1) {
       for (const a of writers[i].territory ?? []) {
@@ -627,7 +687,7 @@ function cmdValidate(args) {
   const open = tasks.filter((t) => !['done', 'canceled'].includes(t.status));
   if (doc.phase !== 'closed') {
     for (const m of members) {
-      if (['running', 'idle'].includes(m.status) && !open.some((t) => t.assignee === m.name)) {
+      if (['running', 'holding', 'idle'].includes(m.status) && !open.some((t) => t.assignee === m.name)) {
         warn(`member "${m.name}" is ${m.status} but owns no open task`);
       }
     }
@@ -653,15 +713,21 @@ function cmdStatus(args) {
     process.exit(1);
   }
   const doc = JSON.parse(readFileSync(file, 'utf8'));
-  const rows = (doc.tasks ?? []).map((t) => [
-    t.id,
-    (t.subject ?? '').slice(0, 48),
-    t.assignee ?? '-',
-    t.status,
-    (t.dependencies ?? []).join(',') || '-',
-    t.evidence ? t.evidence.replace(/^.*[\\/]/, '') : '-',
-  ]);
-  const head = ['id', 'task', 'owner', 'status', 'deps', 'evidence'];
+  // Person first: the board exists to show what stops the run, not to list what is fine.
+  const rank = { person: 0, teammate: 1, slot: 2, none: 3 };
+  const rows = (doc.tasks ?? [])
+    .map((t, i) => ({ t, i }))
+    .sort((a, b) => (rank[a.t.waitingOn] ?? 3) - (rank[b.t.waitingOn] ?? 3) || a.i - b.i)
+    .map(({ t }) => [
+      t.id,
+      (t.subject ?? '').slice(0, 48),
+      t.assignee ?? '-',
+      t.status,
+      t.waitingOn ?? '-',
+      (t.dependencies ?? []).join(',') || '-',
+      t.evidence ? t.evidence.replace(/^.*[\\/]/, '') : '-',
+    ]);
+  const head = ['id', 'task', 'owner', 'status', 'waits', 'deps', 'evidence'];
   const width = head.map((h, i) => Math.max(h.length, ...rows.map((r) => String(r[i] ?? '').length), 4));
   const line = (cells) => cells.map((c, i) => String(c ?? '').padEnd(width[i])).join('  ');
   console.log(`${doc.name} — ${doc.objective}`);
@@ -671,6 +737,14 @@ function cmdStatus(args) {
   for (const r of rows) console.log(line(r));
   const open = (doc.tasks ?? []).filter((t) => !['done', 'canceled'].includes(t.status));
   console.log(`\nopen: ${open.length}${open.length ? ` (${open.map((t) => `${t.id}:${t.status}`).join(' ')})` : ''}`);
+  const person = open.filter((t) => t.waitingOn === 'person');
+  if (person.length) {
+    console.log(`needs a person (${person.length}): ${person.map((t) => `${t.id}:${t.status}`).join(' ')}`);
+  }
+  const holding = (doc.members ?? []).filter((m) => m.status === 'holding');
+  if (holding.length) {
+    console.log(`holding (turn ended, work still running): ${holding.map((m) => m.name).join(', ')}`);
+  }
 
   const batches = commitGroups(doc);
   if (batches.length) {

@@ -75,6 +75,10 @@ Each step ends when its completion criterion holds.
    before the build"), a paste-ready `verify` command where one exists,
    `inScope` globs, dependencies, and a `commitGroup` on every implementation task: one group
    per territory, so each builder's work lands as its own commit instead of one closing blob.
+   Give every task a `waitingOn` (`person|teammate|slot|none`) and, where a builder needs its
+   own tree, a `prepare` command (`git worktree add …`): the lead runs it after `baseline`, then
+   records `preparedAt` and `prepareExit`. A batch never reaches `ready` while a `prepare` is
+   missing or failed — the same rule as hard rule 8, applied before the teammate starts.
    Ask the human **once, here**, for two things. First the **run mode** — quick / standard /
    thorough, with your recommendation and the classes they want kept off the quick path
    (`references/modes.md` has the paste-ready question); a Solo or one-helper run asks nothing.
@@ -93,6 +97,8 @@ Each step ends when its completion criterion holds.
    `gate`, that check does not vanish — it becomes yours at step 5. Delegate what a teammate can finish without you and hand back as evidence; keep
    the judgement calls, the integration and anything smaller than the brief it would take.
    Record the returned identity (child id or teammate name) as that member's `agentId`.
+   Say in the brief how a turn that ends with jobs still running must be reported: `holding`,
+   with what is running and where — otherwise the board reads it as a finished task.
    *Done when:* every live member has an `agentId`, and `board.md` shows who owns what.
 
 4. **Run** — you are a working lead: you hold the smallest tasks, the integration, and every
@@ -106,6 +112,10 @@ Each step ends when its completion criterion holds.
    is looping, drifting, or outside its territory — then decide explicitly whether to re-brief
    it or finish the work yourself. Where `steer` or `stop` is absent, `protocol.md` says what
    replaces it.
+   A settled turn is not a finished task: DSH reports `inactive` for a teammate whose shell jobs
+   or subagents are still running. Record that member as `holding`, read its jobs, and only then
+   count the task done. `team.mjs status` prints who is holding and which tasks wait on a person
+   — that line, not the roster, is what decides your next move.
    Append every exchange to `inbox.log`.
    *Done when:* every task is `in_progress`, `in_review`, `blocked`, or `done` — and the board
    plus `inbox.log` say so.
@@ -122,7 +132,8 @@ Each step ends when its completion criterion holds.
    The moment every task in a `commitGroup` is settled and its verdict is `pass`, that batch
    lands: `team.mjs batch` prints the pathspecs, you show the human `git status --short` for
    those globs, commit **by pathspec only**, then write the sha into each task's `commitSha`
-   and one `commit` line into `inbox.log`. Never `git add -A`, `git add .` or `git commit -a` —
+   and one `commit` line into `inbox.log`. A batch with a task whose `prepare` is missing or
+   non-zero is blocked, not ready: a worktree that failed to build is not a tree to commit from. Never `git add -A`, `git add .` or `git commit -a` —
    `baseline.dirtyPaths` lists what was in the tree before the team existed.
    *Done when:* every implementation task has a verification task with a verdict, every passing
    batch carries a `commitSha`, and a failure has been re-briefed (attempt 1) or escalated
@@ -165,6 +176,9 @@ Each step ends when its completion criterion holds.
    charter, for a Light team or larger (`references/modes.md`); it lives in `team.json.mode`,
    and the closing report quotes it. Escalating needs their confirmation; downgrading is
    theirs alone.
+10. **A settled turn is not a finished task.** A teammate whose turn ended while its jobs or
+    subagents still run is `holding`, not `idle` and not done. Check the work before you count
+    it, and never retire a member with its jobs still running.
 
 ## Red flags — stop and correct
 
@@ -207,6 +221,11 @@ Each step ends when its completion criterion holds.
 - A teammate saturating the machine (load loops, servers, watchers) with no bound, and no check
   that the load is gone before the lead reads its own build or test numbers — a loaded machine
   turns known-flaky tests red, so the lead then chases a defect the team itself created.
+- A task in `in_review` with no verification or review task pointing at it — nothing will ever
+  return a verdict, and the batch above it stays blocked while the board claims it is checked.
+- A builder working in the shared tree because its `prepare` never ran — the isolation was a
+  sentence in the brief, and every other teammate's `git status` now includes its work.
+- A `holding` teammate nobody has looked at, or one retired with its jobs still running.
 
 ## Read next
 

@@ -49,6 +49,7 @@
       "kind": "recon",
       "subject": "REPLACE: write the terrain facts before anyone edits",
       "status": "todo",
+      "waitingOn": "none",
       "assignee": "lead",
       "dependencies": [],
       "attempt": 0,
@@ -59,6 +60,9 @@
       "verify": [
         "REPLACE: a command a prober can paste unchanged, or drop this field for recon tasks"
       ],
+      "prepare": "",
+      "preparedAt": "",
+      "prepareExit": null,
       "inScope": [
         "REPLACE: path globs this task may write"
       ],
