@@ -33,10 +33,11 @@ dependency: if it is missing, hand-edit the JSON and keep going.
 | `baseline <team-dir>` | records the git sha, branch and already-dirty paths into `team.json` |
 | `validate <team-dir> [--strict]` | checks the whole board; exit 0 means it is staffable |
 | `status <team-dir>` | the task table, person-facing waiting first, plus each commit batch's state |
+| `board <team-dir>` | regenerates the two marked blocks of `board.md` from `team.json` |
 | `batch <team-dir> [group]` | per batch: ready/blocked/landed, and the paste-ready `git add` |
 | `log <team-dir> <from> <to> <kind> <summary>` | appends one `inbox.log` line |
 
-`init`, `baseline` and `log` write; the rest only read.
+`init`, `baseline`, `board` and `log` write; the rest only read.
 
 Check what the harness currently offers — the agent profiles it lists, and any spawn or
 concurrency budget it enforces — before staffing a wide team, not after it fails. Your adapter
@@ -46,12 +47,12 @@ under `adapters/` names the calls.
 
 | Block | Fields |
 | --- | --- |
-| top | `schema` (2), `name`, `objective`, `createdAt`, `phase`, `humanGates[]`, `houseRules[]`, `baseline`, `commitPolicy`, `mode`, `fastPathExclusions[]` |
+| top | `schema` (2), `name`, `objective`, `createdAt`, `phase`, `humanGates[]`, `houseRules[]`, `baseline`, `commitPolicy`, `mode`, `fastPathExclusions[]`, `policyVersion`, `proactiveRules[]` |
 | `baseline` | `sha`, `branch`, `dirtyPaths[]`, `verifiedClean`, `knownFailures[]`, `capturedAt` |
 | `baseline.knownFailures[]` | `command`, `symptom`, `why` |
 | `commitPolicy` | `mode`, `authorized`, `authorizedAt`, `messagePrefix` |
 | `members[]` | `name`, `role`, `agentId`, `status`, `territory[]`, `model` |
-| `tasks[]` | `id`, `kind`, `subject`, `status`, `waitingOn`, `assignee`, `dependencies[]`, `attempt`, `objective`, `acceptance[]`, `verify[]`, `prepare`, `preparedAt`, `prepareExit`, `inScope[]`, `outOfScope[]`, `commitGroup`, `commitSha`, `evidence`, `reviewedTaskId`, `verdict` |
+| `tasks[]` | `id`, `kind`, `subject`, `status`, `waitingOn`, `assignee`, `dependencies[]`, `attempt`, `objective`, `acceptance[]`, `verify[]`, `prepare`, `preparedAt`, `prepareExit`, `mandate`, `inScope[]`, `outOfScope[]`, `commitGroup`, `commitSha`, `evidence`, `reviewedTaskId`, `verdict` |
 
 Schema 1 boards (no `baseline`, no `commitPolicy`) still validate; the script skips the batch
 checks on them and says so once. Do not retrofit an archived board — leave it at 1.
@@ -69,6 +70,7 @@ Enumerations — keep them exact, the script validates them:
 | `tasks[].kind` | `recon`, `implementation`, `verification`, `review`, `docs` |
 | `tasks[].status` | `backlog`, `todo`, `in_progress`, `in_review`, `done`, `blocked`, `canceled` |
 | `tasks[].waitingOn` | `person`, `teammate`, `slot`, `none` |
+| `tasks[].mandate.basis` | `explicit`, `inferred`, `rule` |
 | `tasks[].verdict` | `null`, `pass`, `needs_revision`, `reject` |
 
 Field notes:
@@ -131,6 +133,21 @@ Field notes:
   `preparedAt` and `prepareExit`; a non-zero exit is an error, not a warning, and the batch
   stays blocked (`<task-id>:prepare`) until it exits 0. Work that started in the shared tree
   because nobody ran it is the failure the field exists to catch.
+- `policyVersion` is the version of the rules that authorize work: `humanGates`, `mode`,
+  `commitPolicy` and `proactiveRules`. Bump it whenever one of those changes, write one `policy`
+  line naming the new version, and tell the live members whose mandate cites the old one —
+  `validate` warns on both halves (a live mandate on an old version, a version with no `policy`
+  line). Downgrading the policy is the human's call, as with the mode.
+- `proactiveRules[]` holds the written rules that let the lead start work nobody asked for, one
+  line each ("a flaky test that blocks CI may be fixed without asking"). A rule that is not
+  written here cannot be cited: `mandate.basis: "rule"` with no matching entry is an error.
+- `mandate` answers the question `commitPolicy` never does: **why is this work allowed, and how
+  far may it go?** `basis` is `explicit` (the human asked for it), `inferred` (the lead derived
+  it from the objective, with no rule involved) or `rule` (a `proactiveRules` entry allowed it).
+  `version` is the `policyVersion` at accept time; `scope` is the globs it authorizes, and
+  `validate` warns when an `inScope` glob falls outside it. An implementation task without a
+  mandate is an error, because "the lead decided to" is not an authorization story a fresh
+  session can audit.
 - The seven task states are deliberately ordinary, so a board can be mirrored onto whatever
   tracker the project already uses without translation. This skill writes only its own files.
 
@@ -172,31 +189,30 @@ If `inScope` holds prose rather than pathspecs (`Core/Config/* (recipe section o
 
 ## `board.md`
 
-One table, newest state, plus a short header. Keep it skimmable by a human who has not read
-`team.json`:
+The top is one table, newest state, plus a short header; everything below it is the lead's
+prose and survives regeneration. Two marked blocks are generated from `team.json`:
 
 ```markdown
-# <slug> — <objective>
+<!-- board:tasks -->
+## Board
+… phase line, the "Waiting on a person" line, the task table …
+<!-- /board:tasks -->
 
-phase: running · updated: 2026-09-17T04:30Z
-
-| id | task | owner | status | waits | deps | batch | evidence |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| t2 | implement truncate | builder-b | in_review | teammate | — | builder-b | reports/t2-builder-b.md |
-| t1 | implement slugify | builder-a | done | none | — | builder-a `a1b2c3d` | reports/t1-builder-a.md |
-| t3 | verify t1+t2 against acceptance | prober-a | in_progress | none | t1,t2 | — | — |
+<!-- board:batches -->
+## Commit batches
+… baseline, mode, the batch table, "Already broken before we started" …
+<!-- /board:batches -->
 ```
 
-Order the table the way `team.mjs status` does: `waitingOn: "person"` first, then `teammate`,
-then the rest. A human reading the board should learn in one line what is waiting on them, not
-scan every row to find out that nothing is.
+Run `team.mjs board <team-dir>` on every status transition. It rewrites only what is between
+the markers, orders the table the way `status` does (`person` first, then `teammate`), and
+leaves the sections you wrote by hand — open questions, gates, notes — untouched. A board
+without the markers is refused rather than guessed at: an old hand-written board keeps
+working, it just does not get the generator.
 
-Keep the batch table under it in step with `team.mjs status`: which groups landed, which are
-ready, which are blocked and on what.
-
-The lead is the only writer of `board.md` and `team.json`. Update both on every status
-transition, in the same step that the transition happens — a board that lags the run is
-worse than no board, because it is believed.
+The lead is still the only writer of `team.json`; the generator only reads it. `validate`
+warns when `board.md` is older than `team.json`, because a board that lags the run is worse
+than no board: it is believed.
 
 ## Resuming after a context loss
 

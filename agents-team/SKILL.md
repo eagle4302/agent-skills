@@ -79,6 +79,10 @@ Each step ends when its completion criterion holds.
    own tree, a `prepare` command (`git worktree add …`): the lead runs it after `baseline`, then
    records `preparedAt` and `prepareExit`. A batch never reaches `ready` while a `prepare` is
    missing or failed — the same rule as hard rule 8, applied before the teammate starts.
+   Every implementation task also needs a `mandate`: `explicit` when the human asked for it,
+   `inferred` when you derived it, or `rule` naming a written `proactiveRules` entry. Set
+   `policyVersion: 1`, and bump it — with one `policy` line in `inbox.log` — whenever
+   `humanGates`, `mode`, `commitPolicy` or `proactiveRules` change.
    Ask the human **once, here**, for two things. First the **run mode** — quick / standard /
    thorough, with your recommendation and the classes they want kept off the quick path
    (`references/modes.md` has the paste-ready question); a Solo or one-helper run asks nothing.
@@ -86,7 +90,8 @@ Each step ends when its completion criterion holds.
    both — `mode` + `fastPathExclusions`, and `commitPolicy`. Run `validate` until it exits 0.
    *Done when:* validation passes, `baseline.sha` and `verifiedClean` are filled, `houseRules`
    carries whatever the project insists on, `mode` and `commitPolicy` carry the human's answers,
-   and every task has an owner or is deliberately `backlog`.
+   `team.mjs board` has written the first board, and every task has an owner or is deliberately
+   `backlog`.
 
 3. **Staff** — spawn independent teammates **in one message** so they run in parallel, each with
    a self-contained brief from `staffing.md`. Dispatch the role the way your adapter says (a
@@ -116,6 +121,9 @@ Each step ends when its completion criterion holds.
    or subagents are still running. Record that member as `holding`, read its jobs, and only then
    count the task done. `team.mjs status` prints who is holding and which tasks wait on a person
    — that line, not the roster, is what decides your next move.
+   Before each dispatch, relaunch or relay, write an `intent` line naming the task id; close it
+   with `outcome` or with the member's own report. Re-run `team.mjs board` in the same step as
+   any status change.
    Append every exchange to `inbox.log`.
    *Done when:* every task is `in_progress`, `in_review`, `blocked`, or `done` — and the board
    plus `inbox.log` say so.
@@ -144,9 +152,9 @@ Each step ends when its completion criterion holds.
    *Done when:* the verdict is `pass`, or every finding is fixed and re-reviewed.
 
 7. **Close** — integrate the artifacts yourself, run the end-to-end check yourself, land the
-   last batch, finish `board.md`, move the directory to `.agent-teams/archive/<slug>/`, and
-   report to the human: what shipped and **as which shas**, what did not, what they can do
-   today, remaining risk, and what needs their decision.
+   last batch, regenerate `board.md` (`team.mjs board`), move the directory to
+   `.agent-teams/archive/<slug>/`, and report to the human: what shipped and **as which shas**,
+   what did not, what they can do today, remaining risk, and what needs their decision.
    *Done when:* the human report names the evidence for each claim and lists the shas, and
    `validate` reports no batch left uncommitted.
 
@@ -179,6 +187,9 @@ Each step ends when its completion criterion holds.
 10. **A settled turn is not a finished task.** A teammate whose turn ended while its jobs or
     subagents still run is `holding`, not `idle` and not done. Check the work before you count
     it, and never retire a member with its jobs still running.
+11. **Write the intent before the action.** The dispatch, relaunch or relay line goes into
+    `inbox.log` before the call, not after it. An intent no report closes is what tells the next
+    session it cannot know whether the action happened — silence is not evidence of not acting.
 
 ## Red flags — stop and correct
 
@@ -226,6 +237,9 @@ Each step ends when its completion criterion holds.
 - A builder working in the shared tree because its `prepare` never ran — the isolation was a
   sentence in the brief, and every other teammate's `git status` now includes its work.
 - A `holding` teammate nobody has looked at, or one retired with its jobs still running.
+- An `intent` line nobody closed, and the lead reading the silence as "it never happened".
+- Hand-editing the task table in `board.md` while `team.mjs board` exists — the next
+  regeneration overwrites it, and the hand edit was never in `team.json` anyway.
 
 ## Read next
 

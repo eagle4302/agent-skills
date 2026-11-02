@@ -5,6 +5,7 @@
 //   node team.mjs baseline <team.json | team-dir>
 //   node team.mjs validate <team.json | team-dir> [--strict]
 //   node team.mjs status <team.json | team-dir>
+//   node team.mjs board <team.json | team-dir>
 //   node team.mjs batch <team.json | team-dir> [group]
 //   node team.mjs log <team-dir> <from> <to> <kind> <summary...>
 //
@@ -28,6 +29,9 @@ const ROLES = ['lead', 'scout', 'builder', 'prober', 'critic', 'scribe', 'ops'];
 const MEMBER_STATUS = ['running', 'holding', 'idle', 'ready', 'retired'];
 // What a live task is waiting for. The board and `status` order by it, person first.
 const WAITING_ON = ['person', 'teammate', 'slot', 'none'];
+// Why a task may be done: the human asked for it, the lead inferred it from the objective, or
+// a written proactive rule allowed it. See references/team-state.md → "mandate".
+const MANDATE_BASES = ['explicit', 'inferred', 'rule'];
 const KINDS = ['recon', 'implementation', 'verification', 'review', 'docs'];
 const TASK_STATUS = ['backlog', 'todo', 'in_progress', 'in_review', 'done', 'blocked', 'canceled'];
 const VERDICTS = [null, 'pass', 'needs_revision', 'reject'];
@@ -36,6 +40,9 @@ const VERDICTS = [null, 'pass', 'needs_revision', 'reject'];
 const LOG_KINDS = [
   'brief', 'steer', 'block', 'report', 'verdict', 'human', 'commit',
   'note', 'finding', 'verified', 'decision', 'action', 'takeover',
+  // Intent before an action, outcome after it. An intent nobody confirmed is how a session
+  // that lost its context learns it cannot tell whether the action ever happened.
+  'intent', 'outcome', 'dropped', 'policy',
 ];
 // Vocabulary real boards already use. Normalised before anything reads a kind.
 const LOG_ALIASES = {
@@ -70,6 +77,7 @@ const usage = (msg) => {
   console.error('       team.mjs baseline <team.json|team-dir>');
   console.error('       team.mjs validate <team.json|team-dir> [--strict]');
   console.error('       team.mjs status <team.json|team-dir>');
+  console.error('       team.mjs board <team.json|team-dir>');
   console.error('       team.mjs batch <team.json|team-dir> [group]');
   console.error('       team.mjs log <team-dir> <from> <to> <kind> <summary...>');
   process.exit(2);
@@ -141,7 +149,7 @@ function cmdInit(args) {
   console.log(`next: team.mjs baseline ${relative(process.cwd(), dir) || dir}`);
   console.log('then: objective, tasks (acceptance + verify + inScope + commitGroup + waitingOn + prepare),');
   console.log('      the human\'s');
-  console.log('      one-time commit authorization in commitPolicy, validate, then staff the team');
+  console.log('      one-time commit authorization in commitPolicy; then board, validate, staff the team');
 }
 
 // ── validate ────────────────────────────────────────────────────────────────
@@ -446,6 +454,51 @@ function cmdValidate(args) {
     if (t.prepareExit !== undefined && t.prepareExit !== null && !Number.isInteger(t.prepareExit)) {
       err(at('"prepareExit" must be null or an integer'));
     }
+    // A mandate says why this work may be done, under which policy, and how far it may go.
+    // Without it "the lead decided to" is the whole authorization story.
+    const wantsMandate = t.kind === 'implementation' && v2 && !['chartering', 'closed'].includes(doc.phase);
+    if (t.mandate === undefined) {
+      if (wantsMandate) {
+        err(at('implementation task needs a "mandate" — who allowed it, under which policyVersion, and its scope'));
+      }
+    } else if (!t.mandate || typeof t.mandate !== 'object' || Array.isArray(t.mandate)) {
+      err(at('"mandate" must be an object'));
+    } else {
+      const m = t.mandate;
+      if (!MANDATE_BASES.includes(m.basis)) {
+        err(at(`"mandate.basis" must be one of ${MANDATE_BASES.join('|')}`));
+      }
+      const rule = String(m.rule ?? '').trim();
+      if (m.basis === 'rule') {
+        const rules = Array.isArray(doc.proactiveRules) ? doc.proactiveRules : [];
+        if (!rule) err(at('"mandate.basis" is "rule" but "mandate.rule" is empty'));
+        else if (!rules.includes(rule)) {
+          err(at(`"mandate.rule" must be one of "proactiveRules": ${JSON.stringify(rule)}`));
+        }
+      } else if (rule) {
+        warn(at(`"mandate.rule" is set but basis is "${m.basis}" — only rule-based work cites a rule`));
+      }
+      if (!Number.isInteger(m.version) || m.version < 1) {
+        err(at('"mandate.version" must be the integer "policyVersion" the work was accepted under'));
+      } else if (Number.isInteger(doc.policyVersion)) {
+        if (m.version > doc.policyVersion) {
+          err(at(`"mandate.version" ${m.version} is newer than "policyVersion" ${doc.policyVersion}`));
+        } else if (m.version < doc.policyVersion && !['done', 'canceled'].includes(t.status)) {
+          warn(at(`accepted under policy v${m.version}, current is v${doc.policyVersion} — re-confirm or re-mandate before it lands`));
+        }
+      }
+      if (!Array.isArray(m.scope)) {
+        err(at('"mandate.scope" must be an array of path globs'));
+      } else if (t.kind === 'implementation' && m.scope.length === 0) {
+        err(at('an implementation mandate needs at least one "scope" glob'));
+      } else if (t.kind === 'implementation') {
+        for (const p of t.inScope ?? []) {
+          if (!m.scope.some((g) => globOverlap(g, p))) {
+            warn(at(`inScope "${p}" is outside the mandate's scope (${m.scope.join(', ')})`));
+          }
+        }
+      }
+    }
     // Hard rule: the prober is never the builder. This is the one invariant the board can
     // actually check, and a self-verified task would otherwise be reported ready to land.
     if (['verification', 'review'].includes(t.kind) && t.assignee) {
@@ -547,6 +600,22 @@ function cmdValidate(args) {
       }
     }
 
+    // The policy version every mandate records, and the written rules that let the lead start
+    // work nobody asked for. A rule that lives only in the lead's head is not a policy.
+    if (doc.policyVersion === undefined) {
+      if (!['chartering', 'closed'].includes(doc.phase)) {
+        warn('no "policyVersion" — a mandate cannot say which rules it was accepted under');
+      }
+    } else if (!Number.isInteger(doc.policyVersion) || doc.policyVersion < 1) {
+      err('"policyVersion" must be an integer >= 1');
+    }
+    if (doc.proactiveRules !== undefined && !Array.isArray(doc.proactiveRules)) {
+      err('"proactiveRules" must be an array of one-line written rules ([] when the team may only do what it was asked)');
+    } else if (Array.isArray(doc.proactiveRules)
+      && doc.proactiveRules.some((r) => typeof r !== 'string' || !r.trim())) {
+      err('every "proactiveRules" entry must be a non-empty one-line rule');
+    }
+
     const runMode = doc.mode;
     if (runMode === undefined || runMode === null || String(runMode).trim() === '') {
       warn('no "mode" recorded — ask the human for quick|standard|thorough at charter (references/modes.md)');
@@ -636,6 +705,30 @@ function cmdValidate(args) {
         warn(`inbox.log: ${odd.length} kind(s) outside the vocabulary are kept but invisible to the checks below: ${odd.slice(0, 8).join(', ')}`);
       }
 
+      // Intent/outcome pairing. An intent with no closing report is not an error — the
+      // teammate may still be running — but a fresh session must not read it as done.
+      const tokens = (s) => String(s).split(/\s+/).filter(Boolean);
+      const closing = ['report', 'verdict', 'finding', 'block', 'outcome', 'dropped'];
+      const taskIds = new Set(tasks.map((t) => t.id).filter(Boolean));
+      const openById = new Map(
+        tasks.filter((t) => !['done', 'canceled'].includes(t.status)).map((t) => [t.id, t]),
+      );
+      for (const e of shaped.filter((x) => x.kind === 'intent')) {
+        const ref = tokens(e.summary)[0];
+        if (!taskIds.has(ref) || !openById.has(ref)) continue;
+        const confirmed = shaped.some(
+          (x) => closing.includes(x.kind) && x.from === e.to && tokens(x.summary).includes(ref),
+        );
+        if (!confirmed) {
+          warn(`task "${ref}": intent recorded but no outcome/report from ${e.to} — a fresh session cannot tell whether it happened`);
+        }
+      }
+      const pv = doc.policyVersion;
+      if (Number.isInteger(pv) && pv > 1
+        && !logged('policy', (e) => tokens(e.summary).includes(`v${pv}`))) {
+        warn(`"policyVersion" is ${pv} but no "policy" line records the change — members were never told`);
+      }
+
       for (const m of members) {
         if (m.role === 'lead' || !String(m.agentId ?? '').trim()) continue;
         if (!logged('brief', (e) => e.to === m.name)) {
@@ -655,6 +748,18 @@ function cmdValidate(args) {
           }
         }
       }
+    }
+  }
+
+  // A board that lags the run is worse than no board, because it is believed.
+  const boardFile = join(teamDir, 'board.md');
+  if (existsSync(boardFile) && existsSync(file)) {
+    try {
+      if (statSync(boardFile).mtimeMs < statSync(file).mtimeMs) {
+        warn('board.md is older than team.json — run `team.mjs board` (a board that lags is worse than none)');
+      }
+    } catch {
+      // mtime is a convenience, never a gate: an unreadable stamp is not a defect.
     }
   }
 
@@ -758,6 +863,107 @@ function cmdStatus(args) {
       console.log(`  ${b.group.padEnd(18)} ${b.state.padEnd(10)} ${tag}  (${b.tasks.map((t) => t.id).join(',')})`);
     }
   }
+}
+
+// ── board ───────────────────────────────────────────────────────────────────
+
+/** One table cell: no pipes (they would split the column) and no newlines. */
+const cell = (v) => String(v ?? '').replace(/\|/g, '\\|').replace(/\s+/g, ' ').trim() || '—';
+
+/**
+ * The two blocks `board.md` regenerates: the task table and the commit batches. Everything
+ * outside the markers is the lead's prose and stays untouched.
+ */
+function boardBlocks(doc, now) {
+  const tasks = Array.isArray(doc.tasks) ? doc.tasks : [];
+  const rank = { person: 0, teammate: 1, slot: 2, none: 3 };
+  const open = tasks.filter((t) => !['done', 'canceled'].includes(t.status));
+  const ordered = tasks
+    .map((t, i) => ({ t, i }))
+    .sort((a, b) => (rank[a.t.waitingOn] ?? 3) - (rank[b.t.waitingOn] ?? 3) || a.i - b.i)
+    .map(({ t }) => t);
+  const person = open.filter((t) => t.waitingOn === 'person');
+  const rows = ordered.map((t) => [
+    t.id, t.subject, t.assignee, t.status, t.waitingOn,
+    (t.dependencies ?? []).join(','), t.commitGroup,
+    t.evidence ? t.evidence.replace(/^.*[\\/]/, '') : '',
+  ].map(cell).join(' | '));
+  const tasksBlock = [
+    '## Board',
+    '',
+    `phase: ${doc.phase} · updated: ${now} · ${open.length} open · ${person.length} waiting on a person`,
+    '',
+    person.length
+      ? `**Waiting on a person:** ${person.map((t) => `${t.id} (${t.status})`).join(' · ')}`
+      : '**Waiting on a person:** none',
+    '',
+    '| id | task | owner | status | waits | deps | batch | evidence |',
+    '| --- | --- | --- | --- | --- | --- | --- | --- |',
+    ...(rows.length ? rows.map((r) => `| ${r} |`) : ['| — | — | — | — | — | — | — | — |']),
+  ].join('\n');
+
+  const bl = doc.baseline ?? {};
+  const cp = doc.commitPolicy ?? {};
+  const authorized = cp.authorized === true ? `yes${cp.authorizedAt ? ` (${cp.authorizedAt})` : ''}` : 'no';
+  const batchRows = commitGroups(doc).map((b) => {
+    const detail = b.state === 'committed' ? [...b.shas].join(' ')
+      : b.state === 'ready' ? 'run: team.mjs batch'
+      : b.blockers.join(', ');
+    return [b.group, b.tasks.map((t) => t.id).join(','), b.state, detail].map(cell).join(' | ');
+  });
+  const failures = Array.isArray(bl.knownFailures) ? bl.knownFailures : [];
+  const failRows = failures.map((kf) => [kf.command, kf.symptom].map(cell).join(' | '));
+  const batchesBlock = [
+    '## Commit batches',
+    '',
+    `baseline: ${cell(bl.branch)} @ ${cell(String(bl.sha ?? '').slice(0, 7))} · ${(bl.dirtyPaths ?? []).length} path(s) dirty before the team started`,
+    `mode: ${cell(cp.mode)} · authorized: ${authorized}${Number.isInteger(doc.policyVersion) ? ` · policy v${doc.policyVersion}` : ''}`,
+    '',
+    '| batch | tasks | state | detail |',
+    '| --- | --- | --- | --- |',
+    ...(batchRows.length ? batchRows.map((r) => `| ${r} |`) : ['| — | — | — | — |']),
+    '',
+    '### Already broken before we started',
+    '',
+    `verified on the untouched tree: ${cell(bl.verifiedClean ?? 'unknown')}`,
+    '',
+    ...(failRows.length
+      ? ['| command | symptom |', '| --- | --- |', ...failRows.map((r) => `| ${r} |`)]
+      : ['none recorded.']),
+  ].join('\n');
+  return { tasks: tasksBlock, batches: batchesBlock };
+}
+
+function cmdBoard(args) {
+  const target = args.find((a) => !a.startsWith('--'));
+  if (!target) usage('board needs a team.json or team directory');
+  const file = manifestPath(target);
+  if (!existsSync(file)) {
+    console.error(`cannot read ${file}`);
+    process.exit(1);
+  }
+  const doc = JSON.parse(readFileSync(file, 'utf8'));
+  const boardPath = join(dirname(file), 'board.md');
+  if (!existsSync(boardPath)) {
+    console.error(`no board.md beside ${file} — run team.mjs init for this team first`);
+    process.exit(1);
+  }
+  const blocks = boardBlocks(doc, iso());
+  let text = readFileSync(boardPath, 'utf8');
+  const swap = (name, body) => {
+    const re = new RegExp(`(<!-- board:${name} -->)[\\s\\S]*?(<!-- /board:${name} -->)`);
+    if (!re.test(text)) {
+      console.error(`board.md has no "<!-- board:${name} -->" markers — add them, or stop regenerating this board`);
+      process.exit(1);
+    }
+    text = text.replace(re, (_m, open, close) => `${open}\n${body}\n${close}`);
+  };
+  swap('tasks', blocks.tasks);
+  swap('batches', blocks.batches);
+  writeFileSync(boardPath, text.endsWith('\n') ? text : `${text}\n`);
+  const total = (doc.tasks ?? []).length;
+  const open = (doc.tasks ?? []).filter((t) => !['done', 'canceled'].includes(t.status)).length;
+  console.log(`board: ${total} task(s), ${open} open, ${commitGroups(doc).length} batch(es) -> ${relative(process.cwd(), boardPath) || boardPath}`);
 }
 
 // ── baseline ────────────────────────────────────────────────────────────────
@@ -896,6 +1102,18 @@ function cmdLog(args) {
     usage(`kind must be one of ${LOG_KINDS.join('|')} (aliases: ${Object.keys(LOG_ALIASES).join(', ')})`);
   }
   const summary = rest.join(' ').replace(/\s+/g, ' ').trim();
+  // A task-scoped action line has to name the task first, or the pairing check in
+  // `validate` cannot say which task the intent belongs to.
+  if (['intent', 'outcome', 'dropped'].includes(canonical)) {
+    const teamJson = join(resolve(dir), 'team.json');
+    if (existsSync(teamJson)) {
+      const doc = JSON.parse(readFileSync(teamJson, 'utf8'));
+      const ref = summary.split(/\s+/)[0];
+      if (!new Set((doc.tasks ?? []).map((t) => t.id)).has(ref)) {
+        usage(`${canonical} needs the task id as the first word of the summary (got "${ref}")`);
+      }
+    }
+  }
   const file = join(resolve(dir), 'inbox.log');
   appendFileSync(file, `${iso()} ${from} -> ${to} ${canonical} ${summary}\n`);
   console.log(`logged: ${canonical}${canonical === kind ? '' : ` (from "${kind}")`} ${from} -> ${to}`);
@@ -909,6 +1127,7 @@ switch (command) {
   case 'baseline': cmdBaseline(rest); break;
   case 'validate': cmdValidate(rest); break;
   case 'status': cmdStatus(rest); break;
+  case 'board': cmdBoard(rest); break;
   case 'batch': cmdBatch(rest); break;
   case 'log': cmdLog(rest); break;
   default: usage(command ? `unknown command "${command}"` : 'no command given');

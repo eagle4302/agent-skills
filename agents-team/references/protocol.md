@@ -49,8 +49,13 @@ runs degraded is worse than one that says which leg it is standing on.
    harnesses is not even the default for the profiles a team uses most. Check your adapter, pass
    the context mode explicitly where the harness accepts one, and tag a deliberate fork in
    `members[].model` with `(fork)`.
-4. **Log every exchange.** One `inbox.log` line per brief, steer, block, report, verdict and
-   commit. That file is how a fresh session reconstructs the team.
+4. **Log every exchange, and write the intent before the action.** One `inbox.log` line per
+   brief, steer, block, report, verdict and commit. Before a dispatch, a relaunch or a relay
+   that will outlive the turn, write an `intent` line whose summary starts with the task id;
+   close it with `outcome`, or with the member's `report`/`block`/`verdict` naming that id.
+   That file is how a fresh session reconstructs the team, and an unconfirmed intent — one no
+   later line closes — is exactly what it needs to see before it repeats an action that already
+   happened.
 5. **Answer three questions every loop.** Who is running, what am I waiting on, what is the next
    checkpoint. If you cannot, use `status`.
 6. **Status before action.** A settled teammate is not necessarily a successful one — read the
@@ -77,9 +82,10 @@ runs degraded is worse than one that says which leg it is standing on.
 
 `kind` is one of two groups. Traffic between the lead and its teammates: `brief`, `steer`,
 `block`, `report`, `verdict`, `human`, `commit`. The lead's own record of why it acted: `note`,
-`finding`, `verified`, `decision`, `action`. A real run writes far more of the second group than
-the first, and both belong in the file — a log of only the traffic cannot explain a single
-decision. Common synonyms (`task`, `question`, `ruling`, `measured`, `request`, `charter`, `ack`,
+`finding`, `verified`, `decision`, `action`, plus the outbox lines — `intent` before an action,
+`outcome` after it, `dropped` when there was nothing to do, and `policy` when the rules that
+authorize work changed. A real run writes far more of the second group than the first, and both
+belong in the file — a log of only the traffic cannot explain a single decision. Common synonyms (`task`, `question`, `ruling`, `measured`, `request`, `charter`, `ack`,
 `addendum`, `correction`, `reopen`, `status`) are normalised by `team.mjs log`, and `validate`
 reads them the same way. Example:
 
@@ -87,11 +93,17 @@ reads them the same way. Example:
 2026-09-17T04:11:22Z lead -> lead commit baseline master@1b524c1, 1 path(s) already dirty
 2026-09-17T04:11:24Z lead -> lead note harness: pi · gate present · verifier of record: harness
 2026-09-17T04:11:30Z lead -> lead human commit authorization: per-territory, land on pass
-2026-09-17T04:11:22Z lead -> builder-a brief implement slugify per acceptance 1-4
-2026-09-17T04:26:03Z builder-a -> lead report done, 6/6 acceptance, evidence reports/t1-builder-a.md
-2026-09-17T04:27:40Z lead -> prober-a brief independent re-run of t1 acceptance
+2026-09-17T04:11:22Z lead -> builder-a brief t1 implement slugify per acceptance 1-4
+2026-09-17T04:11:22Z lead -> builder-a intent t1 launch in its own worktree
+2026-09-17T04:26:03Z builder-a -> lead report t1 done, 6/6 acceptance, evidence reports/t1-builder-a.md
+2026-09-17T04:27:40Z lead -> prober-a brief t6 independent re-run of t1 acceptance
 2026-09-17T04:41:09Z lead -> lead commit batch builder-a landed a1b2c3d (t1,t6)
 ```
+
+An `intent` line whose summary starts with a task id is a promise the log makes to the next
+session: if no later `outcome`, `report`, `block` or `verdict` from its target names that id,
+`validate` warns, because "not started" and "started, unknown" are different facts and only the
+log can tell them apart.
 
 Write the harness line at charter, as above. A fresh session reading this log needs to know
 which capabilities the run had before it can judge any verdict in it.

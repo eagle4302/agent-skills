@@ -30,6 +30,8 @@
   },
   "mode": "",
   "fastPathExclusions": [],
+  "policyVersion": 1,
+  "proactiveRules": [],
   "members": [
     {
       "name": "lead",
@@ -63,6 +65,12 @@
       "prepare": "",
       "preparedAt": "",
       "prepareExit": null,
+      "mandate": {
+        "basis": "explicit",
+        "rule": "",
+        "version": 1,
+        "scope": []
+      },
       "inScope": [
         "REPLACE: path globs this task may write"
       ],
