@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flow Prototype</title>
+<style>
+  :root {
+    --bg: #020617;
+    --panel: #0f172a;
+    --panel-2: #111827;
+    --text: #e5e7eb;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --line: #1f2937;
+    --ok: #22c55e;
+    --bad: #ef4444;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
+    font-family: system-ui, "Microsoft JhengHei UI", "Segoe UI", sans-serif; }
+  #app { display: flex; flex-direction: column; height: 100%; }
+
+  #hud {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    padding: 10px 16px; background: var(--panel); border-bottom: 1px solid var(--line);
+  }
+  #hud .title { font-weight: 700; font-size: 14px; }
+  #hud .pill {
+    display: inline-block; margin-left: 8px; padding: 2px 10px; border-radius: 999px;
+    background: #172554; color: var(--accent); font-size: 12px;
+  }
+  #tasks { display: flex; gap: 12px; flex-wrap: wrap; flex: 1; }
+  .task { font-size: 12px; color: var(--muted); border: 1px solid var(--line);
+    padding: 4px 10px; border-radius: 999px; }
+  .task.done { color: var(--ok); border-color: #14532d; background: #052e16; text-decoration: line-through; }
+  #stats { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  button {
+    font: inherit; font-size: 12px; color: var(--text); background: #1e293b;
+    border: 1px solid #334155; border-radius: 6px; padding: 5px 10px; cursor: pointer;
+  }
+  button:hover { background: #273449; }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  #stage { flex: 1; position: relative; display: flex; align-items: center;
+    justify-content: center; overflow: hidden; padding: 16px; }
+  #canvas { position: relative; background: #fff; box-shadow: 0 10px 40px rgba(0,0,0,.5); }
+  .screen { position: absolute; inset: 0; display: none; }
+  .screen.active { display: block; }
+  .screen img, .screen svg { width: 100%; height: 100%; display: block; }
+  .hotspot { position: absolute; border: 2px dashed transparent; border-radius: 4px;
+    cursor: pointer; }
+  .hotspot:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  body.show-hotspots .hotspot { border-color: rgba(56,189,248,.9); background: rgba(56,189,248,.12); }
+  body.show-hotspots .hotspot:hover { background: rgba(56,189,248,.25); }
+
+  #logbar {
+    display: flex; justify-content: space-between; gap: 16px; padding: 8px 16px;
+    background: var(--panel-2); border-top: 1px solid var(--line);
+    font-size: 12px; color: var(--muted);
+  }
+  #lastAction { color: var(--accent); }
+  #help { white-space: nowrap; }
+
+  #selftest {
+    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(2, 6, 23, .92); z-index: 99;
+  }
+  #selftest .box {
+    max-width: 720px; max-height: 80vh; overflow: auto; padding: 24px 28px;
+    border: 1px solid #334155; border-radius: 12px; background: var(--panel);
+  }
+  #selftest h1 { margin: 0 0 12px; font-size: 18px; }
+  #selftest .pass { color: var(--ok); }
+  #selftest .fail { color: var(--bad); }
+  #selftest pre { white-space: pre-wrap; font-size: 12px; color: var(--muted); }
+
+  body.hide-hud #hud, body.hide-hud #logbar { display: none; }
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="hud">
+    <div><span class="title" id="title">Flow Prototype</span><span class="pill" id="screenLabel">—</span></div>
+    <div id="tasks"></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span id="stats">00:00 · 0 步</span>
+      <button id="btn-reset" type="button">重設 (R)</button>
+      <button id="btn-hotspots" type="button">熱點 (H)</button>
+      <button id="btn-copy" type="button">複製紀錄 (C)</button>
+      <button id="btn-download" type="button">下載 JSON</button>
+    </div>
+  </header>
+
+  <main id="stage">
+    <div id="canvas" aria-label="流程原型畫面"></div>
+  </main>
+
+  <footer id="logbar">
+    <span id="lastAction">就緒</span>
+    <span id="help">H 熱點 · R 重設 · C 複製 · 1–9 切換畫面</span>
+  </footer>
+</div>
+
+<script>
+/* ------------------------------------------------------------------
+ * 1. CONFIG — replace this demo with approved screens and hotspots.
+ *
+ * screens:  [{ id, label, image }]      image = png/svg path or data URI
+ * hotspots: [{ id, screen, x, y, w, h, label, target, task? }]
+ *           x/y/w/h are percentages of the design canvas (0-100).
+ * tasks:    [{ id, label }]             checked when a hotspot with task=<id> is used
+ *
+ * Do not rebuild layouts here. This harness only swaps approved images.
+ * ------------------------------------------------------------------ */
+
+function demoScreen(title, subtitle, accent) {
+  const w = 1920, h = 1080;
+  const font = 'Microsoft JhengHei UI, Segoe UI, sans-serif';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet">
+    <rect width="${w}" height="${h}" fill="#0B1220"/>
+    <rect x="32" y="32" width="1856" height="1016" rx="16" fill="#111A2B" stroke="#25324A"/>
+    <rect x="32" y="32" width="${w - 64}" height="72" rx="16" fill="#18233A"/>
+    <text x="72" y="82" font-family="${font}" font-size="30" font-weight="700" fill="#E6EDF7">${title}</text>
+    <text x="72" y="132" font-family="${font}" font-size="20" fill="#9FB0C7">${subtitle}</text>
+
+    <rect x="40" y="200" width="180" height="40" rx="6" fill="#2F80ED"/>
+    <text x="60" y="226" font-family="${font}" font-size="18" fill="#FFFFFF">開啟警報中心</text>
+    <rect x="40" y="286" width="180" height="40" rx="6" fill="#18233A" stroke="#25324A"/>
+    <text x="60" y="312" font-family="${font}" font-size="18" fill="#E6EDF7">← 回上頁</text>
+
+    <rect x="40" y="352" width="344" height="64" rx="8" fill="#18233A" stroke="${accent}" stroke-width="2"/>
+    <text x="64" y="392" font-family="${font}" font-size="20" fill="#E6EDF7">M-07 雷射切割機（點我）</text>
+
+    <text x="440" y="392" font-family="${font}" font-size="22" fill="#9FB0C7">示範畫面 — 換成核准的 SVG/PNG</text>
+    <text x="440" y="428" font-family="${font}" font-size="18" fill="#64748B">熱點位置以設計尺寸的百分比設定</text>
+
+    <circle cx="1848" cy="82" r="24" fill="#18233A" stroke="#25324A"/>
+    <text x="1848" y="90" font-family="${font}" font-size="16" fill="#E6EDF7" text-anchor="middle">示</text>
+  </svg>`;
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+
+const CONFIG = {
+  title: '設備運轉監控 — 流程原型（示範）',
+  design: { width: 1920, height: 1080 },
+  start: 'list',
+  screens: [
+    { id: 'list',    label: '設備清單', image: demoScreen('設備清單', '點 M-07 那一列 → 設備詳情', '#38BDF8') },
+    { id: 'detail',  label: '設備詳情', image: demoScreen('M-07 雷射切割機', '點下方按鈕 → 警報中心；左上角回清單', '#A78BFA') },
+    { id: 'alarms',  label: '警報中心', image: demoScreen('警報中心', '左上角回設備詳情', '#F59E0B') }
+  ],
+  hotspots: [
+    { id: 'h-open-detail', screen: 'list',   x: 2.1,  y: 32.6, w: 17.9, h: 5.9, label: '開啟 M-07 詳情', target: 'detail', task: 'T1' },
+    { id: 'h-open-alarms', screen: 'detail', x: 2.1,  y: 18.5, w: 9.4,  h: 3.7, label: '開啟警報中心',   target: 'alarms', task: 'T2' },
+    { id: 'h-back-list',   screen: 'detail', x: 2.1,  y: 26.5, w: 9.4,  h: 3.7, label: '回設備清單',     target: 'list' },
+    { id: 'h-back-detail', screen: 'alarms', x: 2.1,  y: 26.5, w: 9.4,  h: 3.7, label: '回設備詳情',     target: 'detail' }
+  ],
+  tasks: [
+    { id: 'T1', label: 'T1 從清單開啟 M-07' },
+    { id: 'T2', label: 'T2 從詳情開啟警報中心' }
+  ]
+};
+
+/* ------------------------------------------------------------------
+ * 2. State and rendering
+ * ------------------------------------------------------------------ */
+
+const state = {
+  current: CONFIG.start,
+  log: [],
+  done: new Set(),
+  startedAt: performance.now(),
+  lastAction: '就緒'
+};
+
+const $ = (id) => document.getElementById(id);
+const canvas = $('canvas');
+const stage = $('stage');
+
+function nowIso() { return new Date().toISOString(); }
+function elapsedMs() { return Math.round(performance.now() - state.startedAt); }
+
+function logEntry(type, data) {
+  state.log.push(Object.assign({ t: nowIso(), elapsedMs: elapsedMs(), type }, data || {}));
+}
+
+function screenById(id) { return CONFIG.screens.find((s) => s.id === id); }
+
+function buildScreens() {
+  CONFIG.screens.forEach((screen) => {
+    const div = document.createElement('div');
+    div.className = 'screen';
+    div.dataset.screen = screen.id;
+    const img = document.createElement('img');
+    img.src = screen.image;
+    img.alt = screen.label;
+    img.draggable = false;
+    div.appendChild(img);
+    canvas.appendChild(div);
+  });
+}
+
+function buildHotspots() {
+  CONFIG.hotspots.forEach((h) => {
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'hotspot';
+    el.dataset.id = h.id;
+    el.dataset.screen = h.screen;
+    el.title = h.label || h.id;
+    el.setAttribute('aria-label', h.label || h.id);
+    el.style.left = h.x + '%';
+    el.style.top = h.y + '%';
+    el.style.width = h.w + '%';
+    el.style.height = h.h + '%';
+    el.addEventListener('click', () => activateHotspot(h.id));
+    canvas.appendChild(el);
+  });
+}
+
+function buildTasks() {
+  const wrap = $('tasks');
+  wrap.innerHTML = '';
+  CONFIG.tasks.forEach((task) => {
+    const el = document.createElement('span');
+    el.className = 'task';
+    el.dataset.task = task.id;
+    el.textContent = task.label;
+    wrap.appendChild(el);
+  });
+}
+
+function renderTasks() {
+  CONFIG.tasks.forEach((task) => {
+    const el = document.querySelector(`[data-task="${task.id}"]`);
+    if (el) el.classList.toggle('done', state.done.has(task.id));
+  });
+}
+
+function renderHotspots() {
+  document.querySelectorAll('.hotspot').forEach((el) => {
+    const visible = el.dataset.screen === state.current;
+    el.style.display = visible ? 'block' : 'none';
+    el.tabIndex = visible ? 0 : -1;
+  });
+}
+
+function renderStats() {
+  const secs = Math.floor(elapsedMs() / 1000);
+  const mm = String(Math.floor(secs / 60)).padStart(2, '0');
+  const ss = String(secs % 60).padStart(2, '0');
+  const steps = state.log.filter((e) => e.type === 'hotspot').length;
+  $('stats').textContent = `${mm}:${ss} · ${steps} 步`;
+  $('lastAction').textContent = state.lastAction;
+}
+
+function goTo(screenId) {
+  if (!screenById(screenId)) return;
+  state.current = screenId;
+  document.querySelectorAll('.screen').forEach((el) => {
+    el.classList.toggle('active', el.dataset.screen === screenId);
+  });
+  const screen = screenById(screenId);
+  $('screenLabel').textContent = screen ? screen.label : screenId;
+  renderHotspots();
+  renderStats();
+  logEntry('screen', { screen: screenId });
+}
+
+function activateHotspot(hotspotId) {
+  const h = CONFIG.hotspots.find((x) => x.id === hotspotId);
+  if (!h) return;
+  state.lastAction = `熱點：${h.label || h.id} → ${h.target}`;
+  logEntry('hotspot', { hotspot: h.id, screen: h.screen, target: h.target, task: h.task || null });
+  if (h.task && !state.done.has(h.task)) {
+    state.done.add(h.task);
+    renderTasks();
+  }
+  goTo(h.target);
+}
+
+/* ------------------------------------------------------------------
+ * 3. Layout, HUD controls, export
+ * ------------------------------------------------------------------ */
+
+function layout() {
+  const pad = 16;
+  const availW = stage.clientWidth - pad * 2;
+  const availH = stage.clientHeight - pad * 2;
+  const scale = Math.min(availW / CONFIG.design.width, availH / CONFIG.design.height);
+  const w = Math.max(1, Math.floor(CONFIG.design.width * scale));
+  const h = Math.max(1, Math.floor(CONFIG.design.height * scale));
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+}
+
+function reset() {
+  state.current = CONFIG.start;
+  state.log = [];
+  state.done = new Set();
+  state.startedAt = performance.now();
+  state.lastAction = '已重設';
+  renderTasks();
+  goTo(CONFIG.start);
+}
+
+function copyLog() {
+  const text = JSON.stringify({ config: { title: CONFIG.title, design: CONFIG.design }, log: state.log, tasksDone: [...state.done] }, null, 2);
+  const done = () => { state.lastAction = '紀錄已複製'; renderStats(); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done, () => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); state.lastAction = '紀錄已複製（fallback）'; }
+  catch (_) { state.lastAction = '複製失敗，請用下載'; }
+  ta.remove();
+  renderStats();
+}
+
+function downloadLog() {
+  const payload = { config: { title: CONFIG.title, design: CONFIG.design }, log: state.log, tasksDone: [...state.done] };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'flow-log-' + new Date().toISOString().replace(/[:.]/g, '-') + '.json';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  state.lastAction = '紀錄已下載';
+  renderStats();
+}
+
+function toggleHotspots() {
+  document.body.classList.toggle('show-hotspots');
+  state.lastAction = document.body.classList.contains('show-hotspots') ? '顯示熱點' : '隱藏熱點';
+  renderStats();
+}
+
+/* ------------------------------------------------------------------
+ * 4. Self-test (?selftest=1) — validates config and one navigation.
+ * ------------------------------------------------------------------ */
+
+function renderSelfTest(errors, details) {
+  const box = document.createElement('div');
+  box.id = 'selftest';
+  box.innerHTML = `<div class="box">
+    <h1 class="${errors.length ? 'fail' : 'pass'}">${errors.length ? 'SELF-TEST FAIL' : 'SELF-TEST PASS'}</h1>
+    <pre>${errors.length ? errors.map((e) => '✗ ' + e).join('\n') : details.join('\n')}</pre>
+  </div>`;
+  document.body.appendChild(box);
+  document.title = errors.length ? 'SELF-TEST FAIL' : 'SELF-TEST PASS';
+}
+
+function selfTest() {
+  const errors = [];
+  const ids = new Set();
+
+  if (!Array.isArray(CONFIG.screens) || CONFIG.screens.length === 0) errors.push('no screens');
+  CONFIG.screens.forEach((s) => {
+    if (!s.id) errors.push('screen missing id');
+    if (ids.has(s.id)) errors.push('duplicate screen id: ' + s.id);
+    ids.add(s.id);
+    if (!s.image) errors.push('screen missing image: ' + s.id);
+  });
+  if (!ids.has(CONFIG.start)) errors.push('start screen missing: ' + CONFIG.start);
+
+  CONFIG.hotspots.forEach((h) => {
+    if (!ids.has(h.screen)) errors.push('hotspot screen missing: ' + h.id);
+    if (!ids.has(h.target)) errors.push('hotspot target missing: ' + h.id);
+    ['x', 'y', 'w', 'h'].forEach((k) => {
+      if (typeof h[k] !== 'number' || h[k] < 0 || h[k] > 100) errors.push('hotspot bounds: ' + h.id + '.' + k);
+    });
+    if (h.x + h.w > 100.01 || h.y + h.h > 100.01) errors.push('hotspot overflows canvas: ' + h.id);
+  });
+
+  CONFIG.tasks.forEach((t) => {
+    if (!t.id) errors.push('task missing id');
+    if (!CONFIG.hotspots.some((h) => h.task === t.id)) errors.push('task has no completing hotspot: ' + t.id);
+  });
+
+  const details = [];
+  if (!errors.length) {
+    const start = CONFIG.start;
+    const hotspot = CONFIG.hotspots.find((h) => h.screen === start);
+    if (!hotspot) {
+      errors.push('no hotspot on start screen: ' + start);
+    } else {
+      const before = state.current;
+      activateHotspot(hotspot.id);
+      details.push('start screen: ' + before);
+      details.push('clicked: ' + hotspot.id);
+      details.push('arrived: ' + state.current + ' (expected ' + hotspot.target + ')');
+      if (state.current !== hotspot.target) errors.push('navigation mismatch');
+      const hotspotLogs = state.log.filter((e) => e.type === 'hotspot');
+      if (hotspotLogs.length === 0) errors.push('hotspot not logged');
+      if (hotspot.task && !state.done.has(hotspot.task)) errors.push('task not marked done: ' + hotspot.task);
+      details.push('log entries: ' + state.log.length);
+      details.push('tasks done: ' + [...state.done].join(', '));
+    }
+    reset();
+    details.push('reset ok: ' + state.current);
+  }
+
+  renderSelfTest(errors, details);
+  return errors;
+}
+
+/* ------------------------------------------------------------------
+ * 5. Boot
+ * ------------------------------------------------------------------ */
+
+function boot() {
+  $('title').textContent = CONFIG.title;
+  buildScreens();
+  buildHotspots();
+  buildTasks();
+  layout();
+  window.addEventListener('resize', layout);
+
+  $('btn-reset').addEventListener('click', reset);
+  $('btn-hotspots').addEventListener('click', toggleHotspots);
+  $('btn-copy').addEventListener('click', copyLog);
+  $('btn-download').addEventListener('click', downloadLog);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+    const k = e.key.toLowerCase();
+    if (k === 'h') { toggleHotspots(); }
+    else if (k === 'r') { reset(); }
+    else if (k === 'c') { copyLog(); }
+    else if (k === 'p') { document.body.classList.toggle('hide-hud'); layout(); }
+    else if (/^[1-9]$/.test(k)) {
+      const screen = CONFIG.screens[Number(k) - 1];
+      if (screen) goTo(screen.id);
+    }
+  });
+
+  if (new URLSearchParams(location.search).has('hud') &&
+      new URLSearchParams(location.search).get('hud') === '0') {
+    document.body.classList.add('hide-hud');
+  }
+  if (new URLSearchParams(location.search).get('hotspots') === '1') {
+    document.body.classList.add('show-hotspots');
+  }
+
+  goTo(CONFIG.start);
+
+  if (new URLSearchParams(location.search).has('selftest')) {
+    selfTest();
+  }
+}
+
+boot();
+</script>
+</body>
+</html>

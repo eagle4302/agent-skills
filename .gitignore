@@ -10,3 +10,7 @@ __pycache__/
 
 # graphify installer backup when the installed skill differs from the packaged one.
 SKILL.md.bak
+
+# svg-first-ui example renders: every PNG is regenerated from the sibling SVG (or re-captured
+# from the running app), so the repository keeps the SVG source, not the render.
+svg-first-ui/examples/**/*.png

@@ -1,0 +1,229 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800" viewBox="0 0 1280 800"
+     font-family="'Microsoft JhengHei UI','Segoe UI','Noto Sans TC',sans-serif">
+  <title>訂單管理 — 低保真線框 v1</title>
+  <desc>範例：灰色方塊只確認版面區塊、資訊層級與操作動線。長客戶名以刪節號顯示（極端值測試），實際資料由後端提供。</desc>
+
+  <defs>
+    <!-- 圖示佔位：低保真不畫真圖示 -->
+    <symbol id="wf-icon" viewBox="0 0 24 24">
+      <rect x="0.5" y="0.5" width="23" height="23" rx="4" fill="none" stroke="#AAB3C0" stroke-dasharray="3 3"/>
+      <path d="M6 6l12 12M18 6L6 18" stroke="#AAB3C0" stroke-width="1.5"/>
+    </symbol>
+    <!-- 可重用：核取方塊、狀態膠囊、頭像、篩選標籤 -->
+    <symbol id="wf-checkbox" viewBox="0 0 16 16">
+      <rect x="0.5" y="0.5" width="15" height="15" rx="2" fill="#FFFFFF" stroke="#AAB3C0" stroke-dasharray="2 2"/>
+    </symbol>
+    <symbol id="wf-status" viewBox="0 0 64 24">
+      <rect x="0.5" y="0.5" width="63" height="23" rx="12" fill="none" stroke="#AAB3C0" stroke-dasharray="3 3"/>
+    </symbol>
+    <symbol id="wf-avatar" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="11.5" fill="#DDE3EA" stroke="#AAB3C0"/>
+    </symbol>
+    <symbol id="wf-chip" viewBox="0 0 88 32">
+      <rect x="0.5" y="0.5" width="87" height="31" rx="16" fill="none" stroke="#C9D0DA"/>
+    </symbol>
+  </defs>
+
+  <rect id="bg" width="1280" height="800" fill="#FFFFFF"/>
+
+  <!-- ── 頂部工具列 ── -->
+  <g id="topbar">
+    <rect x="0" y="0" width="1280" height="64" fill="#F2F4F7"/>
+    <line x1="0" y1="64.5" x2="1280" y2="64.5" stroke="#C9D0DA"/>
+    <use href="#wf-icon" x="24" y="16" width="32" height="32"/>
+    <text x="72" y="42" font-size="20" font-weight="700" fill="#2B3038">訂單管理</text>
+
+    <g id="topbar-controls">
+      <rect x="856" y="12" width="240" height="40" rx="4" fill="#FFFFFF" stroke="#C9D0DA"/>
+      <use href="#wf-icon" x="872" y="24" width="16" height="16"/>
+      <text x="900" y="37" font-size="14" fill="#9AA3AF">搜尋訂單、客戶</text>
+      <rect x="1112" y="12" width="144" height="40" rx="4" fill="#4B5563"/>
+      <text x="1184" y="37" font-size="14" fill="#FFFFFF" text-anchor="middle">建立訂單</text>
+    </g>
+  </g>
+
+  <!-- ── 篩選列 ── -->
+  <g id="filter-bar">
+    <rect x="24" y="88" width="88" height="32" rx="16" fill="#DDE3EA"/>
+    <text x="68" y="109" font-size="14" font-weight="600" fill="#2B3038" text-anchor="middle">全部</text>
+    <use href="#wf-chip" x="120" y="88" width="88" height="32"/>
+    <text x="164" y="109" font-size="14" fill="#6B7280" text-anchor="middle">待處理</text>
+    <use href="#wf-chip" x="216" y="88" width="88" height="32"/>
+    <text x="260" y="109" font-size="14" fill="#6B7280" text-anchor="middle">已出貨</text>
+    <use href="#wf-chip" x="312" y="88" width="88" height="32"/>
+    <text x="356" y="109" font-size="14" fill="#6B7280" text-anchor="middle">已取消</text>
+
+    <rect x="1000" y="80" width="256" height="40" rx="4" fill="#FFFFFF" stroke="#C9D0DA"/>
+    <text x="1016" y="105" font-size="13" fill="#6B7280">2025-01-01 – 2025-12-31</text>
+    <use href="#wf-icon" x="1232" y="92" width="16" height="16"/>
+  </g>
+
+  <!-- ── 訂單表格 ── -->
+  <g id="table-orders">
+    <rect x="24" y="136" width="1232" height="48" fill="#F7F8FA"/>
+    <use href="#wf-checkbox" x="24" y="152" width="16" height="16"/>
+    <text x="64" y="166" font-size="13" font-weight="600" fill="#6B7280">訂單編號</text>
+    <text x="216" y="166" font-size="13" font-weight="600" fill="#6B7280">客戶</text>
+    <text x="480" y="166" font-size="13" font-weight="600" fill="#6B7280">金額</text>
+    <text x="632" y="166" font-size="13" font-weight="600" fill="#6B7280">狀態</text>
+    <text x="768" y="166" font-size="13" font-weight="600" fill="#6B7280">建立時間 ▼</text>
+    <text x="984" y="166" font-size="13" font-weight="600" fill="#6B7280">負責人</text>
+    <text x="1128" y="166" font-size="13" font-weight="600" fill="#6B7280">操作</text>
+    <line x1="24" y1="184.5" x2="1256" y2="184.5" stroke="#C9D0DA"/>
+
+    <!-- row 1 -->
+    <g id="row-0042">
+      <use href="#wf-checkbox" x="24" y="204" width="16" height="16"/>
+      <text x="64" y="218" font-size="14" fill="#2B3038" font-family="'Cascadia Mono',Consolas,monospace">ORD-251101-0042</text>
+      <text x="216" y="218" font-size="14" fill="#2B3038">台灣精密工業股份有限公司</text>
+      <text x="616" y="218" font-size="14" fill="#2B3038" text-anchor="end" font-family="'Cascadia Mono',Consolas,monospace">NT$ 128,400</text>
+      <use href="#wf-status" x="632" y="200" width="64" height="24"/>
+      <text x="664" y="217" font-size="12" fill="#4B5563" text-anchor="middle">已出貨</text>
+      <text x="768" y="218" font-size="13" fill="#6B7280" font-family="'Cascadia Mono',Consolas,monospace">11-01 14:32</text>
+      <use href="#wf-avatar" x="984" y="200" width="24" height="24"/>
+      <text x="1016" y="218" font-size="14" fill="#2B3038">王小明</text>
+      <text x="1128" y="218" font-size="13" fill="#2B3038">查看</text>
+      <text x="1224" y="218" font-size="14" fill="#6B7280">⋯</text>
+      <line x1="24" y1="239.5" x2="1256" y2="239.5" stroke="#E8ECF1"/>
+    </g>
+
+    <!-- row 2 -->
+    <g id="row-0041">
+      <use href="#wf-checkbox" x="24" y="260" width="16" height="16"/>
+      <text x="64" y="274" font-size="14" fill="#2B3038" font-family="'Cascadia Mono',Consolas,monospace">ORD-251101-0041</text>
+      <text x="216" y="274" font-size="14" fill="#2B3038">宏達機械有限公司</text>
+      <text x="616" y="274" font-size="14" fill="#2B3038" text-anchor="end" font-family="'Cascadia Mono',Consolas,monospace">NT$ 42,800</text>
+      <use href="#wf-status" x="632" y="256" width="64" height="24"/>
+      <text x="664" y="273" font-size="12" fill="#4B5563" text-anchor="middle">待處理</text>
+      <text x="768" y="274" font-size="13" fill="#6B7280" font-family="'Cascadia Mono',Consolas,monospace">11-01 13:58</text>
+      <use href="#wf-avatar" x="984" y="256" width="24" height="24"/>
+      <text x="1016" y="274" font-size="14" fill="#2B3038">陳美玲</text>
+      <text x="1128" y="274" font-size="13" fill="#2B3038">查看</text>
+      <text x="1224" y="274" font-size="14" fill="#6B7280">⋯</text>
+      <line x1="24" y1="295.5" x2="1256" y2="295.5" stroke="#E8ECF1"/>
+    </g>
+
+    <!-- row 3 -->
+    <g id="row-0038">
+      <use href="#wf-checkbox" x="24" y="316" width="16" height="16"/>
+      <text x="64" y="330" font-size="14" fill="#2B3038" font-family="'Cascadia Mono',Consolas,monospace">ORD-251101-0038</text>
+      <text x="216" y="330" font-size="14" fill="#2B3038">大立光電</text>
+      <text x="616" y="330" font-size="14" fill="#2B3038" text-anchor="end" font-family="'Cascadia Mono',Consolas,monospace">NT$ 7,650</text>
+      <use href="#wf-status" x="632" y="312" width="64" height="24"/>
+      <text x="664" y="329" font-size="12" fill="#4B5563" text-anchor="middle">待處理</text>
+      <text x="768" y="330" font-size="13" fill="#6B7280" font-family="'Cascadia Mono',Consolas,monospace">11-01 11:20</text>
+      <use href="#wf-avatar" x="984" y="312" width="24" height="24"/>
+      <text x="1016" y="330" font-size="14" fill="#2B3038">王小明</text>
+      <text x="1128" y="330" font-size="13" fill="#2B3038">查看</text>
+      <text x="1224" y="330" font-size="14" fill="#6B7280">⋯</text>
+      <line x1="24" y1="351.5" x2="1256" y2="351.5" stroke="#E8ECF1"/>
+    </g>
+
+    <!-- row 4：客戶名過長，示範截斷 -->
+    <g id="row-0099">
+      <use href="#wf-checkbox" x="24" y="372" width="16" height="16"/>
+      <text x="64" y="386" font-size="14" fill="#2B3038" font-family="'Cascadia Mono',Consolas,monospace">ORD-251031-0099</text>
+      <text x="216" y="386" font-size="14" fill="#2B3038">瑞士商精密工具股份有限公司台…</text>
+      <text x="616" y="386" font-size="14" fill="#2B3038" text-anchor="end" font-family="'Cascadia Mono',Consolas,monospace">NT$ 1,286,400</text>
+      <use href="#wf-status" x="632" y="368" width="64" height="24"/>
+      <text x="664" y="385" font-size="12" fill="#4B5563" text-anchor="middle">已出貨</text>
+      <text x="768" y="386" font-size="13" fill="#6B7280" font-family="'Cascadia Mono',Consolas,monospace">10-31 18:02</text>
+      <use href="#wf-avatar" x="984" y="368" width="24" height="24"/>
+      <text x="1016" y="386" font-size="14" fill="#2B3038">林志豪</text>
+      <text x="1128" y="386" font-size="13" fill="#2B3038">查看</text>
+      <text x="1224" y="386" font-size="14" fill="#6B7280">⋯</text>
+      <line x1="24" y1="407.5" x2="1256" y2="407.5" stroke="#E8ECF1"/>
+    </g>
+
+    <!-- row 5：金額 0 元 -->
+    <g id="row-0098">
+      <use href="#wf-checkbox" x="24" y="428" width="16" height="16"/>
+      <text x="64" y="442" font-size="14" fill="#2B3038" font-family="'Cascadia Mono',Consolas,monospace">ORD-251031-0098</text>
+      <text x="216" y="442" font-size="14" fill="#2B3038">統一包裝</text>
+      <text x="616" y="442" font-size="14" fill="#2B3038" text-anchor="end" font-family="'Cascadia Mono',Consolas,monospace">NT$ 0</text>
+      <use href="#wf-status" x="632" y="424" width="64" height="24"/>
+      <text x="664" y="441" font-size="12" fill="#4B5563" text-anchor="middle">已取消</text>
+      <text x="768" y="442" font-size="13" fill="#6B7280" font-family="'Cascadia Mono',Consolas,monospace">10-31 17:45</text>
+      <use href="#wf-avatar" x="984" y="424" width="24" height="24"/>
+      <text x="1016" y="442" font-size="14" fill="#2B3038">陳美玲</text>
+      <text x="1128" y="442" font-size="13" fill="#2B3038">查看</text>
+      <text x="1224" y="442" font-size="14" fill="#6B7280">⋯</text>
+      <line x1="24" y1="463.5" x2="1256" y2="463.5" stroke="#E8ECF1"/>
+    </g>
+
+    <!-- row 6 -->
+    <g id="row-0092">
+      <use href="#wf-checkbox" x="24" y="484" width="16" height="16"/>
+      <text x="64" y="498" font-size="14" fill="#2B3038" font-family="'Cascadia Mono',Consolas,monospace">ORD-251031-0092</text>
+      <text x="216" y="498" font-size="14" fill="#2B3038">南亞塑膠工業股份有限公司</text>
+      <text x="616" y="498" font-size="14" fill="#2B3038" text-anchor="end" font-family="'Cascadia Mono',Consolas,monospace">NT$ 388,000</text>
+      <use href="#wf-status" x="632" y="480" width="64" height="24"/>
+      <text x="664" y="497" font-size="12" fill="#4B5563" text-anchor="middle">已出貨</text>
+      <text x="768" y="498" font-size="13" fill="#6B7280" font-family="'Cascadia Mono',Consolas,monospace">10-31 16:10</text>
+      <use href="#wf-avatar" x="984" y="480" width="24" height="24"/>
+      <text x="1016" y="498" font-size="14" fill="#2B3038">王小明</text>
+      <text x="1128" y="498" font-size="13" fill="#2B3038">查看</text>
+      <text x="1224" y="498" font-size="14" fill="#6B7280">⋯</text>
+      <line x1="24" y1="519.5" x2="1256" y2="519.5" stroke="#E8ECF1"/>
+    </g>
+
+    <!-- row 7：極大金額 -->
+    <g id="row-0091">
+      <use href="#wf-checkbox" x="24" y="540" width="16" height="16"/>
+      <text x="64" y="554" font-size="14" fill="#2B3038" font-family="'Cascadia Mono',Consolas,monospace">ORD-251031-0091</text>
+      <text x="216" y="554" font-size="14" fill="#2B3038">臻鼎科技</text>
+      <text x="616" y="554" font-size="14" fill="#2B3038" text-anchor="end" font-family="'Cascadia Mono',Consolas,monospace">NT$ 99,999,999</text>
+      <use href="#wf-status" x="632" y="536" width="64" height="24"/>
+      <text x="664" y="553" font-size="12" fill="#4B5563" text-anchor="middle">待處理</text>
+      <text x="768" y="554" font-size="13" fill="#6B7280" font-family="'Cascadia Mono',Consolas,monospace">10-31 15:33</text>
+      <use href="#wf-avatar" x="984" y="536" width="24" height="24"/>
+      <text x="1016" y="554" font-size="14" fill="#2B3038">林志豪</text>
+      <text x="1128" y="554" font-size="13" fill="#2B3038">查看</text>
+      <text x="1224" y="554" font-size="14" fill="#6B7280">⋯</text>
+      <line x1="24" y1="575.5" x2="1256" y2="575.5" stroke="#E8ECF1"/>
+    </g>
+
+    <!-- row 8 -->
+    <g id="row-0090">
+      <use href="#wf-checkbox" x="24" y="596" width="16" height="16"/>
+      <text x="64" y="610" font-size="14" fill="#2B3038" font-family="'Cascadia Mono',Consolas,monospace">ORD-251031-0090</text>
+      <text x="216" y="610" font-size="14" fill="#2B3038">環球晶圓股份有限公司</text>
+      <text x="616" y="610" font-size="14" fill="#2B3038" text-anchor="end" font-family="'Cascadia Mono',Consolas,monospace">NT$ 12,300,000</text>
+      <use href="#wf-status" x="632" y="592" width="64" height="24"/>
+      <text x="664" y="609" font-size="12" fill="#4B5563" text-anchor="middle">已出貨</text>
+      <text x="768" y="610" font-size="13" fill="#6B7280" font-family="'Cascadia Mono',Consolas,monospace">10-31 09:12</text>
+      <use href="#wf-avatar" x="984" y="592" width="24" height="24"/>
+      <text x="1016" y="610" font-size="14" fill="#2B3038">王小明</text>
+      <text x="1128" y="610" font-size="13" fill="#2B3038">查看</text>
+      <text x="1224" y="610" font-size="14" fill="#6B7280">⋯</text>
+    </g>
+    <line x1="24" y1="631.5" x2="1256" y2="631.5" stroke="#C9D0DA"/>
+  </g>
+
+  <!-- ── 分頁 ── -->
+  <g id="pagination">
+    <text x="24" y="681" font-size="13" fill="#6B7280">共 128 筆，每頁 20 筆</text>
+    <g id="page-buttons">
+      <rect x="1024" y="656" width="32" height="32" rx="4" fill="#FFFFFF" stroke="#C9D0DA"/>
+      <text x="1040" y="677" font-size="13" fill="#6B7280" text-anchor="middle">‹</text>
+      <rect x="1064" y="656" width="32" height="32" rx="4" fill="#DDE3EA"/>
+      <text x="1080" y="677" font-size="13" fill="#2B3038" text-anchor="middle">1</text>
+      <rect x="1104" y="656" width="32" height="32" rx="4" fill="#FFFFFF" stroke="#C9D0DA"/>
+      <text x="1120" y="677" font-size="13" fill="#6B7280" text-anchor="middle">2</text>
+      <rect x="1144" y="656" width="32" height="32" rx="4" fill="#FFFFFF" stroke="#C9D0DA"/>
+      <text x="1160" y="677" font-size="13" fill="#6B7280" text-anchor="middle">3</text>
+      <rect x="1184" y="656" width="32" height="32" rx="4" fill="#FFFFFF" stroke="#C9D0DA"/>
+      <text x="1200" y="677" font-size="13" fill="#6B7280" text-anchor="middle">4</text>
+      <rect x="1224" y="656" width="32" height="32" rx="4" fill="#FFFFFF" stroke="#C9D0DA"/>
+      <text x="1240" y="677" font-size="13" fill="#6B7280" text-anchor="middle">›</text>
+    </g>
+  </g>
+
+  <!-- ── 底部狀態列 ── -->
+  <g id="status-bar">
+    <rect x="0" y="736" width="1280" height="64" fill="#F7F8FA"/>
+    <line x1="0" y1="736.5" x2="1280" y2="736.5" stroke="#C9D0DA"/>
+    <text x="24" y="776" font-size="12" fill="#6B7280">最後更新 14:32:08 ｜ 資料來源：ERP</text>
+    <text x="1256" y="776" font-size="12" fill="#6B7280" text-anchor="end">v1.0.0</text>
+  </g>
+</svg>
