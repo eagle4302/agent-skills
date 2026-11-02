@@ -31,7 +31,7 @@ dependency: if it is missing, hand-edit the JSON and keep going.
 | --- | --- |
 | `init <slug>` | creates `.agent-teams/<slug>/` from the templates |
 | `baseline <team-dir>` | records the git sha, branch and already-dirty paths into `team.json` |
-| `validate <team-dir> [--strict]` | checks the whole board; exit 0 means it is staffable |
+| `validate <team-dir> [--strict]` | checks the whole board; exit 0 means it is staffable. `--strict` fails on warnings too, so run it **before staffing or at close** — mid-run it flags healthy states (a ready batch, an idle member) |
 | `status <team-dir>` | the task table, person-facing waiting first, plus each commit batch's state |
 | `board <team-dir>` | regenerates the two marked blocks of `board.md` from `team.json` |
 | `batch <team-dir> [group]` | per batch: ready/blocked/landed, and the paste-ready `git add` |

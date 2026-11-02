@@ -31,6 +31,11 @@ not a diagnosis exercise.
 | One brief carries two deliverables where one depends on the other | Split it | Otherwise revising the upstream artifact forces the downstream one to be redone |
 | The lead is polling with sleeps while teammate runs are open | Do not wait as work | Settlement notices arrive on their own; do queued work, or end the turn |
 | A run settled, but machine load or processes the teammate started are still alive (`yes.exe`, servers, watchers) | Hunt them before trusting any number measured while they ran (`Get-CimInstance Win32_Process` on Windows, `ps` elsewhere), and read the harness's own cleanup story in your adapter — on some it kills only the runner | Re-run the verify you measured under load: a loaded machine turns known-flaky tests red, and you will otherwise chase a defect the team created. Log it, bound the load next time (a counted loop), and have the brief require the teammate to kill its own PIDs before it returns |
+| A member is `inactive` and you counted its task done, but its shell jobs or subagents are still running | `inactive` only means no turn is executing; read the member's last report and check the process table | Record it `holding` in `team.json`, read its jobs' output, and only then count it. Never retire it with jobs alive — the next batch would land on a moving tree |
+| An `intent` line in `inbox.log` has no closing `outcome`/`report` | Do not re-dispatch blind: the action may already have happened | Check the artifact (`git log`, `reports/`, the member's status). Happened → write `outcome`; did not → write `dropped`; cannot tell → say so in the closing report and re-brief with the uncertainty spelled out |
+| A builder started before its `prepare` ran, or `prepare` exited non-zero | Stop it and treat its tree as suspect | Revert its writes to `baseline.sha` (or discard the worktree), fix the command, record `preparedAt`/`prepareExit`, then re-brief into the prepared tree. Log it as a lead error in `inbox.log` |
+| `policyVersion` changed mid-run and a live mandate still cites the old one | Re-confirm any widening of scope with the human first | Bump `policyVersion`, write one `policy` line, tell each affected member, and re-mandate the tasks that are still live |
+| A task sits in `in_review` but no verification task points at it | `validate` calls it an error because no verdict can ever arrive | Create the verification task (or point the existing one at it), or move the task back to `in_progress` if nothing is actually being checked |
 
 ## Standing anti-patterns
 
@@ -73,3 +78,11 @@ not a diagnosis exercise.
   nobody checks the load is gone once it settles. The lead's own verify then measures a machine
   the team still occupies, and reports a flaky red as a real failure. Bound the load, kill it,
   confirm it is gone, and only then read the numbers.
+- **Double-acting on an unconfirmed intent** — re-running a dispatch because no `outcome` line
+  closed it. The log is a promise about an action, not a receipt of one: check the artifact
+  before repeating anything that is not idempotent.
+- **Authorization by momentum** — a `mandate` filled in after the work started, or
+  `basis: "inferred"` on something the human would have refused. The mandate records why work
+  may happen, not why it did.
+- **Holding mistaken for done** — `inactive` read as finished because the turn ended. The turn
+  ending is not the work ending: read the jobs, then count it.

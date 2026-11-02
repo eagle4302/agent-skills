@@ -314,25 +314,36 @@ Inheriting it copies the whole thing: real tokens per teammate and, on a critic,
 was staffed to challenge. Your adapter says whether fresh is the default here — on at least one
 harness it is not, for exactly the profiles a team uses most.
 
+A fresh teammate still gets a runtime identity block naming it and its Lead (DSH, measured
+2026-11-03: *"You are teammate «name». Your Team Lead is named «lead»."*), so its report can say
+who it is even when the settlement notice does not. Do not rely on that block for anything else:
+it carries no task and no rules.
+
 Record the returned id in `team.json` (`members[].agentId`); that id is what `status`, `steer`
 and `stop` take, and what makes the team resumable after a context loss.
 
 Give each teammate: a label (3–5 words), the brief, and nothing else. Spawn children do
 not see this conversation, so the brief must be self-contained. That includes the project's
-own rules: a teammate does not read `CLAUDE.md` or `AGENTS.md` on its way in, so whatever
-those say about build flags, line endings or formatting has to be in `houseRules` and pasted
-into every brief. A teammate that breaks a house rule you never told it is a lead bug.
+own rules: whether a child receives `CLAUDE.md` or `AGENTS.md` is harness-dependent (DSH was
+measured on 2026-11-03 to deliver the global `~/.dsh/AGENTS.md` to a teammate; project-level
+files are unverified), so whatever those say about build flags, line endings or formatting has
+to be in `houseRules` and pasted into every brief. A teammate that breaks a house rule you
+never told it is a lead bug.
 
 ## Brief skeleton (builder)
 
 ```
 You are the <role> on a team. <One-line team objective.>
 
-TASK: <what to produce, in one paragraph>
+TASK: <what to produce, in one paragraph>  (its id: <task id>)
 TERRITORY (the only paths you may write): <globs>
+WORK IN: <the tree the lead prepared for you (its prepare ran) — never the shared checkout,
+  and never "wherever you find it"; say "the lead's tree" when no prepare was needed>
 MUST READ: <exact files, tickets, specs — with paths>
-HOUSE RULES (paste `houseRules` from team.json verbatim — you cannot see the project's
-  CLAUDE.md or AGENTS.md, and "it built on my machine" is not acceptance):
+MANDATE (why you may do this, and how far): <basis — explicit|inferred|rule> · <scope globs>.
+  Anything outside that scope needs a new task: ask the lead, do not expand it.
+HOUSE RULES (paste `houseRules` from team.json verbatim — the project's own files may not
+  reach you, and "it built on my machine" is not acceptance):
   - <build/test command with every flag>
   - <line endings, formatting, naming — whatever the project insists on>
 ALREADY BROKEN (do not try to fix, do not report as yours):
@@ -344,12 +355,14 @@ EVIDENCE FORMAT (mandatory):
   - the exact commands you ran
   - their real output, including numbers
   - file:line for every claim
-  - STATUS: completed | failed | blocked
+  - STATUS: completed | failed | blocked | holding
+    (holding = your turn ended while jobs or subagents you started still run: name them)
   - WHAT YOU DID NOT VERIFY: <be specific; an empty list is a red flag>
 DO NOT: touch files outside your territory; commit; push; deploy; restart services;
   change configuration formats; ask the human anything directly.
-REPORT: your final message is the report. If the harness gives you a way to raise a blocker
-  mid-run, the lead will have named it in this brief; otherwise stop and report what blocked you.
+REPORT: your final message is the report. Name your task id in it. If the harness gives you a
+  way to raise a blocker mid-run, the lead will have named it in this brief; otherwise stop and
+  report what blocked you. A turn that ends with jobs still running is `holding`, not done.
 ```
 
 Adapt for the other roles:
