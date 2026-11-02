@@ -673,3 +673,98 @@ same check before accepting.
 
 Not probed here: `interrupt_agent`, a teammate's mid-turn peer message, `context: "fork"`,
 teammate-spawned helpers, and whether project-level `AGENTS.md` reaches a teammate.
+
+## Round 13 — capability probe: what Round 12 could not reach (2026-11-03)
+
+Round 12 left five unknowns. Four teammates closed most of them in one probe on DSH 0.2.1-rc.3,
+in the same session as Round 14. Every row below is from a teammate's own report or from a notice
+the Lead observed; none is inferred.
+
+| Probe | Result | Evidence |
+| --- | --- | --- |
+| Identity injection, `context: "fresh"` | the child is told who it is | *"You are teammate `p2-scout-a`. Your Team Lead is named `lead`."* |
+| Global `~/.dsh/AGENTS.md` reaches a teammate | yes | the child quoted the first line under `## 語言與用詞` |
+| A teammate messages the Lead | delivered, sender named | arrived as `Team message from p2-scout-a:probe-a: raise test`; `send_message` returned `{"sent":true}` |
+| `interrupt_agent` | stops the turn | returned `{ previousStatus: "running" }`; notice: *"was stopped before it finished. It left no closing message."*; `list_agents` → `inactive` |
+| `context: "fork"` | completed Lead turns only | the fork quoted the human's previous turn ("commit，繼續下一輪") and not the in-flight one |
+| Delegation depth | 1 | the teammate's `subagent` and `subagent_fork` both reported `remaining levels 0` |
+| Parallel spawn | reconfirmed | two `spawn_teammate` calls in one message started both |
+
+### What the probe changed in the skill
+
+- `adapters/dsh.md`: the capability table, the edges table and "Verified / not verified" were
+  rewritten from measured rows. `raise` is no longer marked `(assumed)`, and depth-1 is stated as
+  measured rather than inferred.
+- `staffing.md`: the claim that "a teammate does not read `CLAUDE.md` or `AGENTS.md` on its way in"
+  was **wrong for the global file on DSH**. It is now harness-dependent, with the measurement dated.
+
+### Not verified
+
+- Sibling messaging (only Lead ↔ teammate was exercised).
+- Project-level `AGENTS.md` / `CLAUDE.md` reaching a teammate.
+- A plain `subagent` child being absent from `list_agents`.
+- A teammate calling `team_task_*` / `wait_agent`.
+
+## Round 14 — a real light team on DSH: prepare, mandate, outbox and board (2026-11-03)
+
+First full run through the skill's own loop on DSH, exercising the P0/P1 fields: `waitingOn`,
+`prepare`, `mandate`, `policyVersion`, intent/outcome lines, and the `board` generator. Scenario:
+a throwaway zero-dependency Node 24 repo in `%TEMP%\agents-team-run13\sandbox`; `textkit` with
+two modules, a manifest and an 18-case acceptance harness; **standard** mode; commits to the
+sandbox authorized by the human at charter. Baseline `974dac0`, 0 paths dirty.
+
+| Step | Who | Result | Wall-clock |
+| --- | --- | --- | --- |
+| charter: init, baseline, harness + manifest (t0) | lead | `node test.mjs --list` → 18 cases; `node test.mjs` → `fail 18/18`, exit 1 (red by design) | 68 s |
+| two builders, one message | lead | both started; `builder-a` → `ok 9/9`, `builder-b` → `ok 9/9` (claims) | < 2 min |
+| full harness on the integrated tree | lead | `ok 18/18`, exit 0 | — |
+| probe tree | lead | `git worktree add --detach ../probe-13 974dac0`, exit 0, recorded in `preparedAt`/`prepareExit` | — |
+| independent probe | prober-a | `pass`: 5/5 criteria, 18/18 expectations agree with the spec, 35-input differential 0 mismatches, mutations 2/2 caught (`fail 8/9`, `fail 6/9`) | 2 min 36 s |
+| lead re-run | lead | `ok 18/18`, exit 0 on the frozen artifact | — |
+| land three batches by pathspec | lead | `017087c` (slugify), `d2f3a21` (truncate), `3044153` (harness + manifest); tree clean | — |
+| close | lead | `validate` 0 errors / 0 warnings, board regenerated, directory archived | 6 min 05 s spawn → last commit |
+
+### Findings
+
+- **Hard rule 8 paid for itself before anyone was staffed.** The first harness draft used
+  `pathToFileURL(new URL(rel, HERE).pathname)`; on Windows that produced `C:\C:\Users\…`, so every
+  import failed for the wrong reason. Running the harness once before briefing caught it in ~35 s.
+  A second bug was in the lead's measurement, not the code: a PowerShell pipeline ending in
+  `Select-Object -First 3` swallowed node's exit code, so the run looked green when it was red.
+- **`prepare` worked as the isolation seam it was added for.** The prober's probe tree came from
+  the task's own command, `git worktree add --detach ../probe-13 974dac0`, and the board carried
+  `preparedAt`/`prepareExit`; no builder needed a tree here, and none got one.
+- **The outbox warned while work was open and cleared when it closed.** `validate` flagged
+  `t1`/`t2`/`t3` as "intent recorded but no outcome/report" while the teammates were running; each
+  cleared when its report landed, and the final validation was 0 warnings.
+- **The prober did not trust the green run.** It wrote a reference implementation from the spec,
+  extracted the `CASES` literal from `test.mjs` programmatically, and diffed all 18 pairs — 0
+  disagreements — then ran 35 inputs the harness never touches: 0 mismatches. Two mutations were
+  caught. It found no defects in the artifact, and two nits in the harness (`--only` with no value
+  silently runs everything; `--list` counts cases without resolving modules, which is its
+  documented intent).
+- **Three commits, each by pathspec, none by `git add -A`.** `git status --short` was empty at
+  close, and the prober's report plus the three evidence files all sit under the ignored
+  `.agent-teams/` directory, so no team bookkeeping entered the product commits.
+- **"Green at every commit" is not satisfied by this landing order, and the run does not claim it.**
+  The harness is the contract and tests both modules, so it lands last; the first two commits hold
+  a module and no test at all. Round 11's rule needs a scenario where the contract can land first
+  and still be green, or an acceptance that a commit point merely parses. This scenario cannot
+  demonstrate it.
+
+### What the run changed in the skill
+
+Nothing structural. The `board` staleness warning did its job (it fired after every `team.json`
+edit and disappeared after regeneration), and the `waitingOn` transitions
+(`in_review`/`teammate` → `done`) validated cleanly throughout. One ergonomic note for the record:
+`team.mjs log` summaries containing `;` break PowerShell quoting — quote the summary.
+
+### Not verified
+
+- `quick` and `thorough` modes (only `standard` ran), and the `gate` path (absent on DSH).
+- `holding` in anger: both builders ended their turns with no background jobs.
+- A mid-run `policyVersion` bump and re-mandate.
+- A builder with its own `prepare` tree (only the prober had one).
+- A refused commit authorization (the human authorized at charter).
+- Token cost: this harness reports no token counts, so only wall-clock is recorded.
+
