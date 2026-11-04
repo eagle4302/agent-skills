@@ -48,7 +48,9 @@ is gone, and the sizing ladder drops a rung.
 
 ## Writing an adapter for a harness that has none
 
-Fill the same five sections the shipped ones use, and do not invent a row:
+Fill the same five sections the shipped ones use, and do not invent a row. A shipped adapter may
+add one harness-specific section when a harness fact changes how the lead must act; DSH's
+"Waiting: the notice is the receipt" is the existing example:
 
 1. **Capability table** — the eleven above, each with the exact call or `absent`.
 2. **Role dispatch** — which agent profile or subagent type each of `scout`, `builder`,

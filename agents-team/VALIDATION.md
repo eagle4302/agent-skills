@@ -768,3 +768,49 @@ edit and disappeared after regeneration), and the `waitingOn` transitions
 - A refused commit authorization (the human authorized at charter).
 - Token cost: this harness reports no token counts, so only wall-clock is recorded.
 
+## Round 15 — why the DSH Lead polls, and the adapter fix (2026-11-04)
+
+No team was run in this round. The trigger was the human observing that DSH runs of
+`agents-team` kept showing `wait_agent` cards and held the turn open until the team finished,
+while a plain-subagent skill (`implement-spec`) never did.
+
+Method: read the installed DSH 0.2.1-rc.5 packages (`dsh-experimental-tool-agent-team`,
+`dsh-experimental-agent-team`, `dsh-subagent`, `dsh-tool-subagent`), then counted `wait_agent`
+tool calls in every local session log under `~/.dsh/sessions` (multi-frame `*.jsonl.zstd`;
+`zstd -dc` decodes all frames, while a single-shot decoder stops after the first frame).
+
+| Finding | Evidence |
+| --- | --- |
+| A teammate is created with `delivery: "parent"`, so its turn end publishes the same settlement notice as a plain `subagent` | `dsh-experimental-agent-team/lib/index.js` `spawnAdmitted`; `dsh-subagent/lib/index.js` `notifySettlement` |
+| An idle parent is woken by the notice into a new turn; a busy parent gets it at its next step | `dsh-subagent/lib/index.js` `sendWaking(..., "queue")`; `README.md` "reaching an idle parent starts one independent model request" |
+| `wait_agent` returns on the next team change, never on "all done"; default 30 s, range 10 s–1 h | `dsh-experimental-tool-agent-team/lib/index.js` `wait_agent` |
+| The injected team policy pushes blocking ("Before wait_agent …", "The Lead must wait …") | same file, `teamPolicy()` |
+| agents-team runs polled 26–36 times each, 3–20 min timeouts, single calls up to 15 min | session logs, e.g. `session-e815350c…` 36 calls / 14 timed out, `session-cc411112…` 26 calls |
+| Those team sessions also carry the settlement notices | session logs |
+| A plain-subagent run (`implement-spec`) made 11 `subagent` calls and 0 `wait_agent` calls | `session-9ad0fd90…` |
+
+### What this changed in the skill
+
+- `adapters/dsh.md`: new "Waiting: the notice is the receipt" section — dispatch, do the Lead's
+  own work, end the turn; `wait_agent` only as a ≤120 s in-turn last resort, one call per pending
+  need; `noProgress` means nothing is left to wait for. The `status` row, the `wait_agent` edge
+  and a new settlement-notice edge say the same thing. "Verified / not verified" carries the
+  2026-11-04 source read and the log measurement.
+
+### Smoke — the wake path, exercised (2026-11-04)
+
+One read-only teammate (`smoke-reader`) was spawned with a task that outlived the Lead's turn
+(`Start-Sleep -Seconds 30`, then report the line count and `##` headings of `adapters/dsh.md`).
+The Lead did its queued work (committed this adapter change), ended its turn, and called no
+`wait_agent`. The settlement notice arrived as the next message — *"Background subagent
+b06aaee7-… finished and will do no further work unless you send it more."* — with the closing
+report attached. The report was checked against the file: 180 lines and the seven `##` headings
+matched. `list_agents` showed the teammate `inactive` afterwards.
+
+### Not verified
+
+- A multi-teammate team run under the new rule (one teammate was exercised, not a Light or Full
+  team): whether the Lead keeps ending its turn between notices, and whether the injected team
+  policy still pulls it into a blocked turn.
+- Whether a long-running teammate (a turn of minutes, not 30 s) produces the same wake path.
+
