@@ -117,7 +117,7 @@
       ]
     },
     "slint": {
-      "readme": "official-tooling.md plus its pointers in SKILL.md",
+      "readme": "official-tooling.md plus its pointers in SKILL.md, and the Windows install section in tools-install.md",
       "checks": [
         {
           "file": "SKILL.md",
@@ -126,6 +126,10 @@
         {
           "path": "official-tooling.md",
           "exists": true
+        },
+        {
+          "file": "tools-install.md",
+          "contains": "Expand-Archive"
         }
       ]
     },

@@ -92,4 +92,6 @@ field-office-checklist	-	-	-	local-only	authored here; MetalAutoUQDwpf-specific 
 field-handoff	-	-	-	local-only	authored here
 git-janitor	-	-	-	local-only	authored here
 freecad-cad	-	-	-	local-only	authored here; FreeCAD as the verification and post-processing back end around freecad-mcp
+svg-first-ui	-	-	-	local-only	authored here; every UI task goes SVG draft -> approval -> target-platform code
+ui-fluency-check	-	-	-	local-only	authored here; validates UI/UX fluency against the approved svg-first-ui spec
 reverse-engineer-anything	morluto/rea	.agents/skills/reverse-engineer-anything	160d821ac9a0310afcb8d1fc427862dd6508add5	hold	deliberately pinned to the installed rea-agents 6.8.0 package (publish variant, byte-identical to it); the repo moved to 1ef5918 but a re-sync installs a newer package and copies its skill directory, then bumps this pin

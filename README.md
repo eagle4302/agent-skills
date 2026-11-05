@@ -1,6 +1,6 @@
 # Skills
 
-This directory is the shared user-level skills root (`~/.agents/skills`). It holds 77 skills — most of
+This directory is the shared user-level skills root (`~/.agents/skills`). It holds 79 skills — most of
 them copied from public upstream repos, the rest authored here. DSH reads it directly, Claude Code
 reaches it through the junction below, and OpenCode treats it as a global compatibility source.
 
@@ -91,7 +91,7 @@ finding-validation paragraph). `chief-of-staff` stays held; `reverse-engineer-an
 | [wshaddix/dotnet-skills](https://github.com/wshaddix/dotnet-skills) | `skills/<name>/` | 1 | `09da68d` (2026-02-27) |
 | [earthtojake/text-to-cad](https://github.com/earthtojake/text-to-cad) | `skills/<name>/` | 12 | `4d42cb0` (2026-11-03) |
 | [morluto/rea](https://github.com/morluto/rea) | `.agents/skills/<name>/` inside the REA monorepo | 1 (publish variant) | `160d821` (2026-10-25) |
-| local-only skills (authored here or tool-shipped) | — | 9 | — |
+| local-only skills (authored here or tool-shipped) | — | 11 | — |
 
 `dirname`-style names match upstream for every skill, so a skill's upstream path is usually
 `<layout prefix>/<skill dir name>/`.
@@ -365,7 +365,7 @@ is in `.gitignore`. The backups on disk are the pre-rewrite copies — do not co
 
 ### Local-only skills
 
-No upstream found as of 2026-10-29 — checked by directory name and by the `name:` frontmatter field against
+No upstream found as of 2026-11-06 — checked by directory name and by the `name:` frontmatter field against
 every upstream repo above, and by a filesystem search for a second copy of each skill. Most are authored
 here; `graphify` is shipped by the graphify CLI and has no skill repo to track.
 
@@ -380,6 +380,8 @@ here; `graphify` is shipped by the graphify CLI and has no skill repo to track.
 | `git-janitor` | sweep a messy working tree: commit, push, .gitignore, or delete each stray entry |
 | `graphify` | graphify CLI 0.9.99's skill: turn code/docs/papers into a graph.json, then query/path/explain; Windows variant installed through the Claude junction, not authored here |
 | `ssh-captain` | drive remote dev/build/test boxes over SSH |
+| `svg-first-ui` | authored here 2026-11-03: every UI task goes SVG draft → human approval → target-platform code |
+| `ui-fluency-check` | authored here 2026-11-03: validate flow/clarity/feel/robustness against the approved SVG/UI_SPEC |
 
 ## Local edits that a re-sync would clobber
 
@@ -393,7 +395,7 @@ this table is the instruction and `patches/README.md` has the commands.
 | `show-me` | Removed upstream's `disable-model-invocation: true` and did not copy its `agents/openai.yaml` (`policy: allow_implicit_invocation: false`); deleted the upstream plugin leftovers (`.claude-plugin/`, `skills/show-me/`); rewrote the description with trigger branches; replaced `Bash(open …)` with a per-OS opener | The skill is model-invoked here on purpose. Its description is the only trigger, and `Bash(open …)` is Claude Code notation for a macOS command that fails on this Windows box. |
 | `rpi` | Added `disable-model-invocation: true` and `agents/openai.yaml` with `policy.allow_implicit_invocation: false` | Upstream only says "only use when the user explicitly invokes this skill by name" in prose, so every harness would still auto-invoke it. |
 | `visual-pr` | Same edit as `rpi` | Same reason. |
-| `slint` | Added `official-tooling.md`, a three-line pointer to it above workflow step 1 in `SKILL.md`, and one row for it in `SKILL.md`'s reference-files table | Only the skill is installed, not Slint's plugin, so nothing else tells the agent to offer `slint-viewer`, `slint-lsp`, or the `slint-docs` MCP server. A sync that copies `SKILL.md` over drops the pointer and leaves the new file orphaned. Copy the rest of the tree, then re-add both `SKILL.md` lines. |
+| `slint` | Added `official-tooling.md`, a three-line pointer to it above workflow step 1 in `SKILL.md`, one row for it in `SKILL.md`'s reference-files table, and a Windows install section in `tools-install.md` | Only the skill is installed, not Slint's plugin, so nothing else tells the agent to offer `slint-viewer`, `slint-lsp`, or the `slint-docs` MCP server. A sync that copies `SKILL.md` over drops the pointer and leaves the new file orphaned; a sync that copies `tools-install.md` over drops the one-archive-per-tool PowerShell commands. Copy the rest of the tree, then re-add both `SKILL.md` lines and the Windows section. |
 | `defuddle` | The `description` was rewritten into a longer routing description (adds "use instead of WebFetch", and the "not for `.md` URLs" caveat) | Description text is what the model routes on. Do not let a sync revert it to upstream's one-liner. |
 | `code-review-and-quality` | Body rewritten and condensed relative to upstream (`SKILL.md` only; 362 lines locally vs 400 upstream, different frontmatter) | Upstream renamed/rewrote sections. Treat an upstream update as a source of ideas, not a patch to apply. The 2026-10-04 sync folded upstream's mutation-testing paragraph in at `1401c8b`. On 2026-10-29 two pointers to uninstalled skills were removed and the description now names the code-review branch. On 2026-11-06 upstream's two-sentence finding-validation paragraph was folded in. |
 | `grilling` | Added a "Closed questions: ask with the harness's ask tool" section and a harness→tool table (`ask_user_question`, `AskUserQuestion`, `question`, `vscode_askQuestions`, `request_user_input`, …) | Makes the interview deliver multiple-choice questions through each harness's native ask UI instead of plain text. |
