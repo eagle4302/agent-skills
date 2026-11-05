@@ -56,7 +56,7 @@ writing-shape	mattpocock/skills	skills/in-progress/writing-shape	a496f5513d4a4cf
 chief-of-staff	mattpocock/skills	skills/in-progress/chief-of-staff	49dd158d1076134a641b33efb035946536778336	hold	deliberately held at 49dd158: upstream 5beb35b only adds a wiki-memory section to an in-progress skill; re-check before the next sync
 show-me	humanlayer/skills	plugins/show-me/skills/show-me	653b6411c1f70c275a18e37673b042ff99f67ceb	modified	removed upstream's disable-model-invocation; deleted plugin leftovers (.claude-plugin/, skills/show-me/); description rewritten for routing; per-OS opener instead of Bash(open)
 improve-claude-md	humanlayer/skills	plugins/improve-claude-md/skills/improve-claude-md	653b6411c1f70c275a18e37673b042ff99f67ceb	verbatim	-
-rpi	humanlayer/skills	plugins/rpi/skills/rpi	653b6411c1f70c275a18e37673b042ff99f67ceb	modified	user-invoked here: local disable-model-invocation: true + agents/openai.yaml policy false (upstream only says it in prose)
+rpi	humanlayer/skills	plugins/rpi/skills/rpi	4d69d20f6e9b57b4fcf0d501ccfb1be961f0f329	modified	user-invoked here: local disable-model-invocation: true + agents/openai.yaml policy false (upstream only says it in prose); merged 2026-11-06: Review the Document step + references/prose.md
 visual-pr	humanlayer/skills	plugins/visual-pr/skills/visual-pr	653b6411c1f70c275a18e37673b042ff99f67ceb	modified	user-invoked here: local disable-model-invocation: true + agents/openai.yaml policy false (upstream only says it in prose)
 defuddle	kepano/obsidian-skills	skills/defuddle	3ccff5338ea700537839b21900aa5358a0402c98	modified	description rewritten for routing
 json-canvas	kepano/obsidian-skills	skills/json-canvas	3ccff5338ea700537839b21900aa5358a0402c98	verbatim	-
@@ -64,25 +64,25 @@ knap	kepano/obsidian-skills	skills/knap	3ccff5338ea700537839b21900aa5358a0402c98
 obsidian-bases	kepano/obsidian-skills	skills/obsidian-bases	3ccff5338ea700537839b21900aa5358a0402c98	verbatim	-
 obsidian-cli	kepano/obsidian-skills	skills/obsidian-cli	3ccff5338ea700537839b21900aa5358a0402c98	verbatim	-
 obsidian-markdown	kepano/obsidian-skills	skills/obsidian-markdown	3ccff5338ea700537839b21900aa5358a0402c98	verbatim	-
-code-review-and-quality	addyosmani/agent-skills	skills/code-review-and-quality	aeac41d4d005999432bb7312f7ff06383a91d59d	divergent	local variant; body rewritten, upstream mutation-testing paragraph folded in; two uninstalled child-skill pointers removed 2026-10-29
+code-review-and-quality	addyosmani/agent-skills	skills/code-review-and-quality	301b02b12bff98e4688e6984af6556802322bbde	divergent	local variant; body rewritten, upstream mutation-testing paragraph folded in; two uninstalled child-skill pointers removed 2026-10-29; upstream finding-validation paragraph folded in 2026-11-06
 typesafe-ai	typesafe-ai/skills	skills/typesafe-ai	302eea662c54bca6730873fe245bec1d69ebc23d	verbatim	-
-slint	slint-ui/slint	ai-plugins/skills/slint	dca61c9a3de96a72ec3c96c8301d4ed33b968916	modified	official; skill dir only. Added official-tooling.md plus a pointer in SKILL.md: offer missing official tools (slint-viewer, slint-lsp, slint-docs MCP, plugin); synced 2026-10-27 by three-way merge
+slint	slint-ui/slint	ai-plugins/skills/slint	b71ebba540a3343b953fbe5319e2f069be0955f1	modified	official; skill dir only. Added official-tooling.md plus a pointer in SKILL.md: offer missing official tools (slint-viewer, slint-lsp, slint-docs MCP, plugin); synced 2026-10-27 by three-way merge; synced 2026-11-06: licensing.md, SKILL.md reference row, web-embedding edition wording; local pointer kept
 qt-qml	TheQtCompanyRnD/agent-skills	skills/qt-qml	6845f02d41171a6df8b6e6fe225b7f5d1a6f4adf	verbatim	official Qt; probes for the optional QML Preview MCP server (Qt 6.12+)
 qt-ui-design	TheQtCompanyRnD/agent-skills	skills/qt-ui-design	6845f02d41171a6df8b6e6fe225b7f5d1a6f4adf	verbatim	official Qt; framework-neutral UX rules, section 4 covers embedded/HMI targets
 wpf-design-system	AlstonChan/agent-skills	skills/wpf-design-system	d6a82cf600663e8a3f38534a4b7223f4cd94bcf5	verbatim	-
 dotnet-wpf-modern	wshaddix/dotnet-skills	skills/dotnet-wpf-modern	09da68dc1f3c06f3bde05f49a6301c75478ab123	verbatim	.NET 8+ only; cross-references six sibling skills that are not installed
-bambu-labs	earthtojake/text-to-cad	skills/bambu-labs	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
-cad	earthtojake/text-to-cad	skills/cad	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
-dfam-check	earthtojake/text-to-cad	skills/dfam-check	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
-dfm	earthtojake/text-to-cad	skills/dfm	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
-dxf	earthtojake/text-to-cad	skills/dxf	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
-engineering-drawing	earthtojake/text-to-cad	skills/engineering-drawing	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
-gcode	earthtojake/text-to-cad	skills/gcode	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
-sdf	earthtojake/text-to-cad	skills/sdf	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
-sendcutsend	earthtojake/text-to-cad	skills/sendcutsend	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
-srdf	earthtojake/text-to-cad	skills/srdf	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
-step-parts	earthtojake/text-to-cad	skills/step-parts	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
-urdf	earthtojake/text-to-cad	skills/urdf	a7cf2c470e345d6b6a2fe373a73e0420ff64ad2a	verbatim	-
+bambu-labs	earthtojake/text-to-cad	skills/bambu-labs	4d42cb0bd9a61b46254bc8cf9bd9ae1f45c3295b	verbatim	-
+cad	earthtojake/text-to-cad	skills/cad	4d42cb0bd9a61b46254bc8cf9bd9ae1f45c3295b	verbatim	-
+dfam-check	earthtojake/text-to-cad	skills/dfam-check	4d42cb0bd9a61b46254bc8cf9bd9ae1f45c3295b	verbatim	-
+dfm	earthtojake/text-to-cad	skills/dfm	4d42cb0bd9a61b46254bc8cf9bd9ae1f45c3295b	verbatim	-
+dxf	earthtojake/text-to-cad	skills/dxf	4d42cb0bd9a61b46254bc8cf9bd9ae1f45c3295b	verbatim	-
+engineering-drawing	earthtojake/text-to-cad	skills/engineering-drawing	4d42cb0bd9a61b46254bc8cf9bd9ae1f45c3295b	verbatim	-
+gcode	earthtojake/text-to-cad	skills/gcode	4d42cb0bd9a61b46254bc8cf9bd9ae1f45c3295b	verbatim	-
+sdf	earthtojake/text-to-cad	skills/sdf	4d42cb0bd9a61b46254bc8cf9bd9ae1f45c3295b	verbatim	-
+sendcutsend	earthtojake/text-to-cad	skills/sendcutsend	4d42cb0bd9a61b46254bc8cf9bd9ae1f45c3295b	verbatim	-
+srdf	earthtojake/text-to-cad	skills/srdf	4d42cb0bd9a61b46254bc8cf9bd9ae1f45c3295b	verbatim	-
+step-parts	earthtojake/text-to-cad	skills/step-parts	4d42cb0bd9a61b46254bc8cf9bd9ae1f45c3295b	verbatim	-
+urdf	earthtojake/text-to-cad	skills/urdf	4d42cb0bd9a61b46254bc8cf9bd9ae1f45c3295b	verbatim	-
 agents-team	-	-	-	local-only	authored here; pi-subagents based
 consult	-	-	-	local-only	authored here
 context-first	-	-	-	local-only	authored here; lookup order for dev work: CodeGraph, then narrow judgments to Jev, then the Obsidian vault, then plan and edit

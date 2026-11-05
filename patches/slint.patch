@@ -1,5 +1,5 @@
 diff --git a/slint/SKILL.md b/slint/SKILL.md
-index 95de93f..bf6a096 100644
+index 91a09b1..701aa32 100644
 --- a/slint/SKILL.md
 +++ b/slint/SKILL.md
 @@ -10,6 +10,10 @@ a declarative GUI toolkit for desktop, embedded, mobile, and web.
@@ -13,8 +13,8 @@ index 95de93f..bf6a096 100644
  1. Find the project's Slint version first (`Cargo.toml`/`Cargo.lock`,
     `package.json`, `pyproject.toml`, or the CMake `find_package`/`FetchContent`
     line). This skill targets Slint **≥ 1.17** and its prose assumes the latest
-@@ -79,6 +83,7 @@ Skim the matching file *before* building in that area, not only when stuck.
- | [debugging-and-mcp.md](reference/debugging-and-mcp.md) | Runtime debugging, headless/CI rendering, screenshots, the MCP server. |
+@@ -80,6 +84,7 @@ Skim the matching file *before* building in that area, not only when stuck.
+ | [licensing.md](reference/licensing.md) | The user asks about the license, or builds a closed-source app. |
  | [web-embedding.md](reference/web-embedding.md) | Showing a live `.slint` preview in a web page, HTML report, or docs. |
  | [tools-install.md](tools-install.md) | Installing `slint-lsp` (language server) or `slint-viewer` (preview / screenshots). |
 +| [official-tooling.md](official-tooling.md) | First Slint task of a session: check which official tools are missing and offer them. |

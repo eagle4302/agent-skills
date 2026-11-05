@@ -72,18 +72,24 @@ installed `rea-agents` 6.8.0 package, and the four UI-framework repos on **2026-
 `chief-of-staff` remains `hold`: upstream `5beb35b` only adds a wiki-memory section to an `in-progress`
 skill, so the update check reports it as held, not upstream-ahead.
 
+On **2026-11-06** the check ran again: 12 `text-to-cad` skills were synced to `4d42cb0` (0.10.3) and
+the three conflicts were merged by hand — `rpi` (a Review-the-Document step plus `references/prose.md`),
+`slint` (`licensing.md`, one reference row, one wording fix) and `code-review-and-quality` (one
+finding-validation paragraph). `chief-of-staff` stays held; `reverse-engineer-anything` stays held while
+`rea-agents` is still 6.8.0.
+
 | Upstream repo | Upstream layout | Skills installed | Pinned commit |
 |---|---|---|---|
 | [mattpocock/skills](https://github.com/mattpocock/skills) | `skills/<category>/<name>/` for `engineering`, `productivity`, `misc`, `in-progress` | 38 | `a496f55` (2026-10-29) |
-| [humanlayer/skills](https://github.com/humanlayer/skills) | `plugins/<plugin>/skills/<name>/` | 4 | `653b641` (2026-10-08) |
+| [humanlayer/skills](https://github.com/humanlayer/skills) | `plugins/<plugin>/skills/<name>/` | 4 | `653b641` (2026-10-08; `rpi` `4d69d20`, 2026-11-01) |
 | [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) | `skills/<name>/` | 6 | `3ccff533` (2026-09-15) |
-| [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | `skills/<name>/` | 1 (divergent copy) | `aeac41d` (2026-10-13) |
+| [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | `skills/<name>/` | 1 (divergent copy) | `301b02b` (2026-11-01) |
 | [typesafe-ai/skills](https://github.com/typesafe-ai/skills) | `skills/<name>/` | 1 | `302eea6` (2026-10-23) |
-| [slint-ui/slint](https://github.com/slint-ui/slint) | `ai-plugins/skills/<name>/` inside the Slint monorepo | 1 | `dca61c9` (2026-10-29) |
+| [slint-ui/slint](https://github.com/slint-ui/slint) | `ai-plugins/skills/<name>/` inside the Slint monorepo | 1 | `b71ebba` (2026-11-05) |
 | [TheQtCompanyRnD/agent-skills](https://github.com/TheQtCompanyRnD/agent-skills) | `skills/<name>/` | 2 | `6845f02` (2026-10-20) |
 | [AlstonChan/agent-skills](https://github.com/AlstonChan/agent-skills) | `skills/<name>/` | 1 | `d6a82cf` (2026-10-22) |
 | [wshaddix/dotnet-skills](https://github.com/wshaddix/dotnet-skills) | `skills/<name>/` | 1 | `09da68d` (2026-02-27) |
-| [earthtojake/text-to-cad](https://github.com/earthtojake/text-to-cad) | `skills/<name>/` | 12 | `a7cf2c4` (2026-10-29) |
+| [earthtojake/text-to-cad](https://github.com/earthtojake/text-to-cad) | `skills/<name>/` | 12 | `4d42cb0` (2026-11-03) |
 | [morluto/rea](https://github.com/morluto/rea) | `.agents/skills/<name>/` inside the REA monorepo | 1 (publish variant) | `160d821` (2026-10-25) |
 | local-only skills (authored here or tool-shipped) | — | 9 | — |
 
@@ -185,6 +191,9 @@ plugin, not to the skill, and `rpi` resolves its subagents from its own `referen
 Not installed from this repo: `build-iterated-agentic-loop`, `design-control-loop`,
 `narrow-react-prop-types`.
 
+The 2026-11-06 sync took `rpi` to `4d69d20` (1.1.0): `SKILL.md` gained a Review-the-Document step and
+`references/prose.md` came over; the local frontmatter line and `agents/openai.yaml` were kept.
+
 ### kepano/obsidian-skills — pinned `3ccff5338ea700537839b21900aa5358a0402c98`
 
 | Skill | Upstream path | Local state |
@@ -216,7 +225,9 @@ license_source: https://github.com/addyosmani/agent-skills/blob/main/LICENSE
 
 The repo moved from `1401c8b` to `aeac41d` (2026-10-13); the `code-review-and-quality` tree is unchanged
 between the two, so the pin moved without a copy. The local variant is still the divergence described
-below, not a stale copy of upstream.
+below, not a stale copy of upstream. It moved again to `301b02b` (2026-11-01); the only change to this
+skill was a two-sentence finding-validation paragraph at Step 4, folded into the local body on
+2026-11-06.
 
 **Known optional pointer.** `code-review-and-quality/SKILL.md:169` closes a paragraph with "For a
 project-wide mutation score, see `constraint-driven-development`", which is not installed. It is not a
@@ -271,7 +282,9 @@ one row in its reference table; upstream text is unchanged. The 2026-10-27 sync 
 was a three-way merge: upstream added two preview lines to workflow step 3 and fixed the compile-argument
 notes in `reference/web-embedding.md`, and both local additions applied cleanly. The 2026-10-29 sync
 (`a853159` → `dca61c9`) changed only `reference/web-embedding.md`; the merge was clean and the local
-tooling pointer stayed.
+tooling pointer stayed. The 2026-11-06 sync moved the pin to `b71ebba`: `reference/licensing.md` was
+added and its row entered the reference table, and `web-embedding.md` changed one line
+(`slint-edition` → `edition`); the local `official-tooling.md` pointer stayed.
 
 The skill is pinned to the monorepo's `master` (plugin `1.19.0`), which runs ahead of the latest release
 (`v1.18.1`). Slint's install guide publishes the plugin from
@@ -310,6 +323,10 @@ Python helpers (`dfam-check`, `dfm`, `gcode`, `step-parts`), and `dfam-check` an
 The 2026-10-29 sync moved the pin to `a7cf2c4`: eight skills had upstream changes (CAD snapshot review,
 DXF / drawing / SDF / SRDF / URDF skill text, step-parts, and the Orca preset helper). All were copied
 verbatim.
+
+The 2026-11-06 sync moved the pin to `4d42cb0` (`0.10.3`): all twelve directories changed (40 files),
+`cad` dropped `references/migrations.md` and picked up the project-layout / snapshot-review updates,
+and no hand merge was needed.
 
 | Skill | Upstream path | Local state |
 |---|---|---|
@@ -378,7 +395,7 @@ this table is the instruction and `patches/README.md` has the commands.
 | `visual-pr` | Same edit as `rpi` | Same reason. |
 | `slint` | Added `official-tooling.md`, a three-line pointer to it above workflow step 1 in `SKILL.md`, and one row for it in `SKILL.md`'s reference-files table | Only the skill is installed, not Slint's plugin, so nothing else tells the agent to offer `slint-viewer`, `slint-lsp`, or the `slint-docs` MCP server. A sync that copies `SKILL.md` over drops the pointer and leaves the new file orphaned. Copy the rest of the tree, then re-add both `SKILL.md` lines. |
 | `defuddle` | The `description` was rewritten into a longer routing description (adds "use instead of WebFetch", and the "not for `.md` URLs" caveat) | Description text is what the model routes on. Do not let a sync revert it to upstream's one-liner. |
-| `code-review-and-quality` | Body rewritten and condensed relative to upstream (`SKILL.md` only; 362 lines locally vs 396 upstream, different frontmatter) | Upstream renamed/rewrote sections. Treat an upstream update as a source of ideas, not a patch to apply. The 2026-10-04 sync folded upstream's mutation-testing paragraph in at `1401c8b`. On 2026-10-29 two pointers to uninstalled skills were removed and the description now names the code-review branch. |
+| `code-review-and-quality` | Body rewritten and condensed relative to upstream (`SKILL.md` only; 362 lines locally vs 400 upstream, different frontmatter) | Upstream renamed/rewrote sections. Treat an upstream update as a source of ideas, not a patch to apply. The 2026-10-04 sync folded upstream's mutation-testing paragraph in at `1401c8b`. On 2026-10-29 two pointers to uninstalled skills were removed and the description now names the code-review branch. On 2026-11-06 upstream's two-sentence finding-validation paragraph was folded in. |
 | `grilling` | Added a "Closed questions: ask with the harness's ask tool" section and a harness→tool table (`ask_user_question`, `AskUserQuestion`, `question`, `vscode_askQuestions`, `request_user_input`, …) | Makes the interview deliver multiple-choice questions through each harness's native ask UI instead of plain text. |
 | `improve-codebase-architecture`, `triage`, `wayfinder`, `to-questionnaire`, `loop-me`, `writing-fragments`, `writing-shape` | One-line pointers to `/grilling`'s ask-tool rule, at the spot each asks the human a closed question | The rule lives once, in `grilling`. `grill-me` and `grill-with-docs` are **not** edited: they are one-line delegators to `/grilling` and inherit it. |
 
