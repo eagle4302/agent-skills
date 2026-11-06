@@ -1,6 +1,6 @@
 # Skills
 
-This directory is the shared user-level skills root (`~/.agents/skills`). It holds 79 skills — most of
+This directory is the shared user-level skills root (`~/.agents/skills`). It holds 80 skills — most of
 them copied from public upstream repos, the rest authored here. DSH reads it directly, Claude Code
 reaches it through the junction below, and OpenCode treats it as a global compatibility source.
 
@@ -91,7 +91,7 @@ finding-validation paragraph). `chief-of-staff` stays held; `reverse-engineer-an
 | [wshaddix/dotnet-skills](https://github.com/wshaddix/dotnet-skills) | `skills/<name>/` | 1 | `09da68d` (2026-02-27) |
 | [earthtojake/text-to-cad](https://github.com/earthtojake/text-to-cad) | `skills/<name>/` | 12 | `4d42cb0` (2026-11-03) |
 | [morluto/rea](https://github.com/morluto/rea) | `.agents/skills/<name>/` inside the REA monorepo | 1 (publish variant) | `160d821` (2026-10-25) |
-| local-only skills (authored here or tool-shipped) | — | 11 | — |
+| local-only skills (authored here or tool-shipped) | — | 12 | — |
 
 `dirname`-style names match upstream for every skill, so a skill's upstream path is usually
 `<layout prefix>/<skill dir name>/`.
@@ -379,6 +379,7 @@ here; `graphify` is shipped by the graphify CLI and has no skill repo to track.
 | `freecad-cad` | FreeCAD as the verification and post-processing back end around `freecad-mcp`: OCCT part building, invalid-solid debugging, STEP round-trips, FEM and drawings, plus a bridge to text-to-cad models |
 | `git-janitor` | sweep a messy working tree: commit, push, .gitignore, or delete each stray entry |
 | `graphify` | graphify CLI 0.9.99's skill: turn code/docs/papers into a graph.json, then query/path/explain; Windows variant installed through the Claude junction, not authored here |
+| `guided-step-cards` | authored here 2026-11-06: vertical stepper with gated steps; builds the step dependency table, then hands the screen to svg-first-ui |
 | `ssh-captain` | drive remote dev/build/test boxes over SSH |
 | `svg-first-ui` | authored here 2026-11-03: every UI task goes SVG draft → human approval → target-platform code |
 | `ui-fluency-check` | authored here 2026-11-03: validate flow/clarity/feel/robustness against the approved SVG/UI_SPEC |
