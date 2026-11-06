@@ -94,6 +94,7 @@ For an existing project without `design/`, use `docs/fluency/<screen>/` with the
 | If you are… | Use |
 |---|---|
 | Adding or changing a screen, dialog, or panel | `svg-first-ui` |
+| Leading someone through an ordered multi-step procedure on a screen | `guided-step-cards` first (its dependency table), then `svg-first-ui` |
 | Checking flow, step counts, state clarity, findability | `ui-fluency-check` (flow validation) |
 | Checking latency, animation, focus, touch, data refresh | `ui-fluency-check` (native spike or shipped app) |
 | Comparing implementation against the approved design | `svg-first-ui` Phase 5 + `ui-fluency-check` shipped acceptance |

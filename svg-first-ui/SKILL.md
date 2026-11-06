@@ -10,6 +10,7 @@ description: Use before any UI work — designing, adding, or changing a screen,
 Every UI task follows one path: **SVG draft → human approval → target-platform code**.
 
 - The SVG draft is the single source of design truth; the target platform is only the final output format.
+- A screen leading someone through an ordered multi-step procedure starts with `guided-step-cards`: its dependency table comes before any draft.
 - If there is no approved high-fidelity draft, there is no UI code to write.
 - To change a design, edit the SVG and `design/tokens.md`, then get re-approval. Do not tweak values directly in platform code.
 - Reply to the user in Traditional Chinese (繁體中文) throughout.
